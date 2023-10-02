@@ -1,0 +1,1 @@
+# sem_prace_janousek_mandik
