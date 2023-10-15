@@ -3,6 +3,16 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>Role prihlaseneho zamestnance: @ViewBag.Role</p>
+    <p>Uzivatel: @ViewBag.Email</p>
+    @if(ViewBag.Email == null)
+    {
+        <a asp-controller="Login" asp-action="LoginEmployee"><button type="submit">Prihlaseni pro zamestnance</button></a>
+        <a asp-controller="Login" asp-action="LoginCustomer"><button type="submit">Prihlaseni pro zakazniky</button></a>
+    }
+    else
+    {
+        <a asp-controller="Login" asp-action="Logout"><button type="submit">Odhlasit se</button></a>
+    }
+    
 </div>

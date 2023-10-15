@@ -15,6 +15,18 @@ namespace sem_prace_janousek_mandik.Controllers
 
         public IActionResult Index()
         {
+            string? role = this.HttpContext.Session.GetString("role");
+            string? email = this.HttpContext.Session.GetString("email");
+            if (role != null)
+            {
+                ViewBag.Role = role;
+                ViewBag.Email = email;
+            }
+            else
+            {
+                ViewBag.Role = "nikdo neprihlasen";
+            }
+                
             return View();
         }
 

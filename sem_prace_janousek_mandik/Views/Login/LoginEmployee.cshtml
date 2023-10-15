@@ -1,0 +1,41 @@
+﻿@model sem_prace_janousek_mandik.Models.Zamestnanci
+
+@{
+    ViewData["Title"] = "Prihlaseni pro zamestnance";
+}
+
+@{
+    Layout = null;
+}
+
+
+<h1>Prihlaseni do systemu</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="LoginEmployee">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Heslo" class="control-label"></label>
+                <input asp-for="Heslo" type="password" class="form-control" />
+                <span asp-validation-for="Heslo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Prihlasit se" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-controller="Home" asp-action="Index">Zpet na hlavni stranku</a>
+</div>
+
+
