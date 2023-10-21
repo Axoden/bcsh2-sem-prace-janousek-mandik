@@ -26,7 +26,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
         {
             // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
             ViewBag.ErrorInfo = "Prihlasovaci jmeno nebo heslo je spatne!";
-            if (inputZamestnanec != null)
+            if (ModelState.IsValid == true)
             {
                 Zamestnanci? dbZamestnanec = LoginSQL.AuthEmployee(inputZamestnanec.Email);
 
@@ -54,20 +54,20 @@ namespace sem_prace_janousek_mandik.Controllers.Login
             return View(inputZamestnanec);
         }
 
-        // Nacteni stranky pro neprihlaseneho zamestnance
+        // Nacteni stranky pro neprihlaseneho zákazníka
         [HttpGet]
         public IActionResult LoginCustomer()
         {
             return View();
         }
 
-        // Prijem dat z prihlasovaciho formulare
+        // Příjem dat z přihlašovacího formuláře zákazníka
         [HttpPost]
         public IActionResult LoginCustomer(Zakaznici inputZakaznik)
         {
             // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
             ViewBag.ErrorInfo = "Prihlasovaci jmeno nebo heslo je spatne!";
-            if (inputZakaznik != null)
+            if (ModelState.IsValid == true)
             {
                 Zakaznici? dbZakaznik = LoginSQL.AuthCustomer(inputZakaznik.Email);
 
@@ -90,6 +90,46 @@ namespace sem_prace_janousek_mandik.Controllers.Login
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
+        }
+
+        // Nacteni stranky pro neprihlaseneho zákazníka
+        [HttpGet]
+        public IActionResult RegisterCustomer()
+        {
+            return View();
+        }
+
+        // Příjem dat z přihlašovacího formuláře zákazníka
+        [HttpPost]
+        public IActionResult RegisterCustomer(Zakaznici_Adresy inputZakaznik)
+        {
+            // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
+            ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
+            
+            if (ModelState.IsValid == true)
+            {
+                // Kontrola zda již není zaregistrován zákazník s tímto emailem
+                if(LoginSQL.CheckExistsCustomer(inputZakaznik.Zakaznici.Email) == true)
+                {
+                    ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
+                    return View(inputZakaznik);
+                }
+
+                bool uspesnaRegistrace = LoginSQL.RegisterCustomer(inputZakaznik);
+
+                if (uspesnaRegistrace == true)
+                {
+                   // uspesna registrace, redirect na prihlaseni
+                   return RedirectToAction("RegisterSuccessful", "Login");
+                }
+            }
+
+            return View(inputZakaznik);
+        }
+
+        public IActionResult RegisterSuccessful()
+        {
+            return View();
         }
 
         public static string? HashPassword(string password)

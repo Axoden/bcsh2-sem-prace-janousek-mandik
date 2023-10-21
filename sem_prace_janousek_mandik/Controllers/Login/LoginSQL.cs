@@ -1,5 +1,6 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using sem_prace_janousek_mandik.Models;
+using System.Data;
 
 namespace sem_prace_janousek_mandik.Controllers.Login
 {
@@ -112,6 +113,94 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                 connection.Close();
             }
             return zakaznik;
+        }
+
+        // Kontrola existence emailu (zákazníka) v databázi - kontrola při registraci
+        public static bool CheckExistsCustomer(string email)
+        {
+            bool exists = true;
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM zakaznici WHERE email = :email";
+                    command.Parameters.Add(":email", email);
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            exists = true;
+                        }
+                        else
+                        {
+                            exists = false;
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return exists;
+        }
+
+        public static bool RegisterCustomer(Zakaznici_Adresy novyZakaznikVcetneAdresy)
+        {
+            int? idAdresy = InsertAddressAndReturnId(novyZakaznikVcetneAdresy.Adresy);
+            bool uspesneRegistrovan = false;
+
+            if(idAdresy != null)
+            {
+                using (OracleConnection connection = OracleDbContext.GetConnection())
+                {
+                    connection.Open();
+                    using (OracleCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = "INSERT INTO zakaznici (jmeno, prijmeni, telefon, email, idAdresy, heslo) VALUES (:jmeno, :prijmeni, :telefon, :email, :idAdresy, :heslo)";
+                        command.Parameters.Add(":jmeno", novyZakaznikVcetneAdresy.Zakaznici.Jmeno);
+                        command.Parameters.Add(":prijmeni", novyZakaznikVcetneAdresy.Zakaznici.Prijmeni);
+                        command.Parameters.Add(":telefon", novyZakaznikVcetneAdresy.Zakaznici.Telefon);
+                        command.Parameters.Add(":email", novyZakaznikVcetneAdresy.Zakaznici.Email);
+                        command.Parameters.Add(":idAdresy", (int)idAdresy);
+                        command.Parameters.Add(":heslo", LoginController.HashPassword(novyZakaznikVcetneAdresy.Zakaznici.Heslo));
+
+                        command.ExecuteNonQuery();
+                    }
+                    connection.Close();
+                    uspesneRegistrovan = true;
+                }
+            }
+            return uspesneRegistrovan;
+        }
+
+        private static int? InsertAddressAndReturnId(Adresy novaAdresa)
+        {
+            int? idAdresy = null;
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = new OracleCommand("vlozit_novou_adresu", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Vstupní parametry procedury vlozit_novou_adresu
+                    command.Parameters.Add("v_ulice", OracleDbType.Varchar2).Value = novaAdresa.Ulice;
+                    command.Parameters.Add("v_mesto", OracleDbType.Varchar2).Value = novaAdresa.Mesto;
+                    command.Parameters.Add("v_okres", OracleDbType.Varchar2).Value = novaAdresa.Okres;
+                    command.Parameters.Add("v_zeme", OracleDbType.Varchar2).Value = novaAdresa.Zeme;
+                    command.Parameters.Add("v_psc", OracleDbType.Char).Value = novaAdresa.Psc;
+
+                    // Výstupní parametr id nové adresy
+                    command.Parameters.Add("v_nove_id", OracleDbType.Int32).Direction = ParameterDirection.Output;
+
+                    command.ExecuteNonQuery();
+
+                    idAdresy = int.Parse(command.Parameters["v_nove_id"].Value.ToString());
+                }
+
+                connection.Close();
+            }
+
+            return idAdresy;
         }
     }
 }

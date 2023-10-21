@@ -9,10 +9,12 @@
     {
         <a asp-controller="Login" asp-action="LoginEmployee"><button type="submit">Prihlaseni pro zamestnance</button></a>
         <a asp-controller="Login" asp-action="LoginCustomer"><button type="submit">Prihlaseni pro zakazniky</button></a>
+        <a asp-controller="Login" asp-action="RegisterCustomer"><button type="submit">Registrace pro zakazniky</button></a>
     }
     else
     {
         <a asp-controller="Login" asp-action="Logout"><button type="submit">Odhlasit se</button></a>
+        <a asp-controller="Management" asp-action="ListEmployees"><button type="submit">Seznam zaměstnanců</button></a>
     }
     
 </div>
