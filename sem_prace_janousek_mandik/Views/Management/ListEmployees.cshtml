@@ -1,0 +1,85 @@
+﻿@model sem_prace_janousek_mandik.Models.Zamestnanci
+
+@{
+	ViewData["Title"] = "Zaměstnanci";
+}
+
+<div class="text-center">
+	<h2>Výpis všech zaměstnanců:</h2>
+
+	@if (ViewBag.Role.Equals("Admin"))
+	{
+		<a asp-controller="Management" asp-action="AddEmployee"><button type="submit">Přidat zaměstnance</button></a>
+	}
+
+	<table border="1">
+		<tr>
+			<td>Jméno</td>
+			<td>Příjmení</td>
+			<td>Heslo</td>
+			<td>Datum narození</td>
+			<td>Telefon</td>
+			<td>Email</td>
+			<td>Adresa</td>
+			<td>Upravit</td>
+			@if (ViewBag.Role.Equals("Admin"))
+			{
+				<td>Odstranit</td>
+			}
+		</tr>
+
+		@{
+			int index = 0;
+			string hidden = "skryté";
+		}
+
+		@foreach (Zamestnanci item in ViewBag.ListOfEmployees)
+		{
+			<tr>
+				<td>@item.Jmeno</td>
+				<td>@item.Prijmeni</td>
+				<td>@hidden</td>
+				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+				{
+					<td>@item.DatumNarozeni</td>
+				}
+
+				<!-- Zobrazení data narození pouze adminovi nebo manažerovi -->
+				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+				{
+					<td>@item.DatumNarozeni</td>
+				}
+
+				@if (ViewBag.Email.Equals(item.Email))
+				{
+					<td>@item.DatumNarozeni</td>
+				}
+				else
+				{
+					<td>@hidden</td>
+
+				}
+
+				<td>@item.Telefon</td>
+				<td>@item.Email</td>
+				<td>adresa</td>
+				@if (ViewBag.Role.Equals("Admin"))
+				{
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-id="@index">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="DeleteEmployee" asp-route-id="@index">Smazat</a></td>
+				}
+
+				@if (ViewBag.Email.Equals(item.Email))
+				{
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-id="@index">Upravit</a></td>
+				}
+				else
+				{
+					<td>@hidden</td>
+
+				}
+			</tr>
+			index++;
+		}
+	</table>
+</div>

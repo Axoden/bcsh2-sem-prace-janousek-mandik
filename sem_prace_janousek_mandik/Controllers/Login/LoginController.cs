@@ -26,7 +26,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
         {
             // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
             ViewBag.ErrorInfo = "Prihlasovaci jmeno nebo heslo je spatne!";
-            if (ModelState.IsValid == true)
+            if (inputZamestnanec.Email != null && inputZamestnanec.Heslo != null)
             {
                 Zamestnanci? dbZamestnanec = LoginSQL.AuthEmployee(inputZamestnanec.Email);
 
@@ -37,7 +37,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                     {
                         HttpContext.Session.SetString("email", dbZamestnanec.Email);
                         Pozice? pozice = LoginSQL.GetPosition(dbZamestnanec.IdPozice);
-                        if(pozice != null)
+                        if (pozice != null)
                         {
                             HttpContext.Session.SetString("role", pozice.Nazev);
                         }
@@ -45,7 +45,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                         {
                             HttpContext.Session.SetString("role", "noRole");
                         }
-                        
+
                         return RedirectToAction("Index", "Home"); // redirect pri uspesnem prihlaseni
                     }
                 }
@@ -105,11 +105,11 @@ namespace sem_prace_janousek_mandik.Controllers.Login
         {
             // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
             ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
-            
+
             if (ModelState.IsValid == true)
             {
                 // Kontrola zda již není zaregistrován zákazník s tímto emailem
-                if(LoginSQL.CheckExistsCustomer(inputZakaznik.Zakaznici.Email) == true)
+                if (LoginSQL.CheckExistsCustomer(inputZakaznik.Zakaznici.Email) == true)
                 {
                     ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
                     return View(inputZakaznik);
@@ -119,8 +119,8 @@ namespace sem_prace_janousek_mandik.Controllers.Login
 
                 if (uspesnaRegistrace == true)
                 {
-                   // uspesna registrace, redirect na prihlaseni
-                   return RedirectToAction("RegisterSuccessful", "Login");
+                    // uspesna registrace, redirect na prihlaseni
+                    return RedirectToAction("RegisterSuccessful", "Login");
                 }
             }
 
