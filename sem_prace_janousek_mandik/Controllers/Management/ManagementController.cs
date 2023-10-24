@@ -19,8 +19,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
                 if (aktRole.Equals("Manazer") || aktRole.Equals("Admin") || aktRole.Equals("Skladnik") || aktRole.Equals("Logistik"))
                 {
                     List<Zamestnanci> zamestnanci = ManagementSQL.GetAllEmployees();
-                    ViewBag.ListOfEmployees = zamestnanci;
-                    ViewBag.Role = this.HttpContext.Session.GetString("role");
+					List<Adresy> adresy = ManagementSQL.GetAllAddresses();
+					List<Pozice> pozice = ManagementSQL.GetAllPositions();
+					ViewBag.ListOfEmployees = zamestnanci;
+					ViewBag.ListOfAddresses = adresy;
+                    ViewBag.ListOfPositions = pozice;
+					ViewBag.Role = this.HttpContext.Session.GetString("role");
                     ViewBag.Email = this.HttpContext.Session.GetString("email");
 
                     return View();
@@ -29,5 +33,24 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
             return RedirectToAction("Index", "Home");
         }
-    }
+
+        [HttpGet]
+        public IActionResult EditEmployee(int index)
+        {
+			Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice = ManagementSQL.GetEmployeeWithAddressPosition(index);
+			return View(zamestnanciAdresyPozice);
+		}
+
+        [HttpPost]
+        public IActionResult EditEmployee(Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice)
+        {
+            ManagementSQL.EditEmployee(zamestnanciAdresyPozice);
+            return RedirectToAction("ListEmployees", "Management");
+        }
+
+        public IActionResult DeleteEmployee(int index)
+		{
+			return View();
+		}
+	}
 }

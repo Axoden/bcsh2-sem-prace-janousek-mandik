@@ -15,8 +15,8 @@ namespace sem_prace_janousek_mandik.Models
         public string? Prijmeni { get; set; }
 
         [Required]
-        [DataType(DataType.DateTime)]
-        public DateTime? DatumNarozeni { get; set; }
+        [DataType(DataType.Date)]
+        public DateOnly? DatumNarozeni { get; set; }
 
         [Required]
         [Phone]
