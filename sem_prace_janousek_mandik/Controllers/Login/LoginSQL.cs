@@ -26,7 +26,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                                 zamestnanec.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
                                 zamestnanec.Jmeno = reader["jmeno"].ToString();
                                 zamestnanec.Prijmeni = reader["prijmeni"].ToString();
-                                zamestnanec.DatumNarozeni = DateTime.Parse(reader["datumNarozeni"].ToString());
+                                zamestnanec.DatumNarozeni = DateOnly.FromDateTime(DateTime.Parse(reader["datumNarozeni"].ToString()));
                                 zamestnanec.Telefon = reader["telefon"].ToString();
                                 zamestnanec.Email = reader["email"].ToString();
                                 zamestnanec.Heslo = reader["heslo"].ToString();

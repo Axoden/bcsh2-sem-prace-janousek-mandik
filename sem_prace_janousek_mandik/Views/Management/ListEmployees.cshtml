@@ -1,7 +1,9 @@
-﻿@model sem_prace_janousek_mandik.Models.Zamestnanci
+﻿@{
+	ViewData["Title"] = "Zaměstnanci";
+}
 
 @{
-	ViewData["Title"] = "Zaměstnanci";
+	Layout = "~/Views/Shared/_LayoutManagement.cshtml";
 }
 
 <div class="text-center">
@@ -20,7 +22,12 @@
 			<td>Datum narození</td>
 			<td>Telefon</td>
 			<td>Email</td>
-			<td>Adresa</td>
+			<td>Ulice</td>
+			<td>Město</td>
+			<td>Okres</td>
+			<td>Země</td>
+			<td>PSČ</td>
+			<td>Pozice</td>
 			<td>Upravit</td>
 			@if (ViewBag.Role.Equals("Admin"))
 			{
@@ -29,12 +36,16 @@
 		</tr>
 
 		@{
-			int index = 0;
-			string hidden = "skryté";
+			int index = 1;
+			string hidden = "<skryté>";
+			List<Adresy> adresy = ViewBag.ListOfAddresses;
+			List<Pozice> pozice = ViewBag.ListOfPositions;
 		}
 
 		@foreach (Zamestnanci item in ViewBag.ListOfEmployees)
 		{
+			Pozice? jednaPozice = pozice.FirstOrDefault((lmb) => lmb.IdPozice == item.IdPozice);
+
 			<tr>
 				<td>@item.Jmeno</td>
 				<td>@item.Prijmeni</td>
@@ -62,16 +73,45 @@
 
 				<td>@item.Telefon</td>
 				<td>@item.Email</td>
-				<td>adresa</td>
+				
+				@if (ViewBag.Email.Equals(item.Email))
+				{
+					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
+					<td>@adresa.Ulice</td>
+					<td>@adresa.Mesto</td>
+					if (adresa.Okres.Equals(""))
+					{
+						string neexistuje = "Nezadán";
+						<td>@neexistuje</td>
+					}
+					else
+					{
+						<td>@adresa.Okres</td>
+					}
+					<td>@adresa.Zeme</td>
+					<td>@adresa.Psc</td>
+				}
+				else
+				{
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+				}
+
+				
+				<td>@jednaPozice.Nazev</td>
+
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-id="@index">Upravit</a></td>
-					<td><a asp-controller="Management" asp-action="DeleteEmployee" asp-route-id="@index">Smazat</a></td>
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@index">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="DeleteEmployee" asp-route-index="@index">Smazat</a></td>
 				}
 
 				@if (ViewBag.Email.Equals(item.Email))
 				{
-					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-id="@index">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@index">Upravit</a></td>
 				}
 				else
 				{
