@@ -17,21 +17,13 @@ namespace sem_prace_janousek_mandik.Controllers
         {
             string? role = this.HttpContext.Session.GetString("role");
             string? email = this.HttpContext.Session.GetString("email");
-            if (role != null)
+			
+			if (role != null)
             {
-                ViewBag.Role = role;
-                ViewBag.Email = email;
-            }
-            else
-            {
-                ViewBag.Role = "nikdo neprihlasen";
-            }
+				ViewBag.Role = role;
+				ViewBag.Email = email;
+			}
                 
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
             return View();
         }
 

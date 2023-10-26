@@ -1,10 +1,10 @@
 ﻿@model sem_prace_janousek_mandik.Models.Zamestnanci_Adresy_Pozice
-@{
-	ViewData["Title"] = "Zaměstnanci";
+@section Title{
+	Úprava zaměstnance
 }
 
 @{
-	Layout = "~/Views/Shared/_LayoutManagement.cshtml";
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
 <h1>Úprava zaměstnance</h1>
@@ -27,12 +27,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Zamestnanci.Heslo" class="control-label"></label>
-                <input asp-for="Zamestnanci.Heslo" class="form-control" />
+                <input asp-for="Zamestnanci.Heslo" class="form-control" placeholder="<nezměněno>" />
                 <span asp-validation-for="Zamestnanci.Heslo" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Zamestnanci.DatumNarozeni" class="control-label"></label>
-                <input asp-for="Zamestnanci.DatumNarozeni" class="form-control" />
+                <input asp-for="Zamestnanci.DatumNarozeni" value="@Model.Zamestnanci.DatumNarozeni?.ToString("yyyy-MM-dd")" class="form-control" />
                 <span asp-validation-for="Zamestnanci.DatumNarozeni" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -58,7 +58,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Adresy.Okres" class="control-label"></label>
-                <input asp-for="Adresy.Okres" class="form-control" placeholder="<nevyplneno>" />
+                <input asp-for="Adresy.Okres" class="form-control" placeholder="<nevyplněno>" />
                 <span asp-validation-for="Adresy.Okres" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -72,10 +72,17 @@
                 <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
             </div>
 
+            @{
+                List<Pozice> pozice = ViewBag.ListOfPositions;
+            }
             <div class="form-group">
-                <label asp-for="Pozice.Nazev" class="control-label"></label>
-                <input asp-for="Pozice.Nazev" class="form-control" />
-                <span asp-validation-for="Pozice.Nazev" class="text-danger"></span>
+                <label asp-for="Pozice.Nazev">Pozice</label>
+                <select asp-for="Pozice.Nazev" class="form-control">
+                    @foreach (Pozice item in pozice)
+                    {
+                        <option value="@item.Nazev">@item.Nazev</option>
+                    }
+                </select>
             </div>
             
             <div class="form-group">

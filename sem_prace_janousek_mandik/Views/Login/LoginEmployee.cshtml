@@ -1,13 +1,12 @@
-﻿@model sem_prace_janousek_mandik.Models.Zamestnanci
+﻿@model sem_prace_janousek_mandik.Models.ZamestnanciLoginForm
 
-@{
-    ViewData["Title"] = "Prihlaseni pro zamestnance";
+@section Title{
+	Přihlášení zaměstnanci
 }
 
 @{
-    Layout = null;
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
-
 
 <h1>Přihlášení do systému</h1>
 
@@ -35,7 +34,5 @@
 </div>
 
 <div>
-    <a asp-controller="Home" asp-action="Index">Zpet na hlavni stranku</a>
+    <a asp-controller="Home" asp-action="Index">Zpět na hlavní stránku</a>
 </div>
-
-

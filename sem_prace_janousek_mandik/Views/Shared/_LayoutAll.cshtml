@@ -1,0 +1,47 @@
+﻿
+@{
+	string role = "Norole";
+	if(ViewBag.Role != null)
+	{
+		role = ViewBag.Role;
+	}
+}
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>@RenderSection("Title", required: false) - Skladové hospodářství</title>
+	</head>
+<body>
+	<div>
+		@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik") || role.Equals("Zakaznik"))
+		{
+			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Kategorie</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Umístění</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Zboží</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Zboží objednávek</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Objednávky</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Faktury</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Platby</button></a>
+			<a asp-controller="Management" asp-action="ListEmployees"><button>Zaměstnanci</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Pozice</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Zákazníci</button></a>
+			<a asp-controller="Home" asp-action="Index"><button>Dodavatelé</button></a>
+		}
+
+		@if(ViewBag.Email == null) {
+			<a asp-controller="Login" asp-action="LoginCustomer"><button>Přihlášení zákazníci</button></a>
+			<a asp-controller="Login" asp-action="RegisterCustomer"><button>Registrace zákazníci</button></a>
+			<a asp-controller="Login" asp-action="LoginEmployee"><button>Přihlášení zaměstnanci</button></a>
+		}
+		else{
+			<a asp-controller="Login" asp-action="Logout"><button>Odhlásit se</button></a>
+		}
+	</div>
+
+	<hr />
+
+	@RenderBody()
+</body>
+</html>

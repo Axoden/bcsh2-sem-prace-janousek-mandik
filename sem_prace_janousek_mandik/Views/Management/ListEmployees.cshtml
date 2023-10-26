@@ -1,9 +1,9 @@
-﻿@{
-	ViewData["Title"] = "Zaměstnanci";
+﻿@section Title{
+	Výpis zaměstnanců
 }
 
 @{
-	Layout = "~/Views/Shared/_LayoutManagement.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
 <div class="text-center">
@@ -36,7 +36,6 @@
 		</tr>
 
 		@{
-			int index = 1;
 			string hidden = "<skryté>";
 			List<Adresy> adresy = ViewBag.ListOfAddresses;
 			List<Pozice> pozice = ViewBag.ListOfPositions;
@@ -105,13 +104,13 @@
 
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@index">Upravit</a></td>
-					<td><a asp-controller="Management" asp-action="DeleteEmployee" asp-route-index="@index">Smazat</a></td>
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="DeleteEmployee" asp-route-index="@item.IdZamestnance">Smazat</a></td>
 				}
 
 				@if (ViewBag.Email.Equals(item.Email))
 				{
-					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@index">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
 				}
 				else
 				{
@@ -119,7 +118,6 @@
 
 				}
 			</tr>
-			index++;
 		}
 	</table>
 </div>

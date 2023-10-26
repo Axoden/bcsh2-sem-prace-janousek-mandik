@@ -13,20 +13,21 @@ namespace sem_prace_janousek_mandik.Controllers.Login
             return View();
         }
 
-        // Nacteni stranky pro neprihlaseneho zamestnance
+        // Načtení přihlašovacího formuláře pro zaměstnance
         [HttpGet]
         public IActionResult LoginEmployee()
         {
             return View();
         }
 
-        // Prijem dat z prihlasovaciho formulare
+        // Příjem dat z přihlašovacího formuláře pro zaměstnance
         [HttpPost]
-        public IActionResult LoginEmployee(Zamestnanci inputZamestnanec)
+        public IActionResult LoginEmployee(ZamestnanciLoginForm inputZamestnanec)
         {
-            // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
-            ViewBag.ErrorInfo = "Prihlasovaci jmeno nebo heslo je spatne!";
-            if (inputZamestnanec.Email != null && inputZamestnanec.Heslo != null)
+            // Informativní zpráva při chybném vyplnění
+            ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
+            
+            if (ModelState.IsValid)
             {
                 Zamestnanci? dbZamestnanec = LoginSQL.AuthEmployee(inputZamestnanec.Email);
 
@@ -35,6 +36,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                     // Kontrola hashe hesel
                     if (dbZamestnanec.Heslo.Equals(HashPassword(inputZamestnanec.Heslo)))
                     {
+                        // Nastavení session
                         HttpContext.Session.SetString("email", dbZamestnanec.Email);
                         Pozice? pozice = LoginSQL.GetPosition(dbZamestnanec.IdPozice);
                         if (pozice != null)
@@ -43,18 +45,18 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                         }
                         else
                         {
-                            HttpContext.Session.SetString("role", "noRole");
+                            HttpContext.Session.SetString("role", "Norole");
                         }
 
-                        return RedirectToAction("Index", "Home"); // redirect pri uspesnem prihlaseni
+                        // Přesměrování při úspěšném přihlášení
+                        return RedirectToAction("Index", "Home");
                     }
                 }
             }
-
             return View(inputZamestnanec);
         }
 
-        // Nacteni stranky pro neprihlaseneho zákazníka
+        // Načtení přihlašovacího formuláře pro zákazníky
         [HttpGet]
         public IActionResult LoginCustomer()
         {
@@ -65,8 +67,8 @@ namespace sem_prace_janousek_mandik.Controllers.Login
         [HttpPost]
         public IActionResult LoginCustomer(Zakaznici inputZakaznik)
         {
-            // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
-            ViewBag.ErrorInfo = "Prihlasovaci jmeno nebo heslo je spatne!";
+            // Informativní zpráva při chybném vyplnění
+            ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
             if (ModelState.IsValid == true)
             {
                 Zakaznici? dbZakaznik = LoginSQL.AuthCustomer(inputZakaznik.Email);
@@ -78,32 +80,32 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                     {
                         HttpContext.Session.SetString("email", inputZakaznik.Email);
                         HttpContext.Session.SetString("role", "Zakaznik");
-                        return RedirectToAction("Index", "Home"); // redirect pri uspesnem prihlaseni
+                        return RedirectToAction("Index", "Home");
                     }
                 }
             }
-
             return View(inputZakaznik);
         }
 
+        // Odhlášení a odstranění session
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
-        // Nacteni stranky pro neprihlaseneho zákazníka
+        // Načtení registračního formuláře
         [HttpGet]
         public IActionResult RegisterCustomer()
         {
             return View();
         }
 
-        // Příjem dat z přihlašovacího formuláře zákazníka
+        // Příjem dat z registrační formuláře zákazníka
         [HttpPost]
         public IActionResult RegisterCustomer(Zakaznici_Adresy inputZakaznik)
         {
-            // Informativni zprava pokud neni nic vyplneno/je spatne vyplneno
+            // Informativní zpráva při chybném vyplnění
             ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
 
             if (ModelState.IsValid == true)
@@ -119,19 +121,20 @@ namespace sem_prace_janousek_mandik.Controllers.Login
 
                 if (uspesnaRegistrace == true)
                 {
-                    // uspesna registrace, redirect na prihlaseni
+                    // Úspěšná registrace, přesměrování na přihlášení
                     return RedirectToAction("RegisterSuccessful", "Login");
                 }
             }
-
             return View(inputZakaznik);
         }
 
+        // Informativní stránka po úspěšné registraci
         public IActionResult RegisterSuccessful()
         {
             return View();
         }
 
+        // Vygenerování hashe z hesla
         public static string? HashPassword(string password)
         {
             if (password != null)
