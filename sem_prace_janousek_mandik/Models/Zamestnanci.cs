@@ -31,7 +31,11 @@ namespace sem_prace_janousek_mandik.Models
         [DataType(DataType.Password)]
         public string? Heslo { get; set; }
 
-        [Browsable(false)]
+		[DataType(DataType.Password)]
+		[Compare("Heslo", ErrorMessage = "Hesla se neshodují!")]
+		public string? HesloZnova { get; set; }
+
+		[Browsable(false)]
         public int IdAdresy { get; set; }
 
         [Browsable(false)]

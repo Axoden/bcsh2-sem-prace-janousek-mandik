@@ -28,8 +28,8 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 					ViewBag.ListOfEmployees = zamestnanci;
 					ViewBag.ListOfAddresses = adresy;
                     ViewBag.ListOfPositions = pozice;
-					ViewBag.Role = this.HttpContext.Session.GetString("role");
-                    ViewBag.Email = this.HttpContext.Session.GetString("email");
+					ViewBag.Role = role;
+                    ViewBag.Email = email;
 
                     return View();
                 }
@@ -68,7 +68,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
         // Příjem upravených dat vybraného zaměstnance
         [HttpPost]
-        public IActionResult EditEmployee(Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice)
+        public IActionResult EditEmployee(Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice, int idZamestnance, int idAdresy, int idPozice)
         {
 			string? aktRole = this.HttpContext.Session.GetString("role");
             /*if (aktRole != null)
@@ -95,6 +95,35 @@ namespace sem_prace_janousek_mandik.Controllers.Management
                 }
             }
 			return RedirectToAction("ListEmployees", "Management");
+		}
+
+        public IActionResult ListPositions()
+        {
+			string? aktRole = this.HttpContext.Session.GetString("role");
+
+			if (aktRole != null)
+			{
+				if (aktRole.Equals("Manazer") || aktRole.Equals("Admin"))
+				{
+					string? role = this.HttpContext.Session.GetString("role");
+					string? email = this.HttpContext.Session.GetString("email");
+					if (role != null)
+					{
+						ViewBag.Role = role;
+						ViewBag.Email = email;
+					}
+
+					List<Pozice> pozice = ManagementSQL.GetAllPositions();
+					ViewBag.ListOfPositions = pozice;
+                    ViewBag.Role = role;
+					ViewBag.Email = email;
+
+					return View();
+				}
+			}
+
+			// Přesměrování, pokud uživatel nemá povolen přístup
+			return RedirectToAction("Index", "Home");
 		}
 	}
 }

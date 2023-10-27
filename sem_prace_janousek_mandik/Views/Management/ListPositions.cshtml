@@ -1,0 +1,49 @@
+﻿@section Title{
+	Výpis pozicí
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech zaměstnanců:</h2>
+
+	@if (ViewBag.Role.Equals("Admin"))
+	{
+		<a asp-controller="Management" asp-action="AddPosition"><button type="submit">Přidat pozici</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td>Název</td>
+			@if (ViewBag.Role.Equals("Admin"))
+			{
+				<td>Upravit</td>
+				<td>Odstranit</td>
+			}
+		</tr>
+
+		@{
+			string hidden = "<skryté>";
+		}
+
+		@foreach (Pozice item in ViewBag.ListOfPositions)
+		{
+			<tr>
+				<td>@item.Nazev</td>
+				@if (ViewBag.Role.Equals("Admin"))
+				{
+					<td><a asp-controller="Management" asp-action="EditPosition" asp-route-index="@item.IdPozice">Upravit</a></td>
+					<td><a asp-controller="Management" asp-action="DeletePosition" asp-route-index="@item.IdPozice">Smazat</a></td>
+				}
+				else
+				{
+					<td>@hidden</td>
+				}
+			</tr>
+		}
+	</table>
+</div>

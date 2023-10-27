@@ -22,7 +22,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
 
         // Příjem dat z přihlašovacího formuláře pro zaměstnance
         [HttpPost]
-        public IActionResult LoginEmployee(ZamestnanciLoginForm inputZamestnanec)
+        public IActionResult LoginEmployee(LoginForm inputZamestnanec)
         {
             // Informativní zpráva při chybném vyplnění
             ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
@@ -65,7 +65,7 @@ namespace sem_prace_janousek_mandik.Controllers.Login
 
         // Příjem dat z přihlašovacího formuláře zákazníka
         [HttpPost]
-        public IActionResult LoginCustomer(Zakaznici inputZakaznik)
+        public IActionResult LoginCustomer(LoginForm inputZakaznik)
         {
             // Informativní zpráva při chybném vyplnění
             ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";

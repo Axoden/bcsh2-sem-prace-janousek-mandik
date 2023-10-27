@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace sem_prace_janousek_mandik.Models
 {
-    public class ZamestnanciLoginForm
+    public class LoginForm
     {
         [Required]
         [EmailAddress]

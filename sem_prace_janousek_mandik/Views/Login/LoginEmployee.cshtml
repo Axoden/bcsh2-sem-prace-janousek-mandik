@@ -1,4 +1,4 @@
-﻿@model sem_prace_janousek_mandik.Models.ZamestnanciLoginForm
+﻿@model sem_prace_janousek_mandik.Models.LoginForm
 
 @section Title{
 	Přihlášení zaměstnanci
@@ -27,12 +27,8 @@
                 <span asp-validation-for="Heslo" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Prihlasit se" class="btn btn-primary" />
+                <input type="submit" value="Přihlásit se" class="btn btn-primary" />
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-controller="Home" asp-action="Index">Zpět na hlavní stránku</a>
 </div>

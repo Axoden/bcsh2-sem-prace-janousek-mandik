@@ -25,12 +25,13 @@
 			<a asp-controller="Home" asp-action="Index"><button>Faktury</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Platby</button></a>
 			<a asp-controller="Management" asp-action="ListEmployees"><button>Zaměstnanci</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Pozice</button></a>
+			<a asp-controller="Management" asp-action="ListPositions"><button>Pozice</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Zákazníci</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Dodavatelé</button></a>
 		}
 
 		@if(ViewBag.Email == null) {
+			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
 			<a asp-controller="Login" asp-action="LoginCustomer"><button>Přihlášení zákazníci</button></a>
 			<a asp-controller="Login" asp-action="RegisterCustomer"><button>Registrace zákazníci</button></a>
 			<a asp-controller="Login" asp-action="LoginEmployee"><button>Přihlášení zaměstnanci</button></a>
