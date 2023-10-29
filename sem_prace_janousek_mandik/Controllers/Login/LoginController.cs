@@ -117,7 +117,9 @@ namespace sem_prace_janousek_mandik.Controllers.Login
                     return View(inputZakaznik);
                 }
 
-                bool uspesnaRegistrace = LoginSQL.RegisterCustomer(inputZakaznik);
+                Zakaznici_Adresy inputZakaznikHashed = inputZakaznik;
+                inputZakaznikHashed.Zakaznici.Heslo = HashPassword(inputZakaznik.Zakaznici.Heslo);
+				bool uspesnaRegistrace = LoginSQL.RegisterCustomer(inputZakaznikHashed);
 
                 if (uspesnaRegistrace == true)
                 {

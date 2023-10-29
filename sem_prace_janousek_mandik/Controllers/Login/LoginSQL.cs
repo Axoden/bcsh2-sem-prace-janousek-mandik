@@ -143,64 +143,34 @@ namespace sem_prace_janousek_mandik.Controllers.Login
             return exists;
         }
 
-        public static bool RegisterCustomer(Zakaznici_Adresy novyZakaznikVcetneAdresy)
+        public static bool RegisterCustomer(Zakaznici_Adresy novyZakaznik)
         {
-            int? idAdresy = InsertAddressAndReturnId(novyZakaznikVcetneAdresy.Adresy);
-            bool uspesneRegistrovan = false;
-
-            if(idAdresy != null)
-            {
-                using (OracleConnection connection = OracleDbContext.GetConnection())
-                {
-                    connection.Open();
-                    using (OracleCommand command = connection.CreateCommand())
-                    {
-                        command.CommandText = "INSERT INTO zakaznici (jmeno, prijmeni, telefon, email, idAdresy, heslo) VALUES (:jmeno, :prijmeni, :telefon, :email, :idAdresy, :heslo)";
-                        command.Parameters.Add(":jmeno", novyZakaznikVcetneAdresy.Zakaznici.Jmeno);
-                        command.Parameters.Add(":prijmeni", novyZakaznikVcetneAdresy.Zakaznici.Prijmeni);
-                        command.Parameters.Add(":telefon", novyZakaznikVcetneAdresy.Zakaznici.Telefon);
-                        command.Parameters.Add(":email", novyZakaznikVcetneAdresy.Zakaznici.Email);
-                        command.Parameters.Add(":idAdresy", (int)idAdresy);
-                        command.Parameters.Add(":heslo", LoginController.HashPassword(novyZakaznikVcetneAdresy.Zakaznici.Heslo));
-
-                        command.ExecuteNonQuery();
-                    }
-                    connection.Close();
-                    uspesneRegistrovan = true;
-                }
-            }
-            return uspesneRegistrovan;
-        }
-
-        private static int? InsertAddressAndReturnId(Adresy novaAdresa)
-        {
-            int? idAdresy = null;
+            bool registerSuccessful = false;
             using (OracleConnection connection = OracleDbContext.GetConnection())
             {
                 connection.Open();
-                using (OracleCommand command = new OracleCommand("vlozit_novou_adresu", connection))
+                using (OracleCommand command = new("P_VLOZIT_ZAKAZNIKA_V2", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
-                    // Vstupní parametry procedury vlozit_novou_adresu
-                    command.Parameters.Add("v_ulice", OracleDbType.Varchar2).Value = novaAdresa.Ulice;
-                    command.Parameters.Add("v_mesto", OracleDbType.Varchar2).Value = novaAdresa.Mesto;
-                    command.Parameters.Add("v_okres", OracleDbType.Varchar2).Value = novaAdresa.Okres;
-                    command.Parameters.Add("v_zeme", OracleDbType.Varchar2).Value = novaAdresa.Zeme;
-                    command.Parameters.Add("v_psc", OracleDbType.Char).Value = novaAdresa.Psc;
-
-                    // Výstupní parametr id nové adresy
-                    command.Parameters.Add("v_nove_id", OracleDbType.Int32).Direction = ParameterDirection.Output;
+					// Vstupní parametry procedury
+					command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = novyZakaznik.Zakaznici.Jmeno;
+					command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = novyZakaznik.Zakaznici.Prijmeni;
+					command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = novyZakaznik.Zakaznici.Telefon;
+					command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = novyZakaznik.Zakaznici.Email;
+					command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = novyZakaznik.Zakaznici.Heslo;
+					command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = novyZakaznik.Adresy.Ulice;
+                    command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = novyZakaznik.Adresy.Mesto;
+                    command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = novyZakaznik.Adresy.Okres;
+                    command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = novyZakaznik.Adresy.Zeme;
+                    command.Parameters.Add("p_psc", OracleDbType.Char).Value = novyZakaznik.Adresy.Psc;
 
                     command.ExecuteNonQuery();
-
-                    idAdresy = int.Parse(command.Parameters["v_nove_id"].Value.ToString());
                 }
-
-                connection.Close();
-            }
-
-            return idAdresy;
+				connection.Close();
+				registerSuccessful = true;
+			}
+            return registerSuccessful;
         }
     }
 }

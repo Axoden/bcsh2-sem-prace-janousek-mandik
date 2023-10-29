@@ -1,6 +1,4 @@
-﻿ListEmployees
-
-@section Title{
+﻿@section Title{
 	Výpis zaměstnanců
 }
 
@@ -71,15 +69,14 @@
 				<td>@item.Telefon</td>
 				<td>@item.Email</td>
 
-				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin") && ViewBag.Role.Equals("Manazer"))
+				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
 				{
 					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
 					<td>@adresa.Ulice</td>
 					<td>@adresa.Mesto</td>
 					if (adresa.Okres.Equals(""))
 					{
-						string neexistuje = "<nezadán>";
-						<td>@neexistuje</td>
+						<td></td>
 					}
 					else
 					{

@@ -122,6 +122,33 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return pozice;
 		}
 
+		// Metoda vrátí idpozice na základě názvu pozice
+		public static int GetPositionIdByName(string nazevPozice)
+		{
+			int idPozice = 0;
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT idpozice FROM pozice WHERE nazev = :nazev";
+					command.Parameters.Add(":nazev", OracleDbType.Varchar2).Value = nazevPozice;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								idPozice = int.Parse(reader["idPozice"].ToString());
+							}
+						}
+					}
+				}
+				connection.Close();
+			}
+			return idPozice;
+		}
+
 		// Metoda vytáhne zaměstnance s jeho adresou a pozicí dle id
 		public static Zamestnanci_Adresy_Pozice GetEmployeeWithAddressPosition(int idZamestnance)
 		{
@@ -190,12 +217,23 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 					command.Parameters.Add("p_idzamestnance", OracleDbType.Int32).Value = zamestnanec.Zamestnanci.IdZamestnance;
 					command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = zamestnanec.Zamestnanci.Jmeno;
 					command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = zamestnanec.Zamestnanci.Prijmeni;
-					command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = zamestnanec.Zamestnanci.DatumNarozeni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					if (zamestnanec.Zamestnanci.DatumNarozeni == null)
+					{
+						command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = null;
+					}
+					else
+					{
+						command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = zamestnanec.Zamestnanci.DatumNarozeni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					}
 					command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = zamestnanec.Zamestnanci.Telefon;
 					command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = zamestnanec.Zamestnanci.Email;
 					command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = zamestnanec.Zamestnanci.Heslo;
 					command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = zamestnanec.Zamestnanci.IdAdresy;
 					command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = zamestnanec.Zamestnanci.IdPozice;
+					if(zamestnanec.Adresy == null)
+					{
+						zamestnanec.Adresy = new();
+					}
 					command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = zamestnanec.Adresy.Ulice;
 					command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = zamestnanec.Adresy.Mesto;
 					command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = zamestnanec.Adresy.Okres;
@@ -225,6 +263,67 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				}
 				connection.Close();
 			}
+		}
+
+		// Kontrola existence emailu (zaměstnance) v databázi - kontrola při vytváření nového zaměstnance
+		public static bool CheckExistsEmployee(string email)
+		{
+			bool exists = true;
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM zamestnanci WHERE email = :email";
+					command.Parameters.Add(":email", email);
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							exists = true;
+						}
+						else
+						{
+							exists = false;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return exists;
+		}
+
+		// Zavolání procedury na registraci zákazníka
+		public static bool RegisterEmployee(Zamestnanci_Adresy_Pozice novyZamestnanec)
+		{
+			bool registerSuccessful = false;
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = new("P_VLOZIT_ZAMESTNANCE_V2", connection))
+				{
+					command.CommandType = CommandType.StoredProcedure;
+
+					// Vstupní parametry procedury
+					command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = novyZamestnanec.Zamestnanci.Jmeno;
+					command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = novyZamestnanec.Zamestnanci.Prijmeni;
+					command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = novyZamestnanec.Zamestnanci.DatumNarozeni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = novyZamestnanec.Zamestnanci.Telefon;
+					command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = novyZamestnanec.Zamestnanci.Email;
+					command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = novyZamestnanec.Zamestnanci.Heslo;
+					command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = novyZamestnanec.Zamestnanci.IdPozice;
+					command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = novyZamestnanec.Adresy.Ulice;
+					command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = novyZamestnanec.Adresy.Mesto;
+					command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = novyZamestnanec.Adresy.Okres;
+					command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = novyZamestnanec.Adresy.Zeme;
+					command.Parameters.Add("p_psc", OracleDbType.Char).Value = novyZamestnanec.Adresy.Psc;
+
+					command.ExecuteNonQuery();
+				}
+				connection.Close();
+				registerSuccessful = true;
+			}
+			return registerSuccessful;
 		}
 	}
 }

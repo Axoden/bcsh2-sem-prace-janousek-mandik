@@ -15,16 +15,19 @@
         <p>@ViewBag.ErrorInfo</p>
         <form asp-action="EditEmployee">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Zamestnanci.Jmeno" class="control-label"></label>
-                <input asp-for="Zamestnanci.Jmeno" class="form-control" />
-                <span asp-validation-for="Zamestnanci.Jmeno" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Zamestnanci.Prijmeni" class="control-label"></label>
-                <input asp-for="Zamestnanci.Prijmeni" class="form-control" />
-                <span asp-validation-for="Zamestnanci.Prijmeni" class="text-danger"></span>
-            </div>
+            @if (ViewBag.Role.Equals("Admin"))
+            {
+                <div class="form-group">
+                    <label asp-for="Zamestnanci.Jmeno" class="control-label"></label>
+                    <input asp-for="Zamestnanci.Jmeno" class="form-control" />
+                    <span asp-validation-for="Zamestnanci.Jmeno" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Zamestnanci.Prijmeni" class="control-label"></label>
+                    <input asp-for="Zamestnanci.Prijmeni" class="form-control" />
+                    <span asp-validation-for="Zamestnanci.Prijmeni" class="text-danger"></span>
+                </div>
+            }
             <div class="form-group">
                 <label asp-for="Zamestnanci.Heslo" class="control-label"></label>
                 <input asp-for="Zamestnanci.Heslo" class="form-control" placeholder="<nevyplňujte, pokud nechcete změnit>" />
@@ -35,60 +38,71 @@
                 <input asp-for="Zamestnanci.HesloZnova" class="form-control" placeholder="<nevyplňujte, pokud nechcete změnit>" />
                 <span asp-validation-for="Zamestnanci.HesloZnova" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Zamestnanci.DatumNarozeni" class="control-label"></label>
-                <input asp-for="Zamestnanci.DatumNarozeni" value="@Model.Zamestnanci.DatumNarozeni?.ToString("yyyy-MM-dd")" class="form-control" />
-                <span asp-validation-for="Zamestnanci.DatumNarozeni" class="text-danger"></span>
-            </div>
+            @if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+            {
+                <div class="form-group">
+                    <label asp-for="Zamestnanci.DatumNarozeni" class="control-label"></label>
+                    <input asp-for="Zamestnanci.DatumNarozeni" value="@Model.Zamestnanci.DatumNarozeni?.ToString("yyyy-MM-dd")" class="form-control" />
+                    <span asp-validation-for="Zamestnanci.DatumNarozeni" class="text-danger"></span>
+                </div>
+            }
             <div class="form-group">
                 <label asp-for="Zamestnanci.Telefon" class="control-label"></label>
                 <input asp-for="Zamestnanci.Telefon" class="form-control" />
                 <span asp-validation-for="Zamestnanci.Telefon" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Zamestnanci.Email" class="control-label"></label>
-                <input asp-for="Zamestnanci.Email" class="form-control" />
-                <span asp-validation-for="Zamestnanci.Email" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Adresy.Ulice" class="control-label"></label>
-                <input asp-for="Adresy.Ulice" class="form-control" />
-                <span asp-validation-for="Adresy.Ulice" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Mesto" class="control-label"></label>
-                <input asp-for="Adresy.Mesto" class="form-control" />
-                <span asp-validation-for="Adresy.Mesto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Okres" class="control-label"></label>
-                <input asp-for="Adresy.Okres" class="form-control" placeholder="<nevyplněno>" />
-                <span asp-validation-for="Adresy.Okres" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Zeme" class="control-label"></label>
-                <input asp-for="Adresy.Zeme" class="form-control" />
-                <span asp-validation-for="Adresy.Zeme" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Psc" class="control-label"></label>
-                <input asp-for="Adresy.Psc" class="form-control" />
-                <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
-            </div>
-
-            @{
-                List<Pozice> pozice = ViewBag.ListOfPositions;
+            @if (ViewBag.Role.Equals("Admin"))
+            {
+                <div class="form-group">
+                    <label asp-for="Zamestnanci.Email" class="control-label"></label>
+                    <input asp-for="Zamestnanci.Email" class="form-control" />
+                    <span asp-validation-for="Zamestnanci.Email" class="text-danger"></span>
+                </div>
             }
-            <div class="form-group">
-                <label asp-for="Pozice.Nazev">Pozice</label>
-                <select asp-for="Pozice.Nazev" class="form-control">
-                    @foreach (Pozice item in pozice)
-                    {
-                        <option value="@item.Nazev">@item.Nazev</option>
-                    }
-                </select>
-            </div>
+
+            @if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+            {
+                <div class="form-group">
+                    <label asp-for="Adresy.Ulice" class="control-label"></label>
+                    <input asp-for="Adresy.Ulice" class="form-control" />
+                    <span asp-validation-for="Adresy.Ulice" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresy.Mesto" class="control-label"></label>
+                    <input asp-for="Adresy.Mesto" class="form-control" />
+                    <span asp-validation-for="Adresy.Mesto" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresy.Okres" class="control-label"></label>
+                    <input asp-for="Adresy.Okres" class="form-control" placeholder="<nevyplněno>" />
+                    <span asp-validation-for="Adresy.Okres" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresy.Zeme" class="control-label"></label>
+                    <input asp-for="Adresy.Zeme" class="form-control" />
+                    <span asp-validation-for="Adresy.Zeme" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Adresy.Psc" class="control-label"></label>
+                    <input asp-for="Adresy.Psc" class="form-control" />
+                    <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
+                </div>
+            }
+
+            @if (ViewBag.Role.Equals("Admin"))
+            {
+                List<Pozice> pozice = ViewBag.ListOfPositions;
+                
+                <div class="form-group">
+                    <label asp-for="Pozice.Nazev">Pozice</label>
+                    <select asp-for="Pozice.Nazev" class="form-control">
+                        @foreach (Pozice item in pozice)
+                        {
+                            <option value="@item.Nazev">@item.Nazev</option>
+                        }
+                    </select>
+                </div>
+            }
             
             <div class="form-group">
                 <input type="submit" value="Upravit" class="btn btn-primary" asp-route-idZamestnance="@Model.Zamestnanci.IdZamestnance"
@@ -96,8 +110,4 @@
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-controller="Home" asp-action="Index">Zpět na hlavní stránku</a>
 </div>
