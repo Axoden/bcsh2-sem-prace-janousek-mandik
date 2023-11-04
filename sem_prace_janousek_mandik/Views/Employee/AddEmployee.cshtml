@@ -83,10 +83,10 @@
             }
             <div class="form-group">
                 <label asp-for="Pozice.Nazev">Pozice</label>
-                <select asp-for="Pozice.Nazev" class="form-control">
+                <select asp-for="Zamestnanci.IdPozice" class="form-control">
                     @foreach (Pozice item in pozice)
                     {
-                        <option value="@item.Nazev">@item.Nazev</option>
+                        <option value="@item.IdPozice">@item.Nazev</option>
                     }
                 </select>
             </div>

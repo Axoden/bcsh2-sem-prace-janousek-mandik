@@ -47,6 +47,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 			// Dostupné pouze pro administrátora
 			if (Role.Equals("Admin"))
 			{
+				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
 				if (ModelState.IsValid == true)
 				{
 					// Kontrola zda již není zaregistrován zaměstnanec s tímto emailem
@@ -58,8 +59,6 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 
 					Zamestnanci_Adresy_Pozice inputZamestnanecEdited = novyZamestnanec;
 					inputZamestnanecEdited.Zamestnanci.Heslo = SharedSQL.HashPassword(novyZamestnanec.Zamestnanci.Heslo);
-					int idPozice = EmployeeSQL.GetPositionIdByName(novyZamestnanec.Pozice.Nazev);
-					inputZamestnanecEdited.Zamestnanci.IdPozice = idPozice;
 					bool uspesnaRegistrace = EmployeeSQL.RegisterEmployee(inputZamestnanecEdited);
 
 					if (uspesnaRegistrace == true)
@@ -97,11 +96,12 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
+				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
 				zamestnanciAdresyPozice.Zamestnanci.IdZamestnance = idZamestnance;
 				zamestnanciAdresyPozice.Zamestnanci.IdAdresy = idAdresy;
 				if (zamestnanciAdresyPozice.Pozice != null)
 				{
-					idPozice = EmployeeSQL.GetPositionIdByName(zamestnanciAdresyPozice.Pozice.Nazev);
+					idPozice = zamestnanciAdresyPozice.Pozice.IdPozice;
 				}
 
 				zamestnanciAdresyPozice.Zamestnanci.IdPozice = idPozice;

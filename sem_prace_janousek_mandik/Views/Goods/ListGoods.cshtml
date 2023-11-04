@@ -1,0 +1,72 @@
+﻿@using sem_prace_janousek_mandik.Models.Goods;
+@section Title{
+	Výpis zboží
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všeho zboží:</h2>
+
+	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	{
+		<a asp-controller="Goods" asp-action="AddGoods"><button type="submit">Přidat zboží</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td>Název</td>
+			<td>Jednotková cena</td>
+			<td>Počet kusů na skladě</td>
+			<td>Čárový kód</td>
+			<td>Poznámka</td>
+			<td>Kategorie</td>
+			<td>Zkratka</td>
+			<td>Popis kategorie</td>
+			<td>Místnost</td>
+			<td>Rada</td>
+			<td>Regál</td>
+			<td>Pozice</td>
+			<td>Datum umístění</td>
+			<td>Poznámka</td>
+			<td>Název</td>
+			<td>Jméno</td>
+			<td>Příjmení</td>
+			<td>Telefon</td>
+			<td>Email</td>
+			<td>Upravit</td>
+			<td>Odstranit</td>
+		</tr>
+
+		@foreach (Zbozi_Umisteni_Kategorie_Dodavatele item in ViewBag.ListOfGoodsWithLocationCategorySupplier)
+		{
+			<tr>
+				<td>@item.Zbozi.Nazev</td>
+				<td>@item.Zbozi.JednotkovaCena</td>
+				<td>@item.Zbozi.PocetNaSklade</td>
+				<td>@item.Zbozi.CarovyKod</td>
+				<td>@item.Zbozi.Poznamka</td>
+				<td>@item.Kategorie.Nazev</td>
+				<td>@item.Kategorie.Zkratka</td>
+				<td>@item.Kategorie.Popis</td>
+				<td>@item.Umisteni.Mistnost</td>
+				<td>@item.Umisteni.Rada</td>
+				<td>@item.Umisteni.Regal</td>
+				<td>@item.Umisteni.Pozice</td>
+				<td>@item.Umisteni.Datum</td>
+				<td>@item.Umisteni.Poznamka</td>
+				<td>@item.Dodavatele.Nazev</td>
+				<td>@item.Dodavatele.Jmeno</td>
+				<td>@item.Dodavatele.Prijmeni</td>
+				<td>@item.Dodavatele.Telefon</td>
+				<td>@item.Dodavatele.Email</td>
+				<td><a asp-controller="Goods" asp-action="EditGoods" asp-route-index="@item.Zbozi.IdZbozi">Upravit</a></td>
+				<td><a asp-controller="Goods" asp-action="DeleteGoods" asp-route-idZbozi="@item.Zbozi.IdZbozi">Smazat</a></td>
+			</tr>
+		}
+	</table>
+</div>

@@ -18,9 +18,9 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public int PocetNaSklade { get; set; }
 
 		[Required]
-		public int CarovyKod { get; set; }
+		public Int64 CarovyKod { get; set; }
 
-        public string? Poznamka { get; set; }
+		public string? Poznamka { get; set; }
 
 		[Browsable(false)]
 		public int IdDodavatele { get; set; }
@@ -30,5 +30,5 @@ namespace sem_prace_janousek_mandik.Models.Goods
 
 		[Browsable(false)]
 		public int IdKategorie { get; set; }
-    }
+	}
 }
