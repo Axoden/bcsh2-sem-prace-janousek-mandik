@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace sem_prace_janousek_mandik.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
 
@@ -15,19 +15,17 @@ namespace sem_prace_janousek_mandik.Controllers
 
         public IActionResult Index()
         {
-            string? role = this.HttpContext.Session.GetString("role");
-            string? email = this.HttpContext.Session.GetString("email");
-			
-			if (role != null)
-            {
-				ViewBag.Role = role;
-				ViewBag.Email = email;
-			}
-                
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+		// Odhlášení a odstranění session
+		public IActionResult Logout()
+		{
+			HttpContext.Session.Clear();
+			return RedirectToAction("Index", "Home");
+		}
+
+		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

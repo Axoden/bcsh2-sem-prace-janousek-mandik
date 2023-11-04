@@ -1,43 +1,58 @@
-﻿
+﻿@using sem_prace_janousek_mandik.Controllers.Customer;
+@using sem_prace_janousek_mandik.Controllers.Employee;
+@using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Controllers.Management;
+
 @{
-	string role = "Norole";
-	if(ViewBag.Role != null)
-	{
-		role = ViewBag.Role;
-	}
+	string role = ViewBag.Role;
 }
 
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>@RenderSection("Title", required: false) - Skladové hospodářství</title>
-	</head>
+<head>
+	<title>@RenderSection("Title", required: false) - Skladové hospodářství</title>
+</head>
 <body>
 	<div>
 		@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik") || role.Equals("Zakaznik"))
 		{
 			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Kategorie</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Umístění</button></a>
+			
 			<a asp-controller="Home" asp-action="Index"><button>Zboží</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Zboží objednávek</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Objednávky</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Faktury</button></a>
 			<a asp-controller="Home" asp-action="Index"><button>Platby</button></a>
-			<a asp-controller="Management" asp-action="ListEmployees"><button>Zaměstnanci</button></a>
-			<a asp-controller="Management" asp-action="ListPositions"><button>Pozice</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Zákazníci</button></a>
-			<a asp-controller="Dodavatele" asp-action="ListSuppliers"><button>Dodavatelé</button></a>
+			
+			if (role.Equals("Admin"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button>Zákazníci</button></a>
+			}
+
+			if (role.Equals("Manazer") || role.Equals("Admin"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListPositions)"><button>Pozice</button></a>
+			}
+			
+			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button>Kategorie</button></a>
+				<a asp-controller="Home" asp-action="Index"><button>Umístění</button></a>
+				<a asp-controller="Supplier" asp-action="ListSuppliers"><button>Dodavatelé</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.ListEmployees)"><button>Zaměstnanci</button></a>
+			}
+			<a asp-controller="Home" asp-action="Index"><button>Objednávky</button></a>
 		}
 
-		@if(ViewBag.Email == null) {
+		@if (role.Equals(""))
+		{
 			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
-			<a asp-controller="Login" asp-action="LoginCustomer"><button>Přihlášení zákazníci</button></a>
-			<a asp-controller="Login" asp-action="RegisterCustomer"><button>Registrace zákazníci</button></a>
-			<a asp-controller="Login" asp-action="LoginEmployee"><button>Přihlášení zaměstnanci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.LoginCustomer)"><button>Přihlášení zákazníci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)"><button>Registrace zákazníci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.LoginEmployee)"><button>Přihlášení zaměstnanci</button></a>
 		}
-		else{
-			<a asp-controller="Login" asp-action="Logout"><button>Odhlásit se</button></a>
+		else
+		{
+			<a asp-controller="Home" asp-action="Logout"><button>Odhlásit se</button></a>
 		}
 	</div>
 

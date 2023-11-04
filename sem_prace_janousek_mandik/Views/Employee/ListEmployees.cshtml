@@ -1,0 +1,135 @@
+﻿@using sem_prace_janousek_mandik.Models.Employee;
+@section Title{
+	Výpis zaměstnanců
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech zaměstnanců:</h2>
+
+	@if (ViewBag.Role.Equals("Admin"))
+	{
+		<a asp-controller="Employee" asp-action="AddEmployee"><button type="submit">Přidat zaměstnance</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td>Jméno</td>
+			<td>Příjmení</td>
+			<td>Heslo</td>
+			<td>Datum narození</td>
+			<td>Telefon</td>
+			<td>Email</td>
+			<td>Ulice</td>
+			<td>Město</td>
+			<td>Okres</td>
+			<td>Země</td>
+			<td>PSČ</td>
+			<td>Pozice</td>
+			<td>Upravit</td>
+			@if (ViewBag.Role.Equals("Admin"))
+			{
+				<td>Odstranit</td>
+			}
+		</tr>
+
+		@{
+			string hidden = "<skryté>";
+			List<Adresy> adresy = ViewBag.ListOfAddresses;
+			List<Pozice> pozice = ViewBag.ListOfPositions;
+		}
+
+		@foreach (Zamestnanci item in ViewBag.ListOfEmployees)
+		{
+			Pozice? jednaPozice = pozice.FirstOrDefault((lmb) => lmb.IdPozice == item.IdPozice);
+
+			<tr>
+				<td>@item.Jmeno</td>
+				<td>@item.Prijmeni</td>
+				<td>@hidden</td>
+
+				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin"))
+				{
+					<td>@item.DatumNarozeni</td>
+				}
+				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+				{
+					<!-- Zobrazení data narození pouze adminovi nebo manažerovi -->
+					<td>@item.DatumNarozeni</td>
+				}
+				else
+				{
+					<td>@hidden</td>
+				}
+
+				<td>@item.Telefon</td>
+				<td>@item.Email</td>
+
+				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
+				{
+					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
+					<td>@adresa.Ulice</td>
+					<td>@adresa.Mesto</td>
+					if (adresa.Okres.Equals(""))
+					{
+						<td></td>
+					}
+					else
+					{
+						<td>@adresa.Okres</td>
+					}
+					<td>@adresa.Zeme</td>
+					<td>@adresa.Psc</td>
+				}
+				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+				{
+					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
+					<td>@adresa.Ulice</td>
+					<td>@adresa.Mesto</td>
+					if (adresa.Okres.Equals(""))
+					{
+						string neexistuje = "<nezadán>";
+						<td>@neexistuje</td>
+					}
+					else
+					{
+						<td>@adresa.Okres</td>
+					}
+					<td>@adresa.Zeme</td>
+					<td>@adresa.Psc</td>
+				}
+				else
+				{
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+					<td>@hidden</td>
+				}
+
+
+				<td>@jednaPozice.Nazev</td>
+
+				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin"))
+				{
+					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
+				}
+				else if (ViewBag.Role.Equals("Admin"))
+				{
+					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
+					<td><a asp-controller="Employee" asp-action="DeleteEmployee" asp-route-idZamestnance="@item.IdZamestnance" asp-route-idAdresy="@item.IdAdresy">Smazat</a></td>
+				}
+				else
+				{
+					<td>@hidden</td>
+
+				}
+			</tr>
+		}
+	</table>
+</div>

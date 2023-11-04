@@ -20,6 +20,7 @@ namespace sem_prace_janousek_mandik.Models
         public string? Zeme { get; set; }
 
         [Required]
+        [Range(0, 99999)]
         public string? Psc { get; set; }
     }
 }

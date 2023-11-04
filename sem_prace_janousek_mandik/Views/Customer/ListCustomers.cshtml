@@ -1,0 +1,53 @@
+﻿@using sem_prace_janousek_mandik.Controllers.Customer;
+@using sem_prace_janousek_mandik.Models.Customer;
+
+@section Title{
+	Výpis zákazníků
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech zákazníků:</h2>
+
+	<table border="1">
+		<tr>
+			<td>Jméno</td>
+			<td>Příjmení</td>
+			<td>Heslo</td>
+			<td>Telefon</td>
+			<td>Email</td>
+			<td>Ulice</td>
+			<td>Město</td>
+			<td>Okres</td>
+			<td>Země</td>
+			<td>PSČ</td>
+			<td>Upravit</td>
+			<td>Odstranit</td>
+		</tr>
+
+		@{
+			string hidden = "<skryté>";
+		}
+
+		@foreach (Zakaznici_Adresy item in ViewBag.ListOfEmployeesWithAddresses)
+		{
+			<tr>
+				<td>@item.Zakaznici.Jmeno</td>
+				<td>@item.Zakaznici.Prijmeni</td>
+				<td>@hidden</td>
+				<td>@item.Zakaznici.Telefon</td>
+				<td>@item.Zakaznici.Email</td>
+				<td>@item.Adresy.Ulice</td>
+				<td>@item.Adresy.Mesto</td>
+				<td>@item.Adresy.Okres</td>
+				<td>@item.Adresy.Zeme</td>
+				<td>@item.Adresy.Psc</td>
+				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomer)" asp-route-index="@item.Zakaznici.IdZakaznika">Upravit</a></td>
+				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)" asp-route-idZakaznika="@item.Zakaznici.IdZakaznika" asp-route-idAdresy="@item.Zakaznici.IdAdresy">Smazat</a></td>
+			</tr>
+		}
+	</table>
+</div>

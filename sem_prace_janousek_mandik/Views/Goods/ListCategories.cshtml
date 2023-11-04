@@ -1,0 +1,54 @@
+﻿@using sem_prace_janousek_mandik.Models.Goods;
+@section Title{
+	Výpis kategorií
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech kategorií:</h2>
+
+	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	{
+		<a asp-controller="Goods" asp-action="AddCategory"><button type="submit">Přidat kategorii</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td>Název</td>
+			<td>Zkratka</td>
+			<td>Popis</td>
+			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+			{
+				<td>Upravit</td>
+				<td>Odstranit</td>
+			}
+		</tr>
+
+		@{
+			string hidden = "<skryté>";
+		}
+
+		@foreach (Kategorie item in ViewBag.ListOfCategories)
+		{
+			<tr>
+				<td>@item.Nazev</td>
+				<td>@item.Zkratka</td>
+				<td>@item.Popis</td>
+				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+				{
+					<td><a asp-controller="Goods" asp-action="EditCategory" asp-route-index="@item.IdKategorie">Upravit</a></td>
+					<td><a asp-controller="Goods" asp-action="DeleteCategory" asp-route-index="@item.IdKategorie">Smazat</a></td>
+				}
+				else
+				{
+					<td>@hidden</td>
+				}
+			</tr>
+		}
+	</table>
+</div>

@@ -1,0 +1,99 @@
+﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_Pozice
+
+@section Title{
+	Přidání zaměstnance
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+
+<h1>Přidání nového zaměstnance</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="AddEmployee">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.Jmeno" class="control-label"></label>
+                <input asp-for="Zamestnanci.Jmeno" class="form-control" />
+                <span asp-validation-for="Zamestnanci.Jmeno" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.Prijmeni" class="control-label"></label>
+                <input asp-for="Zamestnanci.Prijmeni" class="form-control" />
+                <span asp-validation-for="Zamestnanci.Prijmeni" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.DatumNarozeni" class="control-label"></label>
+                <input asp-for="Zamestnanci.DatumNarozeni" class="form-control" />
+                <span asp-validation-for="Zamestnanci.DatumNarozeni" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.Telefon" class="control-label"></label>
+                <input asp-for="Zamestnanci.Telefon" class="form-control" />
+                <span asp-validation-for="Zamestnanci.Telefon" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.Email" class="control-label"></label>
+                <input asp-for="Zamestnanci.Email" class="form-control" />
+                <span asp-validation-for="Zamestnanci.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.Heslo" class="control-label"></label>
+                <input asp-for="Zamestnanci.Heslo" class="form-control" />
+                <span asp-validation-for="Zamestnanci.Heslo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Zamestnanci.HesloZnova" class="control-label"></label>
+                <input asp-for="Zamestnanci.HesloZnova" class="form-control" />
+                <span asp-validation-for="Zamestnanci.HesloZnova" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresy.Ulice" class="control-label"></label>
+                <input asp-for="Adresy.Ulice" class="form-control" />
+                <span asp-validation-for="Adresy.Ulice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresy.Mesto" class="control-label"></label>
+                <input asp-for="Adresy.Mesto" class="form-control" />
+                <span asp-validation-for="Adresy.Mesto" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresy.Okres" class="control-label"></label>
+                <input asp-for="Adresy.Okres" class="form-control" />
+                <span asp-validation-for="Adresy.Okres" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresy.Zeme" class="control-label"></label>
+                <input asp-for="Adresy.Zeme" class="form-control" />
+                <span asp-validation-for="Adresy.Zeme" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Adresy.Psc" class="control-label"></label>
+                <input asp-for="Adresy.Psc" class="form-control" />
+                <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
+            </div>
+
+            @{
+                List<Pozice> pozice = ViewBag.ListOfPositions;
+            }
+            <div class="form-group">
+                <label asp-for="Pozice.Nazev">Pozice</label>
+                <select asp-for="Pozice.Nazev" class="form-control">
+                    @foreach (Pozice item in pozice)
+                    {
+                        <option value="@item.Nazev">@item.Nazev</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Přidat zaměstnance" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

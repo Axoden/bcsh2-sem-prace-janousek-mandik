@@ -1,228 +1,99 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using sem_prace_janousek_mandik.Controllers.Login;
 using sem_prace_janousek_mandik.Models;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
 {
-	public class ManagementController : Controller
+	public class ManagementController : BaseController
 	{
-		// Výpis všech zaměstnanců
-		public IActionResult ListEmployees()
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-
-			if (aktRole != null)
-			{
-				if (aktRole.Equals("Manazer") || aktRole.Equals("Admin") || aktRole.Equals("Skladnik") || aktRole.Equals("Logistik"))
-				{
-					string? role = this.HttpContext.Session.GetString("role");
-					string? email = this.HttpContext.Session.GetString("email");
-					if (role != null)
-					{
-						ViewBag.Role = role;
-						ViewBag.Email = email;
-					}
-
-					List<Zamestnanci> zamestnanci = ManagementSQL.GetAllEmployees();
-					List<Adresy> adresy = AdresySQL.GetAllAddresses();
-					List<Pozice> pozice = ManagementSQL.GetAllPositions();
-					ViewBag.ListOfEmployees = zamestnanci;
-					ViewBag.ListOfAddresses = adresy;
-					ViewBag.ListOfPositions = pozice;
-					ViewBag.Role = role;
-					ViewBag.Email = email;
-
-					return View();
-				}
-			}
-
-			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
-		}
-
-		// Načtení formuláře na přidání nového zaměstnance
-		[HttpGet]
-		public IActionResult AddEmployee()
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-
-			if (aktRole != null)
-			{
-				// Dostupné pouze pro administrátora
-				if (aktRole.Equals("Admin"))
-				{
-					string? role = this.HttpContext.Session.GetString("role");
-					string? email = this.HttpContext.Session.GetString("email");
-					if (role != null)
-					{
-						ViewBag.Role = role;
-						ViewBag.Email = email;
-					}
-
-                    ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-
-                    return View();
-				}
-			}
-			return RedirectToAction("ListEmployees", "Management");
-		}
-
-		// Příjem dat z formuláře na přidání zaměstnance
-		[HttpPost]
-		public IActionResult AddEmployee(Zamestnanci_Adresy_Pozice novyZamestnanec)
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-
-			if (aktRole != null)
-			{
-				// Dostupné pouze pro administrátora
-				if (aktRole.Equals("Admin"))
-				{
-					string? role = this.HttpContext.Session.GetString("role");
-					string? email = this.HttpContext.Session.GetString("email");
-					if (role != null)
-					{
-						ViewBag.Role = role;
-						ViewBag.Email = email;
-					}
-
-					if (ModelState.IsValid == true)
-					{
-						// Kontrola zda již není zaregistrován zaměstnanec s tímto emailem
-						if (ManagementSQL.CheckExistsEmployee(novyZamestnanec.Zamestnanci.Email) == true)
-						{
-							ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-							return View(novyZamestnanec);
-						}
-
-						Zamestnanci_Adresy_Pozice inputZamestnanecEdited = novyZamestnanec;
-						inputZamestnanecEdited.Zamestnanci.Heslo = HashPassword(novyZamestnanec.Zamestnanci.Heslo);
-						int idPozice = ManagementSQL.GetPositionIdByName(novyZamestnanec.Pozice.Nazev);
-						inputZamestnanecEdited.Zamestnanci.IdPozice = idPozice;
-						bool uspesnaRegistrace = ManagementSQL.RegisterEmployee(inputZamestnanecEdited);
-
-						if (uspesnaRegistrace == true)
-						{
-							// Úspěšná registrace, přesměrování na výpis zaměstnanců
-							return RedirectToAction("ListEmployees", "Management");
-						}
-					}
-					return View(novyZamestnanec);
-				}
-			}
-			return RedirectToAction("ListEmployees", "Management");
-		}
-
-		// Načtení formuláře na úpravu vybraného zaměstnance
-		[HttpGet]
-		public IActionResult EditEmployee(int index)
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-			Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice = ManagementSQL.GetEmployeeWithAddressPosition(index);
-			string? role = this.HttpContext.Session.GetString("role");
-			string? email = this.HttpContext.Session.GetString("email");
-			if (role != null)
-			{
-				ViewBag.Role = role;
-				ViewBag.Email = email;
-			}
-
-			if (aktRole != null)
-			{
-				// Kontrola oprávnění na načtení parametrů zaměstnance
-				if (aktRole.Equals("Manazer") || aktRole.Equals("Admin") || aktRole.Equals("Skladnik") && zamestnanciAdresyPozice.Zamestnanci.Email.Equals(email) ||
-					aktRole.Equals("Logistik") && zamestnanciAdresyPozice.Zamestnanci.Email.Equals(email))
-				{
-					ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-					return View(zamestnanciAdresyPozice);
-				}
-			}
-			return RedirectToAction("ListEmployees", "Management");
-		}
-
-		// Příjem upravených dat vybraného zaměstnance
-		[HttpPost]
-		public IActionResult EditEmployee(Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice, int idZamestnance, int idAdresy, int idPozice)
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-			if (aktRole != null)
-			{
-				if (aktRole.Equals("Manazer") || aktRole.Equals("Admin") || aktRole.Equals("Skladnik") || aktRole.Equals("Logistik"))
-				{
-					zamestnanciAdresyPozice.Zamestnanci.IdZamestnance = idZamestnance;
-					zamestnanciAdresyPozice.Zamestnanci.IdAdresy = idAdresy;
-					if (zamestnanciAdresyPozice.Pozice != null)
-					{
-                        idPozice = ManagementSQL.GetPositionIdByName(zamestnanciAdresyPozice.Pozice.Nazev);
-                    }
-
-					zamestnanciAdresyPozice.Zamestnanci.IdPozice = idPozice;
-					ManagementSQL.EditEmployee(zamestnanciAdresyPozice);
-					return RedirectToAction("ListEmployees", "Management");
-				}
-			}
-			return RedirectToAction("ListEmployees", "Management");
-		}
-
-		// Formální metoda pro odstranění vybraného zaměstnance
-		[HttpGet]
-		public IActionResult DeleteEmployee(int idZamestnance, int idAdresy)
-		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-
-			if (aktRole != null)
-			{
-				if (aktRole.Equals("Admin"))
-				{
-					ManagementSQL.DeleteEmployee(idZamestnance, idAdresy);
-					return RedirectToAction("ListEmployees", "Management");
-				}
-			}
-			return RedirectToAction("ListEmployees", "Management");
-		}
-
+		// Výpis všech pozic
 		public IActionResult ListPositions()
 		{
-			string? aktRole = this.HttpContext.Session.GetString("role");
-
-			if (aktRole != null)
+			if (Role.Equals("Manazer") || Role.Equals("Admin"))
 			{
-				if (aktRole.Equals("Manazer") || aktRole.Equals("Admin"))
-				{
-					string? role = this.HttpContext.Session.GetString("role");
-					string? email = this.HttpContext.Session.GetString("email");
-					if (role != null)
-					{
-						ViewBag.Role = role;
-						ViewBag.Email = email;
-					}
+				List<Pozice> pozice = ManagementSQL.GetAllPositions();
+				ViewBag.ListOfPositions = pozice;
 
-					List<Pozice> pozice = ManagementSQL.GetAllPositions();
-					ViewBag.ListOfPositions = pozice;
-					ViewBag.Role = role;
-					ViewBag.Email = email;
-
-					return View();
-				}
+				return View();
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup
 			return RedirectToAction("Index", "Home");
 		}
 
-		// Vygenerování hashe z hesla
-		public static string? HashPassword(string password)
+		// Načtení formuláře na přidání nové pozice
+		[HttpGet]
+		public IActionResult AddPosition()
 		{
-			if (password != null)
+			// Dostupné pouze pro administrátora
+			if (Role.Equals("Admin"))
 			{
-				var sha = SHA256.Create();
-				var encoded = Encoding.Default.GetBytes(password);
-				var hashedPassword = sha.ComputeHash(encoded);
-				return Convert.ToBase64String(hashedPassword);
+				return View();
 			}
-			return null;
+
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
+		}
+
+		// Příjem dat z formuláře na přidání pozice
+		[HttpPost]
+		public IActionResult AddPosition(Pozice novaPozice)
+		{
+			// Dostupné pouze pro administrátora
+			if (Role.Equals("Admin"))
+			{
+				if (ModelState.IsValid == true)
+				{
+					bool uspesnaRegistrace = ManagementSQL.RegisterPosition(novaPozice);
+
+					if (uspesnaRegistrace == true)
+					{
+						// Úspěšná registrace, přesměrování na výpis pozic
+						return RedirectToAction(nameof(ListPositions), nameof(Management));
+					}
+				}
+				return View(novaPozice);
+			}
+
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
+		}
+
+		// Načtení formuláře na úpravu vybrané pozice
+		[HttpGet]
+		public IActionResult EditPosition(int index)
+		{
+			// Kontrola oprávnění na načtení parametru pozice
+			if (Role.Equals("Admin"))
+			{
+				Pozice pozice = ManagementSQL.GetPositionById(index);
+				return View(pozice);
+			}
+
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
+		}
+
+		// Příjem upravených dat vybrané pozice
+		[HttpPost]
+		public IActionResult EditPosition(Pozice pozice, int idPozice)
+		{
+			if (Role.Equals("Admin"))
+			{
+				pozice.IdPozice = idPozice;
+				ManagementSQL.EditPosition(pozice);
+			}
+
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
+		}
+
+		// Formální metoda pro odstranění vybrané pozice
+		[HttpGet]
+		public IActionResult DeletePosition(int index)
+		{
+			if (Role.Equals("Admin"))
+			{
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_POZICI", index);
+			}
+
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
 	}
 }
