@@ -12,9 +12,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			if (Role.Equals("Manazer") || Role.Equals("Admin"))
 			{
 				List<Pozice> pozice = ManagementSQL.GetAllPositions();
-				ViewBag.ListOfPositions = pozice;
-
-				return View();
+				return View(pozice);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup

@@ -1,0 +1,45 @@
+﻿@using sem_prace_janousek_mandik.Models.Goods;
+@model sem_prace_janousek_mandik.Models.Order.ZboziObjednavek_Zbozi
+
+@section Title{
+	Přidání zboží do objednávky
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+@{
+    List<Zbozi> goods = ViewBag.ListOfGoods;
+    Model.ZboziObjednavek.IdObjednavky = ViewBag.IdObjednavky;
+}
+
+<h1>Přidání zboží do objednávky</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="AddGoodsToOrder">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Zbozi">Zboží</label>
+                <select asp-for="ZboziObjednavek.IdZbozi" class="form-control">
+                    @foreach (Zbozi item in goods)
+                    {
+                        <option value="@item.IdZbozi">@item.Nazev, @item.JednotkovaCena, @item.CarovyKod</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="ZboziObjednavek.Mnozstvi" class="control-label"></label>
+                <input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
+                <span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Přidat kategorii" class="btn btn-primary" asp-route-idObjednavky="@Model.ZboziObjednavek.IdObjednavky" />
+            </div>
+        </form>
+    </div>
+</div>

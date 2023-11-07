@@ -1,4 +1,6 @@
-﻿@using sem_prace_janousek_mandik.Models.Employee;
+﻿@model List<sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_Pozice>
+@using sem_prace_janousek_mandik.Controllers.Employee;
+@using sem_prace_janousek_mandik.Models.Employee;
 @section Title{
 	Výpis zaměstnanců
 }
@@ -12,7 +14,7 @@
 
 	@if (ViewBag.Role.Equals("Admin"))
 	{
-		<a asp-controller="Employee" asp-action="AddEmployee"><button type="submit">Přidat zaměstnance</button></a>
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.AddEmployee)"><button type="submit">Přidat zaměstnance</button></a>
 		<br />
 		<br />
 	}
@@ -40,68 +42,54 @@
 
 		@{
 			string hidden = "<skryté>";
-			List<Adresy> adresy = ViewBag.ListOfAddresses;
-			List<Pozice> pozice = ViewBag.ListOfPositions;
 		}
 
-		@foreach (Zamestnanci item in ViewBag.ListOfEmployees)
+		@foreach (Zamestnanci_Adresy_Pozice item in Model)
 		{
-			Pozice? jednaPozice = pozice.FirstOrDefault((lmb) => lmb.IdPozice == item.IdPozice);
-
 			<tr>
-				<td>@item.Jmeno</td>
-				<td>@item.Prijmeni</td>
+				<td>@item.Zamestnanci.Jmeno</td>
+				<td>@item.Zamestnanci.Prijmeni</td>
 				<td>@hidden</td>
 
-				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin"))
 				{
-					<td>@item.DatumNarozeni</td>
+					<td>@item.Zamestnanci.DatumNarozeni</td>
 				}
 				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
 				{
 					<!-- Zobrazení data narození pouze adminovi nebo manažerovi -->
-					<td>@item.DatumNarozeni</td>
+					<td>@item.Zamestnanci.DatumNarozeni</td>
 				}
 				else
 				{
 					<td>@hidden</td>
 				}
 
-				<td>@item.Telefon</td>
-				<td>@item.Email</td>
+				<td>@item.Zamestnanci.Telefon</td>
+				<td>@item.Zamestnanci.Email</td>
 
-				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
+				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
 				{
-					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
-					<td>@adresa.Ulice</td>
-					<td>@adresa.Mesto</td>
-					if (adresa.Okres.Equals(""))
+					<td>@item.Adresy.Ulice</td>
+					<td>@item.Adresy.Mesto</td>
+					if (item.Adresy.Okres.Equals(""))
 					{
 						<td></td>
 					}
 					else
 					{
-						<td>@adresa.Okres</td>
+						<td>@item.Adresy.Okres</td>
 					}
-					<td>@adresa.Zeme</td>
-					<td>@adresa.Psc</td>
+					<td>@item.Adresy.Zeme</td>
+					<td>@item.Adresy.Psc</td>
 				}
 				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
 				{
-					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
-					<td>@adresa.Ulice</td>
-					<td>@adresa.Mesto</td>
-					if (adresa.Okres.Equals(""))
-					{
-						string neexistuje = "<nezadán>";
-						<td>@neexistuje</td>
-					}
-					else
-					{
-						<td>@adresa.Okres</td>
-					}
-					<td>@adresa.Zeme</td>
-					<td>@adresa.Psc</td>
+					<td>@item.Adresy.Ulice</td>
+					<td>@item.Adresy.Mesto</td>
+					<td>@item.Adresy.Okres</td>
+					<td>@item.Adresy.Zeme</td>
+					<td>@item.Adresy.Psc</td>
 				}
 				else
 				{
@@ -113,21 +101,20 @@
 				}
 
 
-				<td>@jednaPozice.Nazev</td>
+				<td>@item.Pozice.Nazev</td>
 
-				@if (ViewBag.Email.Equals(item.Email) && !ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
+					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.Zamestnanci.IdZamestnance">Upravit</a></td>
 				}
 				else if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.IdZamestnance">Upravit</a></td>
-					<td><a asp-controller="Employee" asp-action="DeleteEmployee" asp-route-idZamestnance="@item.IdZamestnance" asp-route-idAdresy="@item.IdAdresy">Smazat</a></td>
+					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.Zamestnanci.IdZamestnance">Upravit</a></td>
+					<td><a asp-controller="Employee" asp-action="DeleteEmployee" asp-route-idZamestnance="@item.Zamestnanci.IdZamestnance" asp-route-idAdresy="@item.Zamestnanci.IdAdresy">Smazat</a></td>
 				}
 				else
 				{
 					<td>@hidden</td>
-
 				}
 			</tr>
 		}

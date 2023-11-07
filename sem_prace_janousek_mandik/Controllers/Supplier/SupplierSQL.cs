@@ -1,5 +1,4 @@
 ﻿using Oracle.ManagedDataAccess.Client;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Supplier;
 using System.Data;
 
@@ -7,33 +6,42 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 {
 	public static class SupplierSQL
 	{
-		// Metoda vytáhne všechny dodavatele
-		public static List<Dodavatele> GetAllSuppliers()
+		// Metoda vytáhne všechny dodavatele včetně adres
+		public static List<Dodavatele_Adresy> GetAllSuppliers()
 		{
-			List<Dodavatele> dodavatele = new();
+			List<Dodavatele_Adresy> dodavateleAdresy = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT * FROM dodavatele";
+					command.CommandText = "SELECT * FROM dodavatele d INNER JOIN adresy a ON d.idAdresy = a.idAdresy";
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
-                        Dodavatele? dodavatel = new();
+						Dodavatele_Adresy? dodavatel = new();
                         if (reader.HasRows)
 						{
 							while (reader.Read())
 							{
 								dodavatel = new();
-								dodavatel.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
-                                dodavatel.Nazev = reader["nazev"].ToString();
-                                dodavatel.Jmeno = reader["jmeno"].ToString();
-								dodavatel.Prijmeni = reader["prijmeni"].ToString();
-								dodavatel.Telefon = reader["telefon"].ToString();
-								dodavatel.Email = reader["email"].ToString();
-								dodavatel.IdAdresy = int.Parse(reader["idAdresy"].ToString());
+								dodavatel.Dodavatele = new();
+								dodavatel.Adresy = new();
 
-								dodavatele.Add(dodavatel);
+								dodavatel.Dodavatele.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
+                                dodavatel.Dodavatele.Nazev = reader["nazev"].ToString();
+                                dodavatel.Dodavatele.Jmeno = reader["jmeno"].ToString();
+								dodavatel.Dodavatele.Prijmeni = reader["prijmeni"].ToString();
+								dodavatel.Dodavatele.Telefon = reader["telefon"].ToString();
+								dodavatel.Dodavatele.Email = reader["email"].ToString();
+								dodavatel.Dodavatele.IdAdresy = int.Parse(reader["idAdresy"].ToString());
+
+								dodavatel.Adresy.Ulice = reader["ulice"].ToString();
+								dodavatel.Adresy.Mesto = reader["mesto"].ToString();
+								dodavatel.Adresy.Okres = reader["okres"].ToString();
+								dodavatel.Adresy.Zeme = reader["zeme"].ToString();
+								dodavatel.Adresy.Psc = reader["psc"].ToString();
+
+								dodavateleAdresy.Add(dodavatel);
 							}
 						}
 						else
@@ -44,7 +52,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 				}
 				connection.Close();
 			}
-			return dodavatele;
+			return dodavateleAdresy;
 		}
 
 		// Zavolá proceduru na úpravu dodavatele

@@ -2,6 +2,9 @@
 @using sem_prace_janousek_mandik.Controllers.Employee;
 @using sem_prace_janousek_mandik.Controllers.Goods;
 @using sem_prace_janousek_mandik.Controllers.Management;
+@using sem_prace_janousek_mandik.Controllers.Order;
+@using sem_prace_janousek_mandik.Controllers.Payment;
+@using sem_prace_janousek_mandik.Controllers.Supplier;
 
 @{
 	string role = ViewBag.Role;
@@ -19,9 +22,10 @@
 			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
 
 			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button>Zboží</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Zboží objednávek</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Faktury</button></a>
-			<a asp-controller="Home" asp-action="Index"><button>Platby</button></a>
+			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
+			}
 
 			if (role.Equals("Admin"))
 			{
@@ -37,10 +41,10 @@
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button>Kategorie</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListLocations)"><button>Umístění</button></a>
-				<a asp-controller="Supplier" asp-action="ListSuppliers"><button>Dodavatelé</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.ListSuppliers)"><button>Dodavatelé</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.ListEmployees)"><button>Zaměstnanci</button></a>
 			}
-			<a asp-controller="Home" asp-action="Index"><button>Objednávky</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.ListOrders)"><button>Objednávky</button></a>
 		}
 
 		@if (role.Equals(""))

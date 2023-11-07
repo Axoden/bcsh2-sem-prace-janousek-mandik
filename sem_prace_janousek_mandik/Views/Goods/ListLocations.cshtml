@@ -1,4 +1,6 @@
-﻿@using sem_prace_janousek_mandik.Models.Goods;
+﻿@model List<sem_prace_janousek_mandik.Models.Goods.Umisteni>
+@using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Models.Goods;
 @section Title{
 	Výpis umístění
 }
@@ -12,7 +14,7 @@
 
 	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik") || ViewBag.Role.Equals("Skladnik"))
 	{
-		<a asp-controller="Goods" asp-action="AddLocation"><button type="submit">Přidat umístění</button></a>
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddLocation)"><button type="submit">Přidat umístění</button></a>
 		<br />
 		<br />
 	}
@@ -30,7 +32,7 @@
 
 		</tr>
 
-		@foreach (Umisteni item in ViewBag.ListOfLocations)
+		@foreach (Umisteni item in Model)
 		{
 			<tr>
 				<td>@item.Mistnost</td>
@@ -39,8 +41,8 @@
 				<td>@item.Pozice</td>
 				<td>@item.Datum</td>
 				<td>@item.Poznamka</td>
-				<td><a asp-controller="Goods" asp-action="EditLocation" asp-route-index="@item.IdUmisteni">Upravit</a></td>
-				<td><a asp-controller="Goods" asp-action="DeleteLocation" asp-route-index="@item.IdUmisteni">Smazat</a></td>
+				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditLocation)" asp-route-index="@item.IdUmisteni">Upravit</a></td>
+				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)" asp-route-index="@item.IdUmisteni">Smazat</a></td>
 			</tr>
 		}
 	</table>

@@ -1,0 +1,77 @@
+﻿@using sem_prace_janousek_mandik.Models.Customer;
+@using sem_prace_janousek_mandik.Models.Employee;
+@using sem_prace_janousek_mandik.Models.Payment;
+@model sem_prace_janousek_mandik.Models.Order.Objednavky
+@section Title{
+	Úprava objednávky
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+@{
+    List<Faktury> faktury = ViewBag.ListOfInvoices;
+    List<Zamestnanci> zamestnanci = ViewBag.ListOfEmployees;
+    List<Zakaznici> zakaznici = ViewBag.ListOfCustomers;
+}
+
+<h1>Úprava objednávky č. @Model.CisloObjednavky</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="EditOrder">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CisloObjednavky" class="control-label"></label>
+                <input asp-for="CisloObjednavky" class="form-control" />
+                <span asp-validation-for="CisloObjednavky" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DatumPrijeti" class="control-label"></label>
+                <input asp-for="DatumPrijeti" class="form-control" />
+                <span asp-validation-for="DatumPrijeti" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Poznamka" class="control-label"></label>
+                <input asp-for="Poznamka" class="form-control" />
+                <span asp-validation-for="Poznamka" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IdFaktury">Faktura</label>
+                <select asp-for="IdFaktury" class="form-control">
+                    @foreach (Faktury item in faktury)
+                    {
+                        <option value="@item.IdFaktury">@item.CisloFaktury, @item.DatumVystaveni</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IdZamestnance">Zaměstnanec</label>
+                <select asp-for="IdZamestnance" class="form-control">
+                    @foreach (Zamestnanci item in zamestnanci)
+                    {
+                        <option value="@item.IdZamestnance">@item.Jmeno, @item.Prijmeni</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="IdZakaznika">Zákazník</label>
+                <select asp-for="IdZakaznika" class="form-control">
+                    @foreach (Zakaznici item in zakaznici)
+                    {
+                        <option value="@item.IdZakaznika">@item.Jmeno, @item.Prijmeni</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Upravit" class="btn btn-primary" asp-route-index="@Model.IdObjednavky" />
+            </div>
+        </form>
+    </div>
+</div>

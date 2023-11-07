@@ -1,0 +1,110 @@
+﻿@model List<sem_prace_janousek_mandik.Models.Payment.Faktury>
+@using sem_prace_janousek_mandik.Controllers.Payment;
+@using sem_prace_janousek_mandik.Models.Payment
+@section Title{
+	Výpis faktur
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech faktur a plateb:</h2>
+
+	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	{
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="XXX_AddInvoice_XXX"><button type="submit">Vytvořit novou fakturu</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td style="font-weight: bold;">Č. faktury</td>
+			<td style="font-weight: bold;">Datum vystavení</td>
+			<td style="font-weight: bold;">Datum splatnosti</td>
+			<td style="font-weight: bold;">Částka za zboží</td>
+			<td style="font-weight: bold;">Částka za dopravu</td>
+			<td style="font-weight: bold;">DPH</td>
+			<td style="font-weight: bold;">Celkem bez DPH</td>
+			<td style="font-weight: bold;">Částka s DPH</td>
+			@if (ViewBag.Role.Equals("Admin"))
+			{
+				<td style="font-weight: bold;">Upravit</td>
+				<td style="font-weight: bold;">Odstranit</td>
+			}
+		</tr>
+
+		@{
+			List<Platby> platby = ViewBag.ListOfPayments;
+			bool printedHeaderTr = false;
+		}
+
+		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+		{
+			@foreach (Faktury item in Model)
+			{
+				printedHeaderTr = false;
+				float celkemBezDph = item.CastkaObjednavka + item.CastkaDoprava;
+				string dph = "1." + item.Dph.ToString();
+				float celkemDph = (float)Math.Round(((item.CastkaObjednavka + item.CastkaDoprava) * float.Parse(dph)), 2);
+				<tr></tr>
+				<tr></tr>
+				<tr></tr>
+				<tr>
+					<td>@item.IdFaktury</td>
+					<td>@item.DatumVystaveni</td>
+					<td>@item.DatumSplatnosti</td>
+					<td>@item.CastkaObjednavka</td>
+					<td>@item.CastkaDoprava</td>
+					<td>@item.Dph</td>
+					<td>@celkemBezDph</td>
+					<td>@celkemDph</td>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditInvoice)" asp-route-index="@item.IdFaktury">Upravit</a></td>
+						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeleteInvoice)" asp-route-index="@item.IdFaktury">Smazat</a></td>
+					}
+				</tr>
+
+				List<Platby> konkretniPlatba = platby.Where((lmb) => lmb.IdFaktury == item.IdFaktury).ToList();
+				@foreach (Platby itemZbozi in konkretniPlatba)
+				{
+					@if (!printedHeaderTr)
+					{
+						<tr></tr>
+						<tr></tr>
+						<tr></tr>
+						<tr>
+							<td></td>
+							<td style="font-weight: bold;">Typ platby</td>
+							<td style="font-weight: bold;">Částka</td>
+							<td style="font-weight: bold;">Datum platby</td>
+							<td style="font-weight: bold;">Variabilní symbol</td>
+							@if (ViewBag.Role.Equals("Admin"))
+							{
+								<td style="font-weight: bold;">Upravit</td>
+								<td style="font-weight: bold;">Odstranit</td>
+							}
+						</tr>
+						printedHeaderTr = true;
+					}
+
+					<tr>
+						<td>>>></td>
+						<td>@itemZbozi.TypPlatby</td>
+						<td>@itemZbozi.Castka</td>
+						<td>@itemZbozi.DatumPlatby</td>
+						<td>@itemZbozi.VariabilniSymbol</td>
+						@if (ViewBag.Role.Equals("Admin"))
+						{
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPayment)" asp-route-index="@itemZbozi.IdPlatby">Upravit</a></td>
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeletePayment)" asp-route-index="@itemZbozi.IdPlatby">Smazat</a></td>
+						}
+					</tr>
+				}
+			}
+		}
+	</table>
+</div>

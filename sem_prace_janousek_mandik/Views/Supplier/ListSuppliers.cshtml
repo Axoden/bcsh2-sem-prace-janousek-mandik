@@ -1,4 +1,6 @@
-﻿@using sem_prace_janousek_mandik.Models.Supplier;
+﻿@model List<sem_prace_janousek_mandik.Models.Supplier.Dodavatele_Adresy>
+@using sem_prace_janousek_mandik.Controllers.Supplier;
+@using sem_prace_janousek_mandik.Models.Supplier;
 @section Title{
 	Výpis dodavatelů
 }
@@ -12,7 +14,7 @@
 
 	@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="Supplier" asp-action="AddSupplier"><button type="submit">Přidat dodavatele</button></a>
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.AddSupplier)"><button type="submit">Přidat dodavatele</button></a>
 		<br />
 		<br />
 	}
@@ -39,34 +41,27 @@
 			}
 		</tr>
 
-		@{
-			List<Adresy> adresy = ViewBag.ListOfAddresses;
-		}
-
-		@foreach (Dodavatele item in ViewBag.ListOfSuppliers)
+		@foreach (Dodavatele_Adresy item in Model)
 		{
 			<tr>
-				<td>@item.Nazev</td>
-				<td>@item.Jmeno</td>
-				<td>@item.Prijmeni</td>
-				<td>@item.Telefon</td>
-				<td>@item.Email</td>
-				@{
-					Adresy? adresa = adresy.FirstOrDefault((lmb) => lmb.IdAdresy == item.IdAdresy);
-				}
-				<td>@adresa.Ulice</td>
-				<td>@adresa.Mesto</td>
-				<td>@adresa.Okres</td>
-				<td>@adresa.Zeme</td>
-				<td>@adresa.Psc</td>
+				<td>@item.Dodavatele.Nazev</td>
+				<td>@item.Dodavatele.Jmeno</td>
+				<td>@item.Dodavatele.Prijmeni</td>
+				<td>@item.Dodavatele.Telefon</td>
+				<td>@item.Dodavatele.Email</td>
+				<td>@item.Adresy.Ulice</td>
+				<td>@item.Adresy.Mesto</td>
+				<td>@item.Adresy.Okres</td>
+				<td>@item.Adresy.Zeme</td>
+				<td>@item.Adresy.Psc</td>
 
 				@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
 				{
-					<td><a asp-controller="Supplier" asp-action="EditSupplier" asp-route-index="@item.IdDodavatele">Upravit</a></td>
+					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplier)" asp-route-index="@item.Dodavatele.IdDodavatele">Upravit</a></td>
 				}
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Supplier" asp-action="DeleteSupplier" asp-route-idDodavatele="@item.IdDodavatele" asp-route-idAdresy="@item.IdAdresy">Smazat</a></td>
+					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)" asp-route-idDodavatele="@item.Dodavatele.IdDodavatele" asp-route-idAdresy="@item.Dodavatele.IdAdresy">Smazat</a></td>
 				}
 			</tr>
 		}

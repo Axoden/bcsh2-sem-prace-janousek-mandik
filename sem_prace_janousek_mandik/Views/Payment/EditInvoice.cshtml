@@ -1,0 +1,54 @@
+﻿@model sem_prace_janousek_mandik.Models.Payment.Faktury
+@section Title{
+	Úprava faktury
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<h1>Úprava faktury</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="EditInvoice">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CisloFaktury" class="control-label"></label>
+                <input asp-for="CisloFaktury" class="form-control" />
+                <span asp-validation-for="CisloFaktury" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DatumVystaveni" class="control-label"></label>
+                <input asp-for="DatumVystaveni" value="@Model.DatumVystaveni?.ToString("yyyy-MM-dd")" class="form-control" />
+                <span asp-validation-for="DatumVystaveni" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DatumSplatnosti" class="control-label"></label>
+                <input asp-for="DatumSplatnosti" value="@Model.DatumSplatnosti?.ToString("yyyy-MM-dd")" class="form-control" />
+                <span asp-validation-for="DatumSplatnosti" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CastkaObjednavka" class="control-label"></label>
+                <input asp-for="CastkaObjednavka" class="form-control" />
+                <span asp-validation-for="CastkaObjednavka" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CastkaDoprava" class="control-label"></label>
+                <input asp-for="CastkaDoprava" class="form-control" />
+                <span asp-validation-for="CastkaDoprava" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Dph" class="control-label"></label>
+                <input asp-for="Dph" class="form-control" />
+                <span asp-validation-for="Dph" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Upravit" class="btn btn-primary" asp-route-index="@Model.IdFaktury" />
+            </div>
+        </form>
+    </div>
+</div>

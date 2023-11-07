@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Supplier;
-using System.Text;
 
 namespace sem_prace_janousek_mandik.Controllers.Supplier
 {
@@ -12,12 +10,8 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				List<Dodavatele> dodavatele = SupplierSQL.GetAllSuppliers();
-				List<Adresy> adresy = SharedSQL.GetAllAddresses();
-				ViewBag.ListOfSuppliers = dodavatele;
-				ViewBag.ListOfAddresses = adresy;
-
-				return View();
+				List<Dodavatele_Adresy> dodavatele = SupplierSQL.GetAllSuppliers();
+				return View(dodavatele);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup

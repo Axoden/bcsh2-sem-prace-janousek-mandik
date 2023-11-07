@@ -1,0 +1,169 @@
+﻿@model List<sem_prace_janousek_mandik.Models.Order.Objednavky_Zamestnanci_Zakaznici>
+@using sem_prace_janousek_mandik.Controllers.Order;
+@using sem_prace_janousek_mandik.Models.Order
+@section Title{
+	Výpis objednávek
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech objednávek:</h2>
+
+	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Zakaznik"))
+	{
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.AddOrder)"><button type="submit">Vytvořit novou objednávku</button></a>
+		<br />
+		<br />
+	}
+
+	<table border="1">
+		<tr>
+			<td style="font-weight: bold;">Č. objednávky</td>
+			<td style="font-weight: bold;">Datum přijetí</td>
+			<td style="font-weight: bold;">Poznámka</td>
+			<td style="font-weight: bold;">Jméno zaměstnance</td>
+			<td style="font-weight: bold;">Příjmení zaměstnance</td>
+			@if (ViewBag.Role.Equals("Zakaznik"))
+			{
+				<td style="font-weight: bold;">Email zaměstnance</td>
+			}
+			<td style="font-weight: bold;">Faktura</td>
+			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+			{
+				<td style="font-weight: bold;">Jméno zákazníka</td>
+				<td style="font-weight: bold;">Příjmení zákazníka</td>
+				<td style="font-weight: bold;">Uzavřená objednávka</td>
+				<td style="font-weight: bold;">Přidat zboží</td>
+			}
+			@if (ViewBag.Role.Equals("Admin"))
+			{
+				<td style="font-weight: bold;">Upravit</td>
+				<td style="font-weight: bold;">Odstranit</td>
+			}
+		</tr>
+
+		@{
+			List<ZboziObjednavek_Zbozi> zboziObjednavek = ViewBag.ListOfGoodsOrders;
+			bool printedHeaderTr = false;
+		}
+
+		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+		{
+			@foreach (Objednavky_Zamestnanci_Zakaznici item in Model)
+			{
+				printedHeaderTr = false;
+				<tr></tr>
+				<tr></tr>
+				<tr></tr>
+				<tr>
+					<td>@item.Objednavky.IdObjednavky</td>
+					<td>@item.Objednavky.DatumPrijeti</td>
+					<td>@item.Objednavky.Poznamka</td>
+					<td>@item.Zamestnanci.Jmeno</td>
+					<td>@item.Zamestnanci.Prijmeni</td>
+					<td><a href="">Faktura</a></td>
+					<td>@item.Zakaznici.Jmeno</td>
+					<td>@item.Zakaznici.Prijmeni</td>
+					<td>
+						@(item.Objednavky.Uzavrena ? "Ano" : "Ne")
+					</td>
+					<td>
+						<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.AddGoodsToOrder)" asp-route-index="@item.Objednavky.IdObjednavky">Přidat</a>
+					</td>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="EditOrder" asp-route-index="@item.Objednavky.IdObjednavky">Upravit</a></td>
+						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteOrder" asp-route-idObjednavky="@item.Objednavky.IdObjednavky">Smazat</a></td>
+					}
+				</tr>
+
+				List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
+				@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
+				{
+					@if (!printedHeaderTr)
+					{
+						<tr></tr>
+						<tr></tr>
+						<tr></tr>
+						<tr>
+							<td></td>
+							<td style="font-weight: bold;">Název zboží</td>
+							<td style="font-weight: bold;">Množství</td>
+							<td style="font-weight: bold;">Cena za kus</td>
+							<td style="font-weight: bold;">Cena celkem</td>
+							@if (ViewBag.Role.Equals("Admin"))
+							{
+								<td style="font-weight: bold;">Upravit</td>
+								<td style="font-weight: bold;">Odstranit</td>
+							}
+						</tr>
+						printedHeaderTr = true;
+					}
+
+					<tr>
+						<td>>>></td>
+						<td>@itemZbozi.Zbozi.Nazev</td>
+						<td>@itemZbozi.ZboziObjednavek.Mnozstvi</td>
+						<td>@itemZbozi.ZboziObjednavek.JednotkovaCena</td>
+						<td>@Math.Round((itemZbozi.ZboziObjednavek.Mnozstvi * itemZbozi.ZboziObjednavek.JednotkovaCena), 2)</td>
+						@if (ViewBag.Role.Equals("Admin"))
+						{
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="EditGoodsOrder" asp-route-index="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Upravit</a></td>
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteGoodsOrder" asp-route-idObjednavky="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Smazat</a></td>
+						}
+					</tr>
+				}
+			}
+		}
+
+
+
+		@if (ViewBag.Role.Equals("Zakaznik"))
+		{
+			@foreach (Objednavky_Zamestnanci item in ViewBag.ListOfOrders)
+			{
+				printedHeaderTr = false;
+				<tr></tr>
+				<tr></tr>
+				<tr></tr>
+				<tr>
+					<td>@item.Objednavky.IdObjednavky</td>
+					<td>@item.Objednavky.DatumPrijeti</td>
+					<td>@item.Objednavky.Poznamka</td>
+					<td>@item.Zamestnanci.Jmeno</td>
+					<td>@item.Zamestnanci.Prijmeni</td>
+					<td>@item.Zamestnanci.Email</td>
+					<td><a href="">Faktura</a></td>
+				</tr>
+
+				List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
+				@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
+				{
+					@if (!printedHeaderTr)
+					{
+						<tr></tr>
+						<tr></tr>
+						<tr></tr>
+						<tr>
+							<td></td>
+							<td style="font-weight: bold;">Název zboží</td>
+							<td style="font-weight: bold;">Množství</td>
+							<td style="font-weight: bold;">Cena za kus</td>
+						</tr>
+						printedHeaderTr = true;
+					}
+
+					<tr>
+						<td>>>></td>
+						<td>@itemZbozi.Zbozi.Nazev</td>
+						<td>@itemZbozi.ZboziObjednavek.Mnozstvi</td>
+						<td>@itemZbozi.ZboziObjednavek.JednotkovaCena</td>
+					</tr>
+				}
+			}
+		}
+	</table>
+</div>

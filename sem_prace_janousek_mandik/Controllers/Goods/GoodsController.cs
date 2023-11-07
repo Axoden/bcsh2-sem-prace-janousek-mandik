@@ -12,9 +12,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				List<Kategorie> kategorie = GoodsSQL.GetAllCategories();
-				ViewBag.ListOfCategories = kategorie;
-
-				return View();
+				return View(kategorie);
 			}
 			return RedirectToAction("Index", "Home");
 		}
@@ -54,14 +52,14 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		}
 
 		// Načtení formuláře na úpravu vybrané kategorie
-		[HttpGet]
-		public IActionResult EditCategory(int index)
+		[HttpPost]
+		public IActionResult EditCategoryGet(int index)
 		{
 			// Kontrola oprávnění na načtení parametrů kategorie
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Kategorie kategorie = GoodsSQL.GetCategoryById(index);
-				return View(kategorie);
+				return View("EditCategory", kategorie);
 			}
 
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
@@ -69,7 +67,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		// Příjem upravených dat vybrané kategorie
 		[HttpPost]
-		public IActionResult EditCategory(Kategorie kategorie, int index)
+		public IActionResult EditCategoryPost(Kategorie kategorie, int index)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
@@ -99,8 +97,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
 				List<Zbozi_Umisteni_Kategorie_Dodavatele> zboziUmisteniKategorieDodavatel = GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
-				ViewBag.ListOfGoodsWithLocationCategorySupplier = zboziUmisteniKategorieDodavatel;
-				return View();
+				return View(zboziUmisteniKategorieDodavatel);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup
@@ -193,16 +190,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
 		}
 
-
 		// Výpis všech umístění
 		public IActionResult ListLocations()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				List<Umisteni> umisteni = GoodsSQL.GetAllLocations();
-				ViewBag.ListOfLocations = umisteni;
-
-				return View();
+				return View(umisteni);
 			}
 			return RedirectToAction("Index", "Home");
 		}

@@ -8,32 +8,48 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 	public class EmployeeSQL
 	{
 		// Metoda vytáhne všechny zaměstnance
-		public static List<Zamestnanci> GetAllEmployees()
+		public static List<Zamestnanci_Adresy_Pozice> GetAllEmployeesWithAddressPosition()
 		{
-			Zamestnanci? zamestnanec = new Zamestnanci();
-			List<Zamestnanci> zamestnanci = new List<Zamestnanci>();
+			List<Zamestnanci_Adresy_Pozice> zamestnanci = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT * FROM zamestnanci";
+					command.CommandText = "SELECT * FROM zamestnanci z" +
+						" INNER JOIN adresy a ON z.idAdresy = a.idAdresy" +
+						" INNER JOIN pozice p ON z.idPozice = p.idPozice";
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
+						Zamestnanci_Adresy_Pozice? zamestnanec = new();
 						if (reader.HasRows)
 						{
 							while (reader.Read())
 							{
-								zamestnanec = new Zamestnanci();
-								zamestnanec.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
-								zamestnanec.Jmeno = reader["jmeno"].ToString();
-								zamestnanec.Prijmeni = reader["prijmeni"].ToString();
-								zamestnanec.DatumNarozeni = DateOnly.FromDateTime(DateTime.Parse(reader["datumNarozeni"].ToString()));
-								zamestnanec.Telefon = reader["telefon"].ToString();
-								zamestnanec.Email = reader["email"].ToString();
-								zamestnanec.Heslo = reader["heslo"].ToString();
-								zamestnanec.IdAdresy = int.Parse(reader["idAdresy"].ToString());
-								zamestnanec.IdPozice = int.Parse(reader["idPozice"].ToString());
+								zamestnanec = new();
+								zamestnanec.Zamestnanci = new();
+								zamestnanec.Adresy = new();
+								zamestnanec.Pozice = new();
+
+								zamestnanec.Zamestnanci.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
+								zamestnanec.Zamestnanci.Jmeno = reader["jmeno"].ToString();
+								zamestnanec.Zamestnanci.Prijmeni = reader["prijmeni"].ToString();
+								zamestnanec.Zamestnanci.DatumNarozeni = DateOnly.FromDateTime(DateTime.Parse(reader["datumNarozeni"].ToString()));
+								zamestnanec.Zamestnanci.Telefon = reader["telefon"].ToString();
+								zamestnanec.Zamestnanci.Email = reader["email"].ToString();
+								zamestnanec.Zamestnanci.Heslo = reader["heslo"].ToString();
+								zamestnanec.Zamestnanci.IdAdresy = int.Parse(reader["idAdresy"].ToString());
+								zamestnanec.Zamestnanci.IdPozice = int.Parse(reader["idPozice"].ToString());
+
+								zamestnanec.Adresy.IdAdresy = int.Parse(reader["idAdresy"].ToString());
+								zamestnanec.Adresy.Ulice = reader["ulice"].ToString();
+								zamestnanec.Adresy.Mesto = reader["mesto"].ToString();
+								zamestnanec.Adresy.Okres = reader["okres"].ToString();
+								zamestnanec.Adresy.Zeme = reader["zeme"].ToString();
+								zamestnanec.Adresy.Psc = reader["psc"].ToString();
+
+								zamestnanec.Pozice.IdPozice = int.Parse(reader["idPozice"].ToString());
+								zamestnanec.Pozice.Nazev = reader["nazev"].ToString();
 
 								zamestnanci.Add(zamestnanec);
 							}
@@ -47,45 +63,6 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 				connection.Close();
 			}
 			return zamestnanci;
-		}
-
-		// Metoda vytáhne všechny adresy
-		public static List<Adresy> GetAllAddresses()
-		{
-			Adresy? adresa = new();
-			List<Adresy> adresy = new();
-			using (OracleConnection connection = OracleDbContext.GetConnection())
-			{
-				connection.Open();
-				using (OracleCommand command = connection.CreateCommand())
-				{
-					command.CommandText = "SELECT * FROM adresy";
-					using (OracleDataReader reader = command.ExecuteReader())
-					{
-						if (reader.HasRows)
-						{
-							while (reader.Read())
-							{
-								adresa = new Adresy();
-								adresa.IdAdresy = int.Parse(reader["idAdresy"].ToString());
-								adresa.Ulice = reader["ulice"].ToString();
-								adresa.Mesto = reader["mesto"].ToString();
-								adresa.Okres = reader["okres"].ToString();
-								adresa.Zeme = reader["zeme"].ToString();
-								adresa.Psc = reader["psc"].ToString();
-
-								adresy.Add(adresa);
-							}
-						}
-						else
-						{
-							adresa = null;
-						}
-					}
-				}
-				connection.Close();
-			}
-			return adresy;
 		}
 
 		// Metoda vytáhne zaměstnance s jeho adresou a pozicí dle id
@@ -333,5 +310,40 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 			}
 			return pozice;
 		}
-	}
+
+        internal static List<Zamestnanci> GetAllEmployees()
+        {
+            List<Zamestnanci> zamestnanci = new();
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT idZamestnance, jmeno, prijmeni FROM zamestnanci";
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        Zamestnanci? zamestnanec = new();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                zamestnanec = new();
+
+                                zamestnanec.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
+                                zamestnanec.Jmeno = reader["jmeno"].ToString();
+                                zamestnanec.Prijmeni = reader["prijmeni"].ToString();
+                                zamestnanci.Add(zamestnanec);
+                            }
+                        }
+                        else
+                        {
+                            zamestnanec = null;
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return zamestnanci;
+        }
+    }
 }

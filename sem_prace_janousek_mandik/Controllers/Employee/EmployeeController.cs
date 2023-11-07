@@ -12,14 +12,8 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				List<Zamestnanci> zamestnanci = EmployeeSQL.GetAllEmployees();
-				List<Adresy> adresy = SharedSQL.GetAllAddresses();
-				List<Pozice> pozice = ManagementSQL.GetAllPositions();
-				ViewBag.ListOfEmployees = zamestnanci;
-				ViewBag.ListOfAddresses = adresy;
-				ViewBag.ListOfPositions = pozice;
-
-				return View();
+				List<Zamestnanci_Adresy_Pozice> zamestnanci = EmployeeSQL.GetAllEmployeesWithAddressPosition();
+				return View(zamestnanci);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup

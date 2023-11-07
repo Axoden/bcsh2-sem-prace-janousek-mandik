@@ -114,9 +114,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			if (Role.Equals("Admin"))
 			{
 				List<Zakaznici_Adresy> zakazniciAdresy = CustomerSQL.GetAllCustomersWithAddresses();
-				ViewBag.ListOfEmployeesWithAddresses = zakazniciAdresy;
-
-				return View();
+				return View(zakazniciAdresy);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup

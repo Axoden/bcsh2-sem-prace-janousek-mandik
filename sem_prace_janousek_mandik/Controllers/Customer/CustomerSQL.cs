@@ -102,7 +102,42 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			}
 		}
 
-		// Metoda vytáhne všechny zákazníky včetně adres
+        internal static List<Zakaznici> GetAllCustomers()
+        {
+            List<Zakaznici> zakaznici = new();
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT idZakaznika, jmeno, prijmeni FROM zakaznici";
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        Zakaznici? zakaznik = new();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                zakaznik = new();
+
+                                zakaznik.IdZakaznika = int.Parse(reader["idZakaznika"].ToString());
+                                zakaznik.Jmeno = reader["jmeno"].ToString();
+                                zakaznik.Prijmeni = reader["prijmeni"].ToString();
+                                zakaznici.Add(zakaznik);
+                            }
+                        }
+                        else
+                        {
+                            zakaznik = null;
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return zakaznici;
+        }
+
+        // Metoda vytáhne všechny zákazníky včetně adres
         internal static List<Zakaznici_Adresy> GetAllCustomersWithAddresses()
         {
 			List<Zakaznici_Adresy> zakazniciAdresy = new();

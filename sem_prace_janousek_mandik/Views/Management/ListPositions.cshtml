@@ -1,4 +1,6 @@
-﻿@section Title{
+﻿@model List<sem_prace_janousek_mandik.Models.Pozice>
+@using sem_prace_janousek_mandik.Controllers.Management;
+@section Title{
 	Výpis pozicí
 }
 
@@ -11,7 +13,7 @@
 
 	@if (ViewBag.Role.Equals("Admin"))
 	{
-		<a asp-controller="Management" asp-action="AddPosition"><button type="submit">Přidat pozici</button></a>
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.AddPosition)"><button type="submit">Přidat pozici</button></a>
 		<br />
 		<br />
 	}
@@ -30,14 +32,14 @@
 			string hidden = "<skryté>";
 		}
 
-		@foreach (Pozice item in ViewBag.ListOfPositions)
+		@foreach (Pozice item in Model)
 		{
 			<tr>
 				<td>@item.Nazev</td>
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Management" asp-action="EditPosition" asp-route-index="@item.IdPozice">Upravit</a></td>
-					<td><a asp-controller="Management" asp-action="DeletePosition" asp-route-index="@item.IdPozice">Smazat</a></td>
+					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPosition)" asp-route-index="@item.IdPozice">Upravit</a></td>
+					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeletePosition)" asp-route-index="@item.IdPozice">Smazat</a></td>
 				}
 				else
 				{
