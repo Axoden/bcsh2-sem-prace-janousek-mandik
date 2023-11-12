@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Models;
-using System.Text;
+using sem_prace_janousek_mandik.Models.Employee;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
 {
-	public class ManagementController : BaseController
+    public class ManagementController : BaseController
 	{
 		// Výpis všech pozic
 		public IActionResult ListPositions()
@@ -93,5 +94,62 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
+
+		// Metoda emuluje admina za vybraného zákazníka
+		public IActionResult StartEmulationCustomer(string emailCustomer)
+		{
+			if (Role.Equals("Admin"))
+			{
+				HttpContext.Session.SetString("emulatedEmail", Email);
+				HttpContext.Session.SetString("email", emailCustomer);
+				HttpContext.Session.SetString("role", "Zakaznik");
+			}
+			return RedirectToAction("Index", "Home");
+		}
+
+		// Metoda emuluje admina za vybraného zaměstnance
+		public IActionResult StartEmulationEmployee(int idEmployee)
+		{
+			if (Role.Equals("Admin"))
+			{
+				// Vytáhnutí emailu a role zaměstnance
+				Zamestnanci_Pozice employee = EmployeeSQL.GetEmployeeRoleEmailById(idEmployee);
+				HttpContext.Session.SetString("emulatedEmail", Email);
+				HttpContext.Session.SetString("email", employee.Zamestnanci.Email);
+				HttpContext.Session.SetString("role", employee.Pozice.Nazev);
+			}
+			return RedirectToAction("Index", "Home");
+		}
+
+		// Metoda ukončí emulaci a přepne zpět na původního admina
+		public IActionResult EndEmulation()
+		{
+			if (!EmulatedEmail.Equals(""))
+			{
+				string adminEmail = EmulatedEmail;
+				HttpContext.Session.SetString("emulatedEmail", "");
+				HttpContext.Session.SetString("email", adminEmail);
+				HttpContext.Session.SetString("role", "Admin");
+			}
+			return RedirectToAction("Index", "Home");
+		}
+
+		public IActionResult ListDatabaseObjects()
+		{
+            if (Role.Equals("Admin"))
+			{
+				ViewBag.Tables = ManagementSQL.GetAllObjects("table_name", "user_tables");
+				ViewBag.Views = ManagementSQL.GetAllObjects("view_name", "user_views");
+				ViewBag.Indexes = ManagementSQL.GetAllObjects("index_name", "user_indexes");
+				ViewBag.Packages = ManagementSQL.GetAllPackages();
+				ViewBag.Procedures = ManagementSQL.GetAllProceduresFunctions(true);
+				ViewBag.Functions = ManagementSQL.GetAllProceduresFunctions(false);
+				ViewBag.Triggers = ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
+				ViewBag.Sequences = ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
+
+				return View();
+			}
+            return RedirectToAction("Index", "Home");
+        }
 	}
 }

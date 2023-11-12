@@ -109,5 +109,112 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			}
 			return getPozice;
 		}
+
+		// Metoda vytáhne všechny objekty použité v DB dle vstupního parametru
+		public static List<string> GetAllObjects(string name, string dbObject)
+		{
+			List<string> objectNames = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = $"SELECT {name} AS nazev FROM {dbObject}";
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						string? specificObject = null;
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificObject = reader["nazev"].ToString();
+
+								objectNames.Add(specificObject);
+							}
+						}
+						else
+						{
+							specificObject = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return objectNames;
+		}
+
+		// Metoda vytáhne všechny balíčky použíté v DB
+		public static List<string> GetAllPackages()
+		{
+			List<string> objectNames = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT object_name AS nazev FROM user_objects WHERE object_type = 'PACKAGE'";
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						string? specificObject = null;
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificObject = reader["nazev"].ToString();
+
+								objectNames.Add(specificObject);
+							}
+						}
+						else
+						{
+							specificObject = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return objectNames;
+		}
+
+		// Metoda vytáhne všechny procedury/funkce použíté v DB dle vstupního parametru
+		public static List<string> GetAllProceduresFunctions(bool procedure)
+		{
+			List<string> objectNames = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					if (procedure)
+					{
+						command.CommandText = "SELECT object_name AS nazev FROM user_procedures WHERE procedure_name IS NULL";
+					}
+					else
+					{
+						command.CommandText = "SELECT object_name AS nazev FROM user_procedures WHERE procedure_name IS NOT NULL";
+					}
+					
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						string? specificObject = null;
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificObject = reader["nazev"].ToString();
+
+								objectNames.Add(specificObject);
+							}
+						}
+						else
+						{
+							specificObject = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return objectNames;
+		}
 	}
 }

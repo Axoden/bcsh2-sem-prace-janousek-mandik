@@ -1,0 +1,60 @@
+﻿@using sem_prace_janousek_mandik.Models.Customer;
+@using sem_prace_janousek_mandik.Models.Employee;
+@using sem_prace_janousek_mandik.Models.Payment;
+@model sem_prace_janousek_mandik.Models.Order.Objednavy_Faktury
+@section Title{
+	Nová objednávka
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+@{
+    List<Zakaznici> zakaznici = ViewBag.ListOfCustomers;
+}
+
+<h1>Vytvoření nové objednávky</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="AddOrder">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Objednavky.DatumPrijeti" class="control-label"></label>
+                <input asp-for="Objednavky.DatumPrijeti" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" class="form-control" />
+                <span asp-validation-for="Objednavky.DatumPrijeti" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Objednavky.Poznamka" class="control-label"></label>
+                <input asp-for="Objednavky.Poznamka" class="form-control" />
+                <span asp-validation-for="Objednavky.Poznamka" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Faktury.CastkaDoprava" class="control-label"></label>
+                <input asp-for="Faktury.CastkaDoprava" class="form-control" />
+                <span asp-validation-for="Faktury.CastkaDoprava" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Faktury.Dph" class="control-label"></label>
+                <input asp-for="Faktury.Dph" value="21" class="form-control" />
+                <span asp-validation-for="Faktury.Dph" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Objednavky.IdZakaznika">Zákazník: </label>
+                <select asp-for="Objednavky.IdZakaznika" class="form-control">
+                    @foreach (Zakaznici item in zakaznici)
+                    {
+                        <option value="@item.IdZakaznika">@item.Jmeno @item.Prijmeni</option>
+                    }
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Přidat" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 ﻿@model List<sem_prace_janousek_mandik.Models.Customer.Zakaznici_Adresy>
 @using sem_prace_janousek_mandik.Controllers.Customer;
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Models.Customer;
 
 @section Title{
@@ -12,6 +13,13 @@
 
 <div class="text-center">
 	<h2>Výpis všech zákazníků:</h2>
+
+	@if (ViewBag.Role.Equals("Admin"))
+	{
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)"><button type="submit">Přidat zákazníka</button></a>
+		<br />
+		<br />
+	}
 
 	<table border="1">
 		<tr>
@@ -27,6 +35,7 @@
 			<td>PSČ</td>
 			<td>Upravit</td>
 			<td>Odstranit</td>
+			<td>Emulovat</td>
 		</tr>
 
 		@{
@@ -48,6 +57,7 @@
 				<td>@item.Adresy.Psc</td>
 				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomer)" asp-route-index="@item.Zakaznici.IdZakaznika">Upravit</a></td>
 				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)" asp-route-idZakaznika="@item.Zakaznici.IdZakaznika" asp-route-idAdresy="@item.Zakaznici.IdAdresy">Smazat</a></td>
+				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationCustomer)" asp-route-emailCustomer="@item.Zakaznici.Email">Emulovat</a></td>
 			</tr>
 		}
 	</table>

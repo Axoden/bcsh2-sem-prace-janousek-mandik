@@ -66,8 +66,12 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 
 				if (uspesnaRegistrace == true)
 				{
+					if (Role.Equals("Admin"))
+					{
+						return RedirectToAction(nameof(ListCustomers), nameof(Customer));
+					}
 					// Úspěšná registrace, přesměrování na přihlášení
-					return RedirectToAction(nameof(RegisterCustomer), nameof(Customer));
+					return RedirectToAction(nameof(RegisterSuccessful), nameof(Customer));
 				}
 			}
 			return View(inputZakaznik);
@@ -115,6 +119,19 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			{
 				List<Zakaznici_Adresy> zakazniciAdresy = CustomerSQL.GetAllCustomersWithAddresses();
 				return View(zakazniciAdresy);
+			}
+
+			// Přesměrování, pokud uživatel nemá povolen přístup
+			return RedirectToAction("Index", "Home");
+		}
+
+		// Výpis informací o konkrétním zákazníkovi
+		public IActionResult ListCustomer()
+		{
+			if (Role.Equals("Zakaznik"))
+			{
+				Zakaznici_Adresy customerAddress = CustomerSQL.GetCustomerWithAddressByEmail(Email);
+				return View(customerAddress);
 			}
 
 			// Přesměrování, pokud uživatel nemá povolen přístup

@@ -9,21 +9,26 @@ namespace sem_prace_janousek_mandik.Models.Supplier
         public int IdDodavatele { get; set; }
 
         [Required]
-        public string? Nazev { get; set; }
+		[DisplayName("Název: ")]
+		public string? Nazev { get; set; }
 
         [Required]
-        public string? Jmeno { get; set; }
+		[DisplayName("Jméno: ")]
+		public string? Jmeno { get; set; }
 
         [Required]
-        public string? Prijmeni { get; set; }
+		[DisplayName("Příjmení: ")]
+		public string? Prijmeni { get; set; }
 
         [Required]
         [Phone]
-        public string? Telefon { get; set; }
+		[DisplayName("Telefon: ")]
+		public string? Telefon { get; set; }
 
         [Required]
         [EmailAddress]
-        public string? Email { get; set; }
+		[DisplayName("Email: ")]
+		public string? Email { get; set; }
 
         [Browsable(false)]
         public int IdAdresy { get; set; }

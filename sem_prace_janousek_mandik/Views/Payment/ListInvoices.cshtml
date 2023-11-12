@@ -14,7 +14,7 @@
 
 	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="XXX_AddInvoice_XXX"><button type="submit">Vytvořit novou fakturu</button></a>
+		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddInvoice)"><button type="submit">Vytvořit novou fakturu</button></a>
 		<br />
 		<br />
 	}
@@ -53,7 +53,7 @@
 				<tr></tr>
 				<tr></tr>
 				<tr>
-					<td>@item.IdFaktury</td>
+					<td>@item.CisloFaktury</td>
 					<td>@item.DatumVystaveni</td>
 					<td>@item.DatumSplatnosti</td>
 					<td>@item.CastkaObjednavka</td>
@@ -84,6 +84,7 @@
 							<td style="font-weight: bold;">Variabilní symbol</td>
 							@if (ViewBag.Role.Equals("Admin"))
 							{
+								<td style="font-weight: bold;">Přidat platbu</td>
 								<td style="font-weight: bold;">Upravit</td>
 								<td style="font-weight: bold;">Odstranit</td>
 							}
@@ -99,6 +100,7 @@
 						<td>@itemZbozi.VariabilniSymbol</td>
 						@if (ViewBag.Role.Equals("Admin"))
 						{
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddPayment)">Přidat</a></td>
 							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPayment)" asp-route-index="@itemZbozi.IdPlatby">Upravit</a></td>
 							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeletePayment)" asp-route-index="@itemZbozi.IdPlatby">Smazat</a></td>
 						}

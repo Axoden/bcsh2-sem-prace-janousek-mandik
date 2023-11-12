@@ -1,4 +1,5 @@
 ﻿using Oracle.ManagedDataAccess.Client;
+using sem_prace_janousek_mandik.Models.Employee;
 using sem_prace_janousek_mandik.Models.Goods;
 using sem_prace_janousek_mandik.Models.Order;
 using System;
@@ -9,24 +10,25 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 {
 	public class OrderSQL
 	{
-		internal static List<Objednavky_Zamestnanci> GetAllCustomerOrders(string email)
+		internal static List<Objednavky_Zamestnanci_Faktury> GetAllCustomerOrders(string email)
 		{
-			List<Objednavky_Zamestnanci> objednavky = new();
+			List<Objednavky_Zamestnanci_Faktury> objednavky = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT o.*, zam.jmeno, zam.prijmeni, zam.email FROM objednavky o" +
+					command.CommandText = "SELECT o.*, zam.jmeno, zam.prijmeni, zam.email, f.datumSplatnosti, f.castkaDoprava, f.dph FROM objednavky o" +
 						" INNER JOIN zamestnanci zam ON o.idZamestnance = zam.idZamestnance" +
 						" INNER JOIN zakaznici zak ON o.idZakaznika = zak.idZakaznika" +
+						" INNER JOIN faktury f ON o.idFaktury = f.idFaktury" +
 						" WHERE zak.email = :zakEmail";
 
 
 					command.Parameters.Add(":zakEmail", OracleDbType.Varchar2).Value = email;
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
-						Objednavky_Zamestnanci? objednavka = new();
+						Objednavky_Zamestnanci_Faktury? objednavka = new();
 						if (reader.HasRows)
 						{
 							while (reader.Read())
@@ -34,10 +36,13 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 								objednavka = new();
 								objednavka.Objednavky = new();
 								objednavka.Zamestnanci = new();
+								objednavka.Faktury = new();
 
 								objednavka.Objednavky.IdObjednavky = int.Parse(reader["idObjednavky"].ToString());
+								objednavka.Objednavky.CisloObjednavky = int.Parse(reader["cisloObjednavky"].ToString());
 								objednavka.Objednavky.DatumPrijeti = DateTime.Parse(reader["datumPrijeti"].ToString());
 								objednavka.Objednavky.Poznamka = reader["poznamka"].ToString();
+								objednavka.Objednavky.Uzavrena = IsClosedOrder(objednavka.Objednavky.IdObjednavky);
 								objednavka.Objednavky.IdFaktury = int.Parse(reader["idFaktury"].ToString());
 								objednavka.Objednavky.IdZakaznika = int.Parse(reader["idZakaznika"].ToString());
 								objednavka.Objednavky.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
@@ -45,6 +50,11 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 								objednavka.Zamestnanci.Jmeno = reader["jmeno"].ToString();
 								objednavka.Zamestnanci.Prijmeni = reader["prijmeni"].ToString();
 								objednavka.Zamestnanci.Email = reader["email"].ToString();
+
+								objednavka.Faktury.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								objednavka.Faktury.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
+								objednavka.Faktury.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
+								objednavka.Faktury.Dph = float.Parse(reader["dph"].ToString());
 
 								objednavky.Add(objednavka);
 							}
@@ -60,21 +70,27 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 			return objednavky;
 		}
 
-		internal static List<Objednavky_Zamestnanci_Zakaznici> GetAllOrders()
+		internal static List<Objednavky_Zamestnanci_Zakaznici_Faktury> GetAllOrders()
 		{
-			List<Objednavky_Zamestnanci_Zakaznici> objednavky = new();
+			List<Objednavky_Zamestnanci_Zakaznici_Faktury> objednavky = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT o.*, zam.jmeno AS zamJmeno, zam.prijmeni AS zamPrijmeni, zak.jmeno AS zakJmeno, zak.prijmeni AS zakPrijmeni" +
+					command.CommandText = "SELECT o.*," +
+						" zam.jmeno AS zamJmeno," +
+						" zam.prijmeni AS zamPrijmeni," +
+						" zak.jmeno AS zakJmeno," +
+						" zak.prijmeni AS zakPrijmeni," +
+						" f.datumSplatnosti, f.castkaDoprava, f.dph " +
 						" FROM objednavky o" +
 						" INNER JOIN zamestnanci zam ON o.idZamestnance = zam.idZamestnance" +
-						" INNER JOIN zakaznici zak ON o.idZakaznika = zak.idZakaznika";
+						" INNER JOIN zakaznici zak ON o.idZakaznika = zak.idZakaznika" +
+						" INNER JOIN faktury f ON o.idFaktury = f.idFaktury";
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
-						Objednavky_Zamestnanci_Zakaznici? objednavka = new();
+						Objednavky_Zamestnanci_Zakaznici_Faktury? objednavka = new();
 						if (reader.HasRows)
 						{
 							while (reader.Read())
@@ -83,10 +99,13 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 								objednavka.Objednavky = new();
 								objednavka.Zamestnanci = new();
 								objednavka.Zakaznici = new();
+								objednavka.Faktury = new();
 
 								objednavka.Objednavky.IdObjednavky = int.Parse(reader["idObjednavky"].ToString());
+								objednavka.Objednavky.CisloObjednavky = int.Parse(reader["cisloObjednavky"].ToString());
 								objednavka.Objednavky.DatumPrijeti = DateTime.Parse(reader["datumPrijeti"].ToString());
 								objednavka.Objednavky.Poznamka = reader["poznamka"].ToString();
+								objednavka.Objednavky.Uzavrena = IsClosedOrder(objednavka.Objednavky.IdObjednavky);
 								objednavka.Objednavky.IdFaktury = int.Parse(reader["idFaktury"].ToString());
 								objednavka.Objednavky.IdZakaznika = int.Parse(reader["idZakaznika"].ToString());
 								objednavka.Objednavky.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
@@ -96,6 +115,11 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 
 								objednavka.Zakaznici.Jmeno = reader["zakJmeno"].ToString();
 								objednavka.Zakaznici.Prijmeni = reader["zakPrijmeni"].ToString();
+
+								objednavka.Faktury.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								objednavka.Faktury.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
+								objednavka.Faktury.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
+								objednavka.Faktury.Dph = float.Parse(reader["dph"].ToString());
 
 								objednavky.Add(objednavka);
 							}
@@ -270,7 +294,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
                                 specificGoods.IdZbozi = int.Parse(reader["idZbozi"].ToString());
                                 specificGoods.Nazev = reader["nazev"].ToString();
                                 specificGoods.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
-                                specificGoods.CarovyKod = Int64.Parse(reader["carovyKod"].ToString());
+                                specificGoods.CarovyKod = reader["carovyKod"].ToString();
 
                                 goods.Add(specificGoods);
                             }
@@ -292,7 +316,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             using (OracleConnection connection = OracleDbContext.GetConnection())
             {
                 connection.Open();
-                using (OracleCommand command = new("P_VLOZIT_ZBOZIOBJEDNAVEK_v2", connection))
+                using (OracleCommand command = new("P_VLOZIT_ZBOZI_OBJEDNAVKU", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
 
@@ -310,7 +334,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             return addSuccessful;
         }
 
-        internal static bool ClosedOrder(int idObjednavky)
+        internal static bool IsClosedOrder(int idObjednavky)
         {
             bool objednavkaUzavrena = false;
             using (OracleConnection connection = OracleDbContext.GetConnection())
@@ -327,7 +351,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 							int objednavkaInt = 0;
                             while (reader.Read())
                             {
-                                objednavkaInt = int.Parse(reader["nazev"].ToString());
+                                objednavkaInt = int.Parse(reader["uzavrena"].ToString());
                             }
 
 							if(objednavkaInt == 1)
@@ -362,7 +386,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
                                 objednavka.CisloObjednavky = int.Parse(reader["cisloObjednavky"].ToString());
                                 objednavka.DatumPrijeti = DateTime.Parse(reader["datumPrijeti"].ToString());
                                 objednavka.Poznamka = reader["poznamka"].ToString();
-								objednavka.Uzavrena = ClosedOrder(objednavka.IdObjednavky);
+								objednavka.Uzavrena = IsClosedOrder(objednavka.IdObjednavky);
                                 objednavka.IdFaktury = int.Parse(reader["idFaktury"].ToString());
                                 objednavka.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
                                 objednavka.IdZakaznika = int.Parse(reader["idZakaznika"].ToString());
@@ -374,5 +398,112 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             }
             return objednavka;
         }
-    }
+
+        internal static float GetPriceForGoods(int idZbozi)
+        {
+            float jednotkovaCena = new();
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT jednotkovacena FROM zbozi WHERE idZbozi = :idZbozi";
+                    command.Parameters.Add(":idZbozi", OracleDbType.Int32).Value = idZbozi;
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+								jednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
+                            }
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return jednotkovaCena;
+        }
+
+        internal static void CloseOrder(int idObjednavky)
+        {
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = new("P_UZAVRIT_OBJEDNAVKU", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+					// Vstupní parametr procedury                    
+					command.Parameters.Add("p_idObjednavky", OracleDbType.Int32).Value = idObjednavky;
+
+                    command.ExecuteNonQuery();
+                }
+                connection.Close();
+            }
+        }
+
+        internal static bool AddOrder(Objednavy_Faktury newOrder)
+        {
+            bool addSuccessful = false;
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = new("P_VLOZIT_OBJEDNAVKU", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+					// Vstupní parametry procedury
+					command.Parameters.Add("p_datumPrijeti", OracleDbType.Date).Value = newOrder.Objednavky.DatumPrijeti;
+                    command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = newOrder.Objednavky.Poznamka;
+                    command.Parameters.Add("p_idZakaznika", OracleDbType.Int32).Value = newOrder.Objednavky.IdZakaznika;
+                    command.Parameters.Add("p_idZamestnance", OracleDbType.Int32).Value = newOrder.Objednavky.IdZamestnance;
+                    command.Parameters.Add("p_castkaDoprava", OracleDbType.BinaryFloat).Value = newOrder.Faktury.CastkaDoprava;
+                    command.Parameters.Add("p_dph", OracleDbType.BinaryFloat).Value = newOrder.Faktury.Dph;
+
+                    command.ExecuteNonQuery();
+                }
+                connection.Close();
+                addSuccessful = true;
+            }
+            return addSuccessful;
+        }
+
+		internal static Objednavky_Zakaznici_Faktury GetCustomerOrderInvoice(int index)
+		{
+			Objednavky_Zakaznici_Faktury customer = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT z.email, f.idFaktury, f.castkaObjednavka, f.castkaDoprava, f.dph FROM objednavky o" +
+						" INNER JOIN zakaznici z ON o.idZakaznika = z.idZakaznika" +
+						" INNER JOIN faktury f ON o.idFaktury = f.idFaktury" +
+						" WHERE idObjednavky = :idObjednavky";
+					command.Parameters.Add(":idObjednavky", OracleDbType.Int32).Value = index;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								customer.Objednavky = new();
+								customer.Zakaznici = new();
+								customer.Faktury = new();
+
+								customer.Zakaznici.Email = reader["email"].ToString();
+								customer.Faktury.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								customer.Faktury.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
+								customer.Faktury.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
+								customer.Faktury.Dph = float.Parse(reader["dph"].ToString());
+							}
+						}
+					}
+				}
+				connection.Close();
+			}
+			return customer;
+		}
+	}
 }

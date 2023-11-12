@@ -1,6 +1,8 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Order.Objednavky_Zamestnanci_Zakaznici>
+﻿@model List<sem_prace_janousek_mandik.Models.Order.Objednavky_Zamestnanci_Zakaznici_Faktury>
 @using sem_prace_janousek_mandik.Controllers.Order;
+@using sem_prace_janousek_mandik.Controllers.Payment;
 @using sem_prace_janousek_mandik.Models.Order
+@using sem_prace_janousek_mandik.Models.Payment;
 @section Title{
 	Výpis objednávek
 }
@@ -12,7 +14,7 @@
 <div class="text-center">
 	<h2>Výpis všech objednávek:</h2>
 
-	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Zakaznik"))
+	@if (ViewBag.Role.Equals("Admin"))
 	{
 		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.AddOrder)"><button type="submit">Vytvořit novou objednávku</button></a>
 		<br />
@@ -31,11 +33,14 @@
 				<td style="font-weight: bold;">Email zaměstnance</td>
 			}
 			<td style="font-weight: bold;">Faktura</td>
+			<td style="font-weight: bold;">Stav faktury</td>
+			<td style="font-weight: bold;">Cena objednávky bez DPH</td>
+			<td style="font-weight: bold;">Cena objednávky vč. DPH</td>
 			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 			{
 				<td style="font-weight: bold;">Jméno zákazníka</td>
 				<td style="font-weight: bold;">Příjmení zákazníka</td>
-				<td style="font-weight: bold;">Uzavřená objednávka</td>
+				<td style="font-weight: bold;">Stav objednávky</td>
 				<td style="font-weight: bold;">Přidat zboží</td>
 			}
 			@if (ViewBag.Role.Equals("Admin"))
@@ -43,40 +48,101 @@
 				<td style="font-weight: bold;">Upravit</td>
 				<td style="font-weight: bold;">Odstranit</td>
 			}
+			@if (ViewBag.Role.Equals("Zakaznik"))
+			{
+				<td style="font-weight: bold;">Platba</td>
+			}
 		</tr>
 
 		@{
 			List<ZboziObjednavek_Zbozi> zboziObjednavek = ViewBag.ListOfGoodsOrders;
+			List<Platby> platby = ViewBag.ListOfPayments;
 			bool printedHeaderTr = false;
 		}
 
 		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 		{
-			@foreach (Objednavky_Zamestnanci_Zakaznici item in Model)
+			@foreach (Objednavky_Zamestnanci_Zakaznici_Faktury item in Model)
 			{
+				var sumJednotkovaCenaBezDph = zboziObjednavek.Where(lmb => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).Sum(lmb => (lmb.ZboziObjednavek.JednotkovaCena * lmb.ZboziObjednavek.Mnozstvi));
+				sumJednotkovaCenaBezDph = sumJednotkovaCenaBezDph + item.Faktury.CastkaDoprava;
+				string dph = "1." + item.Faktury.Dph.ToString();
+				var sumJednotkovaCenaDph = (float)Math.Round((sumJednotkovaCenaBezDph * float.Parse(dph)), 2);
+				var celkovaSumaPlateb = platby.Where(p => p.IdFaktury == item.Faktury.IdFaktury).Sum(p => p.Castka);
+				bool jeFakturaZaplacena = celkovaSumaPlateb >= sumJednotkovaCenaDph;
+				bool jeSplatnostPrekrocena = !jeFakturaZaplacena && DateTime.Now > item.Faktury.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
 				printedHeaderTr = false;
 				<tr></tr>
 				<tr></tr>
 				<tr></tr>
 				<tr>
-					<td>@item.Objednavky.IdObjednavky</td>
+					<td>@item.Objednavky.CisloObjednavky</td>
 					<td>@item.Objednavky.DatumPrijeti</td>
 					<td>@item.Objednavky.Poznamka</td>
 					<td>@item.Zamestnanci.Jmeno</td>
 					<td>@item.Zamestnanci.Prijmeni</td>
-					<td><a href="">Faktura</a></td>
+					<td>
+						<a href="">Faktura</a>
+					</td>
+					<td>
+						@if (Math.Abs(sumJednotkovaCenaDph) < 0.0001f)
+						{
+							<p>Objednávka nemá zboží</p>
+						}
+						else if (jeFakturaZaplacena)
+						{
+							<p>Zaplaceno</p>
+						}
+						else if (jeSplatnostPrekrocena)
+						{
+							<p style="color: red;">Datum splatnosti překročeno</p>
+						}
+						else if (item.Objednavky.Uzavrena == false)
+						{
+							<p>Objednávka není uzavřena</p>
+						}
+						else
+						{
+							<p>Čeká na zaplacení</p>
+						}
+					</td>
+					<td>@sumJednotkovaCenaBezDph</td>
+					<td>@sumJednotkovaCenaDph</td>
 					<td>@item.Zakaznici.Jmeno</td>
 					<td>@item.Zakaznici.Prijmeni</td>
 					<td>
-						@(item.Objednavky.Uzavrena ? "Ano" : "Ne")
+						@if (@item.Objednavky.Uzavrena == true)
+						{
+							<p>Uzavřená</p>
+						}
+						else
+						{
+							if (sumJednotkovaCenaDph > 0)
+							{
+								<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.CloseOrder)" asp-route-idObjednavky="@item.Objednavky.IdObjednavky">Uzavřít objednávku</a>
+							}
+							else
+							{
+								<p>Objednávka nemá zboží</p>
+							}
+						}
 					</td>
+
 					<td>
-						<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.AddGoodsToOrder)" asp-route-index="@item.Objednavky.IdObjednavky">Přidat</a>
+						@if (item.Objednavky.Uzavrena == false)
+						{
+							<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.AddGoodsToOrder)" asp-route-idObjednavky="@item.Objednavky.IdObjednavky">Přidat zboží</a>
+						}
+						else
+						{
+							<p>Objednávka uzavřena</p>
+						}
 					</td>
+
 					@if (ViewBag.Role.Equals("Admin"))
 					{
 						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="EditOrder" asp-route-index="@item.Objednavky.IdObjednavky">Upravit</a></td>
-						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteOrder" asp-route-idObjednavky="@item.Objednavky.IdObjednavky">Smazat</a></td>
+						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteOrder" asp-route-index="@item.Objednavky.IdObjednavky">Smazat</a></td>
 					}
 				</tr>
 
@@ -112,7 +178,7 @@
 						@if (ViewBag.Role.Equals("Admin"))
 						{
 							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="EditGoodsOrder" asp-route-index="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Upravit</a></td>
-							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteGoodsOrder" asp-route-idObjednavky="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Smazat</a></td>
+							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteGoodsOrder" asp-route-index="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Smazat</a></td>
 						}
 					</tr>
 				}
@@ -123,45 +189,94 @@
 
 		@if (ViewBag.Role.Equals("Zakaznik"))
 		{
-			@foreach (Objednavky_Zamestnanci item in ViewBag.ListOfOrders)
+			@foreach (Objednavky_Zamestnanci_Faktury item in ViewBag.ListOfOrders)
 			{
-				printedHeaderTr = false;
-				<tr></tr>
-				<tr></tr>
-				<tr></tr>
-				<tr>
-					<td>@item.Objednavky.IdObjednavky</td>
-					<td>@item.Objednavky.DatumPrijeti</td>
-					<td>@item.Objednavky.Poznamka</td>
-					<td>@item.Zamestnanci.Jmeno</td>
-					<td>@item.Zamestnanci.Prijmeni</td>
-					<td>@item.Zamestnanci.Email</td>
-					<td><a href="">Faktura</a></td>
-				</tr>
-
-				List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
-				@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
+				if (item.Objednavky.Uzavrena == true)
 				{
-					@if (!printedHeaderTr)
-					{
-						<tr></tr>
-						<tr></tr>
-						<tr></tr>
-						<tr>
-							<td></td>
-							<td style="font-weight: bold;">Název zboží</td>
-							<td style="font-weight: bold;">Množství</td>
-							<td style="font-weight: bold;">Cena za kus</td>
-						</tr>
-						printedHeaderTr = true;
-					}
-
+					var sumJednotkovaCenaBezDph = zboziObjednavek.Where(lmb => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).Sum(lmb => (lmb.ZboziObjednavek.JednotkovaCena * lmb.ZboziObjednavek.Mnozstvi));
+					sumJednotkovaCenaBezDph = sumJednotkovaCenaBezDph + item.Faktury.CastkaDoprava;
+					string dph = "1." + item.Faktury.Dph.ToString();
+					var sumJednotkovaCenaDph = (float)Math.Round((sumJednotkovaCenaBezDph * float.Parse(dph)), 2);
+					var celkovaSumaPlateb = platby.Where(p => p.IdFaktury == item.Faktury.IdFaktury).Sum(p => p.Castka);
+					bool jeFakturaZaplacena = celkovaSumaPlateb >= sumJednotkovaCenaDph;
+					bool jeSplatnostPrekrocena = !jeFakturaZaplacena && DateTime.Now > item.Faktury.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					printedHeaderTr = false;
+					<tr></tr>
+					<tr></tr>
+					<tr></tr>
 					<tr>
-						<td>>>></td>
-						<td>@itemZbozi.Zbozi.Nazev</td>
-						<td>@itemZbozi.ZboziObjednavek.Mnozstvi</td>
-						<td>@itemZbozi.ZboziObjednavek.JednotkovaCena</td>
+						<td>@item.Objednavky.CisloObjednavky</td>
+						<td>@item.Objednavky.DatumPrijeti</td>
+						<td>@item.Objednavky.Poznamka</td>
+						<td>@item.Zamestnanci.Jmeno</td>
+						<td>@item.Zamestnanci.Prijmeni</td>
+						<td>@item.Zamestnanci.Email</td>
+						<td>
+							<a href="">Faktura</a>
+						</td>
+						<td>
+							@if (Math.Abs(sumJednotkovaCenaDph) < 0.0001f)
+							{
+								<p>Objednávka nemá zboží</p>
+							}
+							else if (jeFakturaZaplacena)
+							{
+								<p>Zaplaceno</p>
+							}
+							else if (jeSplatnostPrekrocena)
+							{
+								<p style="color: red;">Datum splatnosti překročeno</p>
+							}
+							else if (item.Objednavky.Uzavrena == false)
+							{
+								<p>Objednávka není uzavřena</p>
+							}
+							else
+							{
+								<p>Čeká na zaplacení</p>
+							}
+						</td>
+						<td>@sumJednotkovaCenaBezDph</td>
+						<td>@sumJednotkovaCenaDph</td>
+						<td>
+							@if (jeFakturaZaplacena)
+							{
+								<p>Zaplaceno</p>
+							}
+							else
+							{
+								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddPaymentCustomerGet)">
+									<input type="hidden" name="index" value="@item.Objednavky.IdObjednavky" />
+									<input type="submit" value="Zaplatit" class="btn btn-primary" />
+								</form>
+							}
+						</td>
 					</tr>
+
+					List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
+					@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
+					{
+						@if (!printedHeaderTr)
+						{
+							<tr></tr>
+							<tr></tr>
+							<tr></tr>
+							<tr>
+								<td></td>
+								<td style="font-weight: bold;">Název zboží</td>
+								<td style="font-weight: bold;">Množství</td>
+								<td style="font-weight: bold;">Cena za kus</td>
+							</tr>
+							printedHeaderTr = true;
+						}
+
+						<tr>
+							<td>>>></td>
+							<td>@itemZbozi.Zbozi.Nazev</td>
+							<td>@itemZbozi.ZboziObjednavek.Mnozstvi</td>
+							<td>@itemZbozi.ZboziObjednavek.JednotkovaCena</td>
+						</tr>
+					}
 				}
 			}
 		}

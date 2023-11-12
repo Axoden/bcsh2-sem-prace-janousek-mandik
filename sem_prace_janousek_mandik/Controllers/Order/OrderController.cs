@@ -1,16 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Customer;
 using sem_prace_janousek_mandik.Controllers.Employee;
-using sem_prace_janousek_mandik.Controllers.Goods;
 using sem_prace_janousek_mandik.Controllers.Payment;
-using sem_prace_janousek_mandik.Controllers.Supplier;
-using sem_prace_janousek_mandik.Models.Customer;
-using sem_prace_janousek_mandik.Models.Employee;
-using sem_prace_janousek_mandik.Models.Goods;
 using sem_prace_janousek_mandik.Models.Order;
-using sem_prace_janousek_mandik.Models.Payment;
-using System;
-using System.Text.Json;
 
 namespace sem_prace_janousek_mandik.Controllers.Order
 {
@@ -21,27 +13,28 @@ namespace sem_prace_janousek_mandik.Controllers.Order
         {
             if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
             {
-                List<Objednavky_Zamestnanci_Zakaznici> objednavky = OrderSQL.GetAllOrders();
-                List<ZboziObjednavek_Zbozi> zboziObjednavek = OrderSQL.GetAllGoodsOrders();
-                ViewBag.ListOfGoodsOrders = zboziObjednavek;
+                List<Objednavky_Zamestnanci_Zakaznici_Faktury> objednavky = OrderSQL.GetAllOrders();
+                ViewBag.ListOfGoodsOrders = OrderSQL.GetAllGoodsOrders();
+				ViewBag.ListOfPayments = PaymentSQL.GetAllPayments();
 
-                return View(objednavky);
+				return View(objednavky);
             }
 
             if (Role.Equals("Zakaznik"))
             {
-                List<Objednavky_Zamestnanci> objednavky = OrderSQL.GetAllCustomerOrders(Email);
-                ViewBag.ListOfOrders = objednavky;
-                List<ZboziObjednavek_Zbozi> zboziObjednavek = OrderSQL.GetAllGoodsOrdersCustomer(Email);
-                ViewBag.ListOfGoodsOrders = zboziObjednavek;
-                return View();
+                ViewBag.ListOfOrders = OrderSQL.GetAllCustomerOrders(Email);
+                ViewBag.ListOfGoodsOrders = OrderSQL.GetAllGoodsOrdersCustomer(Email);
+				ViewBag.ListOfPayments = PaymentSQL.GetAllPayments();
+
+				return View();
             }
 
             // Přesměrování, pokud uživatel nemá povolen přístup
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
+		// Metoda zpracování dat nové objednávky
+		[HttpGet]
         public IActionResult EditGoodsOrder(int index)
         {
             // Kontrola oprávnění na načtení parametrů zboží
@@ -54,7 +47,8 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             return RedirectToAction(nameof(ListOrders), nameof(Order));
         }
 
-        [HttpPost]
+		// Metoda pro zpracování upravených dat konkrétního zboží z objednávky
+		[HttpPost]
         public IActionResult EditGoodsOrder(ZboziObjednavek_Zbozi zboziObjednavky, int index)
         {
             if (Role.Equals("Admin"))
@@ -66,23 +60,51 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             return RedirectToAction(nameof(ListOrders), nameof(Order));
         }
 
+		// Metoda pro načtení formuláře na vytvoření objednávky
+		[HttpGet]
         public IActionResult AddOrder()
         {
-            return View();
+            if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+            {
+                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomers();
+                return View();
+            }
+
+            return RedirectToAction(nameof(ListOrders), nameof(Order));
         }
 
-        [HttpGet]
+		// Metoda pro zpracování dat nové objednávky
+		[HttpPost]
+        public IActionResult AddOrder(Objednavy_Faktury newOrder)
+        {
+            if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+            {
+                //if (ModelState.IsValid == true)
+                //{
+                newOrder.Objednavky.IdZamestnance = EmployeeSQL.GetEmployeeIdByEmail(Email);
+                bool uspesnePridani = OrderSQL.AddOrder(newOrder);
+
+                if (uspesnePridani == true)
+                {
+                    return RedirectToAction(nameof(ListOrders), nameof(Order));
+                }
+                //}
+                return View(newOrder);
+            }
+
+            return RedirectToAction(nameof(ListOrders), nameof(Order));
+        }
+
+		// Metoda pro načtení formuláře na úpravu objednávky
+		[HttpGet]
         public IActionResult EditOrder(int index)
         {
             if (Role.Equals("Admin"))
             {
                 Objednavky objednavka = OrderSQL.GetOrderById(index);
-                List<Faktury> invoices = PaymentSQL.GetAllInvoices();
-                List<Zamestnanci> employees = EmployeeSQL.GetAllEmployees();
-                List<Zakaznici> customers = CustomerSQL.GetAllCustomers();
-                ViewBag.ListOfInvoices = invoices;
-                ViewBag.ListOfEmployees = employees;
-                ViewBag.ListOfCustomers = customers;
+                ViewBag.ListOfInvoices = PaymentSQL.GetAllInvoices();
+                ViewBag.ListOfEmployees = EmployeeSQL.GetAllEmployees();
+                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomers();
 
                 return View(objednavka);
             }
@@ -90,13 +112,14 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             return RedirectToAction(nameof(ListOrders), nameof(Order));
         }
 
-        [HttpGet]
+		// Metoda pro načtení formuláře na přidání zboží do objednávky
+		[HttpGet]
         public IActionResult AddGoodsToOrder(int idObjednavky)
         {
             if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
             {
                 // Kontrola, zda je objednávka otevřena
-                if (OrderSQL.ClosedOrder(idObjednavky) == false)
+                if (OrderSQL.IsClosedOrder(idObjednavky) == false)
                 {
                     ViewBag.IdObjednavky = idObjednavky;
                     ViewBag.ListOfGoods = OrderSQL.GetAllGoods();
@@ -105,25 +128,64 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             return View();
         }
 
-        [HttpPost]
+		// Metoda pro zpracování dat přidání zboží do objednávky
+		[HttpPost]
         public IActionResult AddGoodsToOrder(ZboziObjednavek_Zbozi addZboziObjednavek, int idObjednavky)
         {
-            
+
             if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
             {
                 // Kontrola, zda je objednávka otevřena
-                if (OrderSQL.ClosedOrder(idObjednavky) == false)
+                if (OrderSQL.IsClosedOrder(idObjednavky) == false)
                 {
+                    // TODO: Validace vstupu
+                    float jednotkovaCena = OrderSQL.GetPriceForGoods(addZboziObjednavek.ZboziObjednavek.IdZbozi);
+                    addZboziObjednavek.ZboziObjednavek.JednotkovaCena = jednotkovaCena;
+                    addZboziObjednavek.ZboziObjednavek.IdObjednavky = idObjednavky;
                     bool uspesnePridani = OrderSQL.AddGoodsToOrder(addZboziObjednavek);
 
                     if (uspesnePridani == true)
                     {
-                        // Úspěšná registrace, přesměrování na výpis kategorií
                         return RedirectToAction(nameof(ListOrders), nameof(Order));
                     }
                 }
             }
             return View();
+        }
+
+		// Metoda pro uzavření objednávky
+		public IActionResult CloseOrder(int idObjednavky)
+        {
+            if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+            {
+                OrderSQL.CloseOrder(idObjednavky);
+            }
+
+            return RedirectToAction(nameof(ListOrders), nameof(Order));
+        }
+
+		// Metoda pro odstranění vybrané objednávky
+		[HttpGet]
+        public IActionResult DeleteOrder(int index)
+        {
+            if (Role.Equals("Admin"))
+            {
+                SharedSQL.CallDeleteProcedure("P_SMAZAT_OBJEDNAVKU", index);
+            }
+
+            return RedirectToAction(nameof(ListOrders), nameof(Order));
+        }
+
+        // Metoda pro odstranění vybraného zboží z objednávky
+        [HttpGet]
+        public IActionResult DeleteGoodsOrder(int index)
+        {
+            if (Role.Equals("Admin"))
+            {
+                SharedSQL.CallDeleteProcedure("P_SMAZAT_ZBOZI_OBJEDNAVEK", index);
+            }
+
+            return RedirectToAction(nameof(ListOrders), nameof(Order));
         }
     }
 }

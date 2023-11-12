@@ -6,16 +6,60 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 {
 	public class PaymentSQL
 	{
+		internal static void AddInvoice(Faktury invoice)
+		{
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = new("P_VLOZIT_FAKTURU", connection))
+				{
+					command.CommandType = CommandType.StoredProcedure;
+
+					command.Parameters.Add("p_cisloFaktury", OracleDbType.Int32).Value = invoice.CisloFaktury;
+					command.Parameters.Add("p_datumVystaveni", OracleDbType.Date).Value = invoice.DatumVystaveni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					command.Parameters.Add("p_datumSplatnosti", OracleDbType.Date).Value = invoice.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+					command.Parameters.Add("p_castkaObjednavka", OracleDbType.BinaryFloat).Value = invoice.CastkaObjednavka;
+					command.Parameters.Add("p_castkaDoprava", OracleDbType.BinaryFloat).Value = invoice.CastkaDoprava;
+					command.Parameters.Add("p_dph", OracleDbType.BinaryFloat).Value = invoice.Dph;
+
+					command.ExecuteNonQuery();
+				}
+				connection.Close();
+			}
+		}
+
+		internal static void AddPayment(Platby payment)
+		{
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = new("P_VLOZIT_PLATBU", connection))
+				{
+					command.CommandType = CommandType.StoredProcedure;
+
+					command.Parameters.Add("p_datumPlatby", OracleDbType.Date).Value = payment.DatumPlatby;
+					command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Castka;
+					command.Parameters.Add("p_typPlatby", OracleDbType.Char).Value = payment.TypPlatby;
+					command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
+					command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
+
+					command.ExecuteNonQuery();
+				}
+				connection.Close();
+			}
+		}
+
 		internal static void EditInvoice(Faktury invoice)
 		{
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_FAKTURU_V2", connection))
+				using (OracleCommand command = new("P_UPRAVIT_FAKTURU", connection))
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
 					command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = invoice.IdFaktury;
+					command.Parameters.Add("p_cisloFaktury", OracleDbType.Int32).Value = invoice.CisloFaktury;
 					command.Parameters.Add("p_datumVystaveni", OracleDbType.Date).Value = invoice.DatumVystaveni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
 					command.Parameters.Add("p_datumSplatnosti", OracleDbType.Date).Value = invoice.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
 					command.Parameters.Add("p_castkaObjednavka", OracleDbType.BinaryFloat).Value = invoice.CastkaObjednavka;
@@ -33,7 +77,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_PLATBU_V2", connection))
+				using (OracleCommand command = new("P_UPRAVIT_PLATBU", connection))
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
@@ -42,6 +86,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 					command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Castka;
 					command.Parameters.Add("p_typPlatby", OracleDbType.Char).Value = payment.TypPlatby;
 					command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
+					command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
 
 					command.ExecuteNonQuery();
 				}
@@ -67,6 +112,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 							{
 								specificInvoice = new();
 								specificInvoice.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								specificInvoice.CisloFaktury = int.Parse(reader["cisloFaktury"].ToString());
 								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(DateTime.Parse(reader["datumVystaveni"].ToString()));
 								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
 								specificInvoice.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
@@ -142,6 +188,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 							while (reader.Read())
 							{
 								specificInvoice.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								specificInvoice.CisloFaktury = int.Parse(reader["cisloFaktury"].ToString());
 								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(DateTime.Parse(reader["datumVystaveni"].ToString()));
 								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
 								specificInvoice.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());

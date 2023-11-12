@@ -12,13 +12,16 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public string? Nazev { get; set; }
 
 		[Required]
+		[Range(0, float.MaxValue)]
 		public float? JednotkovaCena { get; set; }
 
 		[Required]
+		[Range(0, int.MaxValue)]
 		public int PocetNaSklade { get; set; }
 
 		[Required]
-		public Int64 CarovyKod { get; set; }
+		[Range(0, int.MaxValue)]
+		public string? CarovyKod { get; set; }
 
 		public string? Poznamka { get; set; }
 

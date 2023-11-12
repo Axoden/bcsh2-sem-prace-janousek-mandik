@@ -1,0 +1,43 @@
+﻿@model sem_prace_janousek_mandik.Models.Customer.Zakaznici_Adresy
+@using sem_prace_janousek_mandik.Controllers.Customer;
+@using sem_prace_janousek_mandik.Controllers.Management;
+@using sem_prace_janousek_mandik.Models.Customer;
+
+@section Title{
+	Info o zákazníkovi
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Info o zákazníkovi:</h2>
+
+	<table border="1">
+		<tr>
+			<td>Jméno</td>
+			<td>Příjmení</td>
+			<td>Telefon</td>
+			<td>Email</td>
+			<td>Ulice</td>
+			<td>Město</td>
+			<td>Okres</td>
+			<td>Země</td>
+			<td>PSČ</td>
+		</tr>
+
+		<tr>
+			<td>@Model.Zakaznici.Jmeno</td>
+			<td>@Model.Zakaznici.Prijmeni</td>
+			<td>@Model.Zakaznici.Telefon</td>
+			<td>@Model.Zakaznici.Email</td>
+			<td>@Model.Adresy.Ulice</td>
+			<td>@Model.Adresy.Mesto</td>
+			<td>@Model.Adresy.Okres</td>
+			<td>@Model.Adresy.Zeme</td>
+			<td>@Model.Adresy.Psc</td>
+		</tr>
+
+	</table>
+</div>

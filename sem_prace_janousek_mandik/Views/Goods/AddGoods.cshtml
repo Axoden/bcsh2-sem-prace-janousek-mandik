@@ -48,7 +48,7 @@
 			@{
 				List<Kategorie> kategorie = ViewBag.ListOfCategories;
 				List<Umisteni> umisteni = ViewBag.ListOfLocations;
-				List<Dodavatele> dodavatel = ViewBag.ListOfSuppliers;
+				List<Dodavatele_Adresy> dodavatel = ViewBag.ListOfSuppliers;
 			}
 
 			<div class="form-group">
@@ -72,9 +72,9 @@
 			<div class="form-group">
 				<label asp-for="Dodavatele">Dodavatel</label>
 				<select asp-for="Zbozi.IdDodavatele" class="form-control">
-					@foreach (Dodavatele item in dodavatel)
+					@foreach (Dodavatele_Adresy item in dodavatel)
 					{
-						<option value="@item.IdDodavatele">@item.Nazev</option>
+						<option value="@item.Dodavatele.IdDodavatele">@item.Dodavatele.Nazev</option>
 					}
 				</select>
 			</div>

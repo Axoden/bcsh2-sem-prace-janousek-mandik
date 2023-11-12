@@ -1,21 +1,34 @@
-﻿namespace sem_prace_janousek_mandik.Models.Order
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
+namespace sem_prace_janousek_mandik.Models.Order
 {
 	public class Objednavky
 	{
+        [Browsable(false)]
         public int IdObjednavky { get; set; }
 
+        [Required]
 		public int CisloObjednavky { get; set; }
 
-		public DateTime DatumPrijeti { get; set; }
+		[Required(ErrorMessage = "Datum přijetí je povinné")]
+		[DisplayName("Datum přijetí: ")]
+		
+		public DateTime? DatumPrijeti { get; set; }
 
-        public string? Poznamka { get; set; }
+		[DisplayName("Poznámka: ")]
+		public string? Poznamka { get; set; }
 
-        public bool Uzavrena { get; set; }
+		[Browsable(false)]
+		public bool Uzavrena { get; set; }
 
-        public int IdFaktury { get; set; }
+		[Browsable(false)]
+		public int IdFaktury { get; set; }
 
-        public int IdZakaznika { get; set; }
+		[Browsable(false)]
+		public int IdZakaznika { get; set; }
 
-        public int IdZamestnance { get; set; }
+		[Browsable(false)]
+		public int IdZamestnance { get; set; }
     }
 }

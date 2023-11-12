@@ -11,7 +11,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				List<Kategorie> kategorie = GoodsSQL.GetAllCategories();
+				List<Kategorie_NadrazenaKategorie> kategorie = GoodsSQL.GetAllCategories();
 				return View(kategorie);
 			}
 			return RedirectToAction("Index", "Home");
@@ -23,6 +23,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
+				ViewBag.ListOfUpperCategories = GoodsSQL.GetAllCategoriesIdNameAcronym();
 				return View();
 			}
 
@@ -31,21 +32,21 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		// Příjem dat z formuláře na přidání kategorie
 		[HttpPost]
-		public IActionResult AddCategory(Kategorie novaKategorie)
+		public IActionResult AddCategory(Kategorie newCategory)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
+				ViewBag.ListOfUpperCategories = GoodsSQL.GetAllCategoriesIdNameAcronym();
 				if (ModelState.IsValid == true)
 				{
-					bool uspesnaRegistrace = GoodsSQL.AddCategory(novaKategorie);
-
-					if (uspesnaRegistrace == true)
+					newCategory.Zkratka = newCategory.Zkratka.ToUpper();
+					if (GoodsSQL.AddCategory(newCategory))
 					{
-						// Úspěšná registrace, přesměrování na výpis kategorií
+						// Úspěšné přidání, přesměrování na výpis kategorií
 						return RedirectToAction(nameof(ListCategories), nameof(Goods));
 					}
 				}
-				return View(novaKategorie);
+				return View(newCategory);
 			}
 
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
@@ -59,9 +60,9 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Kategorie kategorie = GoodsSQL.GetCategoryById(index);
-				return View("EditCategory", kategorie);
+                ViewBag.ListOfUpperCategories = GoodsSQL.GetAllCategoriesIdNameAcronym();
+                return View("EditCategory", kategorie);
 			}
-
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
 		}
 
@@ -71,22 +72,32 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				kategorie.IdKategorie = index;
-				GoodsSQL.EditCategory(kategorie);
+                ViewBag.ListOfUpperCategories = GoodsSQL.GetAllCategoriesIdNameAcronym();
+                if (ModelState.IsValid)
+				{
+					kategorie.IdKategorie = index;
+					kategorie.Zkratka = kategorie.Zkratka.ToUpper();
+					if (!GoodsSQL.EditCategory(kategorie))
+					{
+						return View("EditCategory", kategorie);
+					}
+				}
+				else
+				{
+					return View("EditCategory", kategorie);
+				}
 			}
-
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
 		}
 
-		// Formální metoda pro odstranění vybrané kategorie
-		[HttpGet]
+		// Metoda pro odstranění vybrané kategorie
+		[HttpPost]
 		public IActionResult DeleteCategory(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
 				SharedSQL.CallDeleteProcedure("P_SMAZAT_KATEGORII", index);
 			}
-
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
 		}
 
@@ -134,10 +145,8 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						return View(newGoods);
 					}
 
-					bool uspesnaRegistrace = GoodsSQL.RegisterGoods(newGoods);
-					if (uspesnaRegistrace == true)
+					if (GoodsSQL.RegisterGoods(newGoods))
 					{
-						// Úspěšná registrace, přesměrování na výpis zaměstnanců
 						return RedirectToAction(nameof(ListGoods), nameof(Goods));
 					}
 				}
@@ -149,7 +158,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		// Načtení formuláře na úpravu vybraného zboží
 		[HttpGet]
-		public IActionResult EditGoods(int index)
+		public IActionResult EditGoodsGet(int index)
 		{
 			Zbozi_Umisteni_Kategorie_Dodavatele zbozi = GoodsSQL.GetGoodsById(index);
 
@@ -167,24 +176,35 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		// Příjem upravených dat vybraného zboží
 		[HttpPost]
-		public IActionResult EditGoods(Zbozi_Umisteni_Kategorie_Dodavatele zboziUmisteniKategorieDodavatel, int idZbozi)
+		public IActionResult EditGoodsPost(Zbozi_Umisteni_Kategorie_Dodavatele zboziUmisteniKategorieDodavatel, int index)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				zboziUmisteniKategorieDodavatel.Zbozi.IdZbozi = idZbozi;
-				GoodsSQL.EditGoods(zboziUmisteniKategorieDodavatel);
+				if (ModelState.IsValid)
+				{
+					// Kontrola zda již neexistuje zboží s tímto čárovým kódem
+					if (GoodsSQL.CheckExistsBarcode(zboziUmisteniKategorieDodavatel.Zbozi.CarovyKod) == true)
+					{
+						ViewBag.ErrorInfo = "Tento čárový kód je již používán!";
+						return View("EditGoods", zboziUmisteniKategorieDodavatel);
+					}
+					zboziUmisteniKategorieDodavatel.Zbozi.IdZbozi = index;
+					if (!GoodsSQL.EditGoods(zboziUmisteniKategorieDodavatel))
+					{
+						return View("EditGoods", zboziUmisteniKategorieDodavatel);
+					}
+				}
 			}
-
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
 		}
 
 		// Formální metoda pro odstranění vybraného zboží
 		[HttpGet]
-		public IActionResult DeleteGoods(int idZbozi)
+		public IActionResult DeleteGoods(int index)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZBOZI", idZbozi);
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZBOZI", index);
 			}
 
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
@@ -221,26 +241,24 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			{
 				if (ModelState.IsValid == true)
 				{
-					bool uspesnePridani = GoodsSQL.AddLocation(noveUmisteni);
-					if (uspesnePridani == true)
+					if (GoodsSQL.AddLocation(noveUmisteni))
 					{
 						return RedirectToAction(nameof(ListLocations), nameof(Goods));
 					}
 				}
 				return View(noveUmisteni);
 			}
-
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
 		}
 
 		// Načtení formuláře na úpravu vybraného umístění
-		[HttpGet]
-		public IActionResult EditLocation(int index)
+		[HttpPost]
+		public IActionResult EditLocationGet(int index)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				Umisteni umisteni = GoodsSQL.GetLocationById(index);
-				return View(umisteni);
+				return View("EditLocation", umisteni);
 			}
 
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
@@ -248,19 +266,22 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		// Příjem upravených dat vybraného umístění
 		[HttpPost]
-		public IActionResult EditLocation(Umisteni umisteni, int index)
+		public IActionResult EditLocationPost(Umisteni umisteni, int index)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				umisteni.IdUmisteni = index;
-				GoodsSQL.EditLocation(umisteni);
+				if (!GoodsSQL.EditLocation(umisteni))
+				{
+					return View("EditLocation", umisteni);
+				}
 			}
 
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
 		}
 
 		// Odstranění vybraného umístění
-		[HttpGet]
+		[HttpPost]
 		public IActionResult DeleteLocation(int index)
 		{
 			if (Role.Equals("Admin"))

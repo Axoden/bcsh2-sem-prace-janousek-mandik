@@ -41,8 +41,18 @@
 				<td>@item.Pozice</td>
 				<td>@item.Datum</td>
 				<td>@item.Poznamka</td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditLocation)" asp-route-index="@item.IdUmisteni">Upravit</a></td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)" asp-route-index="@item.IdUmisteni">Smazat</a></td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditLocationGet)">
+						<input type="hidden" name="index" value="@item.IdUmisteni" />
+						<input type="submit" value="Upravit" class="btn btn-primary" />
+					</form>
+				</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)">
+						<input type="hidden" name="index" value="@item.IdUmisteni" />
+						<input type="submit" value="Smazat" class="btn btn-primary" />
+					</form>
+				</td>
 			</tr>
 		}
 	</table>

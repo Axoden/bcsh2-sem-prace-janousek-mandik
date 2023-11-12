@@ -1,4 +1,5 @@
 ﻿@using sem_prace_janousek_mandik.Models.Goods;
+@using sem_prace_janousek_mandik.Models.Order;
 @model sem_prace_janousek_mandik.Models.Order.ZboziObjednavek_Zbozi
 
 @section Title{
@@ -11,7 +12,7 @@
 
 @{
     List<Zbozi> goods = ViewBag.ListOfGoods;
-    Model.ZboziObjednavek.IdObjednavky = ViewBag.IdObjednavky;
+    int idObjednavky = ViewBag.IdObjednavky;
 }
 
 <h1>Přidání zboží do objednávky</h1>
@@ -27,7 +28,7 @@
                 <select asp-for="ZboziObjednavek.IdZbozi" class="form-control">
                     @foreach (Zbozi item in goods)
                     {
-                        <option value="@item.IdZbozi">@item.Nazev, @item.JednotkovaCena, @item.CarovyKod</option>
+                        <option value="@item.IdZbozi">@item.Nazev, @Math.Round((decimal)item.JednotkovaCena, 2) Kč, EAN: @item.CarovyKod</option>
                     }
                 </select>
             </div>
@@ -38,7 +39,7 @@
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Přidat kategorii" class="btn btn-primary" asp-route-idObjednavky="@Model.ZboziObjednavek.IdObjednavky" />
+                <input type="submit" value="Přidat zboží do objednávky" class="btn btn-primary" asp-route-idObjednavky="@idObjednavky" />
             </div>
         </form>
     </div>

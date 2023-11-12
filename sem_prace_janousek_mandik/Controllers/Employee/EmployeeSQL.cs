@@ -345,5 +345,63 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
             }
             return zamestnanci;
         }
-    }
+
+		// Metoda získá ID zaměstnance na základě jeho emailu
+        public static int GetEmployeeIdByEmail(string email)
+        {
+			int idZamestnance = 0;
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT idZamestnance FROM zamestnanci WHERE email = :email";
+                    command.Parameters.Add(":email", email);
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                idZamestnance = int.Parse(reader["idZamestnance"].ToString());
+                            }
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return idZamestnance;
+        }
+
+		// Metoda získá email a roli zaměstnance na základě jeho id
+		public static Zamestnanci_Pozice GetEmployeeRoleEmailById(int idEmployee)
+		{
+			Zamestnanci_Pozice employee = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT z.email, p.nazev FROM zamestnanci z INNER JOIN pozice p ON z.idPozice = p.idPozice WHERE idZamestnance = :idZamestnance";
+					command.Parameters.Add(":idZamestnance", idEmployee);
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								employee.Zamestnanci = new();
+								employee.Pozice = new();
+
+								employee.Zamestnanci.Email = reader["email"].ToString();
+								employee.Pozice.Nazev = reader["nazev"].ToString();
+							}
+						}
+					}
+				}
+				connection.Close();
+			}
+			return employee;
+		}
+	}
 }

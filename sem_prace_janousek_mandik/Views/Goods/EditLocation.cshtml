@@ -13,7 +13,7 @@
 <div class="row">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="EditLocation">
+        <form asp-action="EditLocationPost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Mistnost" class="control-label"></label>
@@ -45,8 +45,13 @@
                 <input asp-for="Poznamka" class="form-control" />
                 <span asp-validation-for="Poznamka" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Upravit" class="btn btn-primary" asp-route-index="@Model.IdUmisteni" />
+                <input type="hidden" name="index" value="@Model.IdUmisteni" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Upravit" class="btn btn-primary" />
             </div>
         </form>
     </div>

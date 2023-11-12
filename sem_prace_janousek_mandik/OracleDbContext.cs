@@ -1,5 +1,4 @@
 ﻿using Oracle.ManagedDataAccess.Client;
-using System.Collections.Generic;
 
 namespace sem_prace_janousek_mandik
 {

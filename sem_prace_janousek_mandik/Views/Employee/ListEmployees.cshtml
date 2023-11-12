@@ -37,6 +37,7 @@
 			@if (ViewBag.Role.Equals("Admin"))
 			{
 				<td>Odstranit</td>
+				<td>Emulace</td>
 			}
 		</tr>
 
@@ -111,6 +112,7 @@
 				{
 					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.Zamestnanci.IdZamestnance">Upravit</a></td>
 					<td><a asp-controller="Employee" asp-action="DeleteEmployee" asp-route-idZamestnance="@item.Zamestnanci.IdZamestnance" asp-route-idAdresy="@item.Zamestnanci.IdAdresy">Smazat</a></td>
+					<td><a asp-controller="Management" asp-action="StartEmulationEmployee" asp-route-idEmployee="@item.Zamestnanci.IdZamestnance">Emulovat</a></td>
 				}
 				else
 				{

@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using Oracle.ManagedDataAccess.Client;
-using sem_prace_janousek_mandik.Models.Employee;
+﻿using Oracle.ManagedDataAccess.Client;
 using sem_prace_janousek_mandik.Models.Goods;
 using System.Data;
 
@@ -28,55 +26,71 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		}
 
 		// Zavolá proceduru na úpravu kategorie
-		internal static void EditCategory(Kategorie kategorie)
+		internal static bool EditCategory(Kategorie kategorie)
 		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_KATEGORII_V2", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_KATEGORII_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					command.Parameters.Add("p_idkategorie", OracleDbType.Int32).Value = kategorie.IdKategorie;
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = kategorie.Nazev;
-					command.Parameters.Add("p_zkratka", OracleDbType.Varchar2).Value = kategorie.Zkratka;
-					command.Parameters.Add("p_popis", OracleDbType.Varchar2).Value = kategorie.Popis;
+						command.Parameters.Add("p_idkategorie", OracleDbType.Int32).Value = kategorie.IdKategorie;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = kategorie.Nazev;
+						command.Parameters.Add("p_zkratka", OracleDbType.Varchar2).Value = kategorie.Zkratka;
+						command.Parameters.Add("p_popis", OracleDbType.Varchar2).Value = kategorie.Popis;
+                        command.Parameters.Add("p_idnadrazenekategorie", OracleDbType.Int32).Value = kategorie.IdNadrazeneKategorie;
 
-					command.ExecuteNonQuery();
+                        command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 
 		// Metoda vytáhne všechny kategorie
-		internal static List<Kategorie> GetAllCategories()
+		internal static List<Kategorie_NadrazenaKategorie> GetAllCategories()
 		{
-			List<Kategorie> kategorie = new();
+			List<Kategorie_NadrazenaKategorie> kategorie = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT * FROM kategorie";
+					command.CommandText = "SELECT c.idkategorie, c.nazev, c.zkratka, c.popis, k.nazev AS nazevNadrizena" +
+						" FROM kategorie c LEFT JOIN kategorie k ON c.idnadrazenekategorie = k.idkategorie" +
+						" START WITH c.idnadrazenekategorie IS NULL CONNECT BY PRIOR c.idkategorie = c.idnadrazenekategorie" +
+						" ORDER SIBLINGS BY c.nazev";
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
-						Kategorie? jednaKategorie = new();
+						Kategorie_NadrazenaKategorie? specificCateogory = new();
 						if (reader.HasRows)
 						{
 							while (reader.Read())
 							{
-								jednaKategorie = new();
-								jednaKategorie.IdKategorie = int.Parse(reader["idKategorie"].ToString());
-								jednaKategorie.Nazev = reader["nazev"].ToString();
-								jednaKategorie.Zkratka = reader["zkratka"].ToString();
-								jednaKategorie.Popis = reader["popis"].ToString();
+								specificCateogory = new();
+								specificCateogory.Kategorie = new();
+								specificCateogory.NadrazenaKategorie = new();
 
-								kategorie.Add(jednaKategorie);
+								specificCateogory.Kategorie.IdKategorie = int.Parse(reader["idKategorie"].ToString());
+								specificCateogory.Kategorie.Nazev = reader["nazev"].ToString();
+								specificCateogory.Kategorie.Zkratka = reader["zkratka"].ToString();
+								specificCateogory.Kategorie.Popis = reader["popis"].ToString();
+								specificCateogory.NadrazenaKategorie.Nazev = reader["nazevNadrizena"].ToString();
+
+								kategorie.Add(specificCateogory);
 							}
 						}
 						else
 						{
-							jednaKategorie = null;
+							specificCateogory = null;
 						}
 					}
 				}
@@ -87,7 +101,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		internal static bool AddCategory(Kategorie novaKategorie)
 		{
-			bool registerSuccessful = false;
+			bool addSuccessful = false;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
@@ -99,13 +113,14 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = novaKategorie.Nazev;
 					command.Parameters.Add("p_zkratka", OracleDbType.Varchar2).Value = novaKategorie.Zkratka;
 					command.Parameters.Add("p_popis", OracleDbType.Varchar2).Value = novaKategorie.Popis;
+                    command.Parameters.Add("p_idnadrazenekategorie", OracleDbType.Varchar2).Value = novaKategorie.IdNadrazeneKategorie;
 
-					command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
 				}
 				connection.Close();
-				registerSuccessful = true;
+				addSuccessful = true;
 			}
-			return registerSuccessful;
+			return addSuccessful;
 		}
 
 		internal static Kategorie GetCategoryById(int index)
@@ -128,7 +143,8 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 								getKategorie.Nazev = reader["nazev"].ToString();
 								getKategorie.Zkratka = reader["zkratka"].ToString();
 								getKategorie.Popis = reader["popis"].ToString();
-							}
+                                getKategorie.IdNadrazeneKategorie = int.Parse(reader["IdnadrazeneKategorie"].ToString());
+                            }
 						}
 					}
 				}
@@ -164,7 +180,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 								jednoZbozi.Zbozi.Nazev = reader["nazev"].ToString();
 								jednoZbozi.Zbozi.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
 								jednoZbozi.Zbozi.PocetNaSklade = int.Parse(reader["pocetNaSklade"].ToString());
-								jednoZbozi.Zbozi.CarovyKod = int.Parse(reader["carovyKod"].ToString());
+								jednoZbozi.Zbozi.CarovyKod = reader["carovyKod"].ToString();
 								jednoZbozi.Zbozi.Poznamka = reader["poznamka"].ToString();
 								jednoZbozi.Zbozi.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
 								jednoZbozi.Zbozi.IdUmisteni = int.Parse(reader["idUmisteni"].ToString());
@@ -204,7 +220,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			return zbozi;
 		}
 
-		internal static bool CheckExistsBarcode(Int64 carovyKod)
+		internal static bool CheckExistsBarcode(string carovyKod)
 		{
 			bool exists = true;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
@@ -233,30 +249,35 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 		internal static bool RegisterGoods(Zbozi_Umisteni_Kategorie_Dodavatele newGoods)
 		{
-			bool registerSuccessful = false;
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_VLOZIT_ZBOZI", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_VLOZIT_ZBOZI", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					// Vstupní parametry procedury
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newGoods.Zbozi.Nazev;
-					command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = newGoods.Zbozi.JednotkovaCena;
-					command.Parameters.Add("p_pocetNaSklade", OracleDbType.Int32).Value = newGoods.Zbozi.PocetNaSklade;
-					command.Parameters.Add("p_carovyKod", OracleDbType.Int64).Value = newGoods.Zbozi.CarovyKod;
-					command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = newGoods.Zbozi.Poznamka;
-					command.Parameters.Add("p_idDodavatele", OracleDbType.Int32).Value = newGoods.Zbozi.IdDodavatele;
-					command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = newGoods.Zbozi.IdUmisteni;
-					command.Parameters.Add("p_idKategorie", OracleDbType.Int32).Value = newGoods.Zbozi.IdKategorie;
+						// Vstupní parametry procedury
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newGoods.Zbozi.Nazev;
+						command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = newGoods.Zbozi.JednotkovaCena;
+						command.Parameters.Add("p_pocetNaSklade", OracleDbType.Int32).Value = newGoods.Zbozi.PocetNaSklade;
+						command.Parameters.Add("p_carovyKod", OracleDbType.Varchar2).Value = newGoods.Zbozi.CarovyKod;
+						command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = newGoods.Zbozi.Poznamka;
+						command.Parameters.Add("p_idDodavatele", OracleDbType.Int32).Value = newGoods.Zbozi.IdDodavatele;
+						command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = newGoods.Zbozi.IdUmisteni;
+						command.Parameters.Add("p_idKategorie", OracleDbType.Int32).Value = newGoods.Zbozi.IdKategorie;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
-				registerSuccessful = true;
+				return true;
 			}
-			return registerSuccessful;
+			catch
+			{
+				return false;
+			}
 		}
 
 		internal static Zbozi_Umisteni_Kategorie_Dodavatele GetGoodsById(int index)
@@ -280,7 +301,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 								getZbozi.Zbozi.Nazev = reader["nazev"].ToString();
 								getZbozi.Zbozi.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
 								getZbozi.Zbozi.PocetNaSklade = int.Parse(reader["pocetNaSklade"].ToString());
-								getZbozi.Zbozi.CarovyKod = Int64.Parse(reader["carovyKod"].ToString());
+								getZbozi.Zbozi.CarovyKod = reader["carovyKod"].ToString();
 								getZbozi.Zbozi.Poznamka = reader["poznamka"].ToString();
 								getZbozi.Zbozi.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
 								getZbozi.Zbozi.IdUmisteni = int.Parse(reader["idUmisteni"].ToString());
@@ -334,55 +355,68 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			return umisteni;
 		}
 
-		internal static void EditGoods(Zbozi_Umisteni_Kategorie_Dodavatele zbozi)
+		internal static bool EditGoods(Zbozi_Umisteni_Kategorie_Dodavatele zbozi)
 		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_ZBOZI_V2", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_ZBOZI_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					// Vstupní parametry procedury
-					command.Parameters.Add("p_idZbozi", OracleDbType.Int32).Value = zbozi.Zbozi.IdZbozi;
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = zbozi.Zbozi.Nazev;
-					command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = zbozi.Zbozi.JednotkovaCena;
-					command.Parameters.Add("p_pocetNaSklade", OracleDbType.Int32).Value = zbozi.Zbozi.PocetNaSklade;
-					command.Parameters.Add("p_carovyKod", OracleDbType.Int64).Value = zbozi.Zbozi.CarovyKod;
-					command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = zbozi.Zbozi.Poznamka;
-					command.Parameters.Add("p_idDodavatele", OracleDbType.Int32).Value = zbozi.Zbozi.IdDodavatele;
-					command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = zbozi.Zbozi.IdUmisteni;
-					command.Parameters.Add("p_idKategorie", OracleDbType.Int32).Value = zbozi.Zbozi.IdKategorie;
+						// Vstupní parametry procedury
+						command.Parameters.Add("p_idZbozi", OracleDbType.Int32).Value = zbozi.Zbozi.IdZbozi;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = zbozi.Zbozi.Nazev;
+						command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = zbozi.Zbozi.JednotkovaCena;
+						command.Parameters.Add("p_pocetNaSklade", OracleDbType.Int32).Value = zbozi.Zbozi.PocetNaSklade;
+						command.Parameters.Add("p_carovyKod", OracleDbType.Varchar2).Value = zbozi.Zbozi.CarovyKod;
+						command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = zbozi.Zbozi.Poznamka;
+						command.Parameters.Add("p_idDodavatele", OracleDbType.Int32).Value = zbozi.Zbozi.IdDodavatele;
+						command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = zbozi.Zbozi.IdUmisteni;
+						command.Parameters.Add("p_idKategorie", OracleDbType.Int32).Value = zbozi.Zbozi.IdKategorie;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 
 		internal static bool AddLocation(Umisteni noveUmisteni)
 		{
-			bool addSuccessful = false;
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_VLOZIT_UMISTENI_V2", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_VLOZIT_UMISTENI_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					command.Parameters.Add("p_mistnost", OracleDbType.Varchar2).Value = noveUmisteni.Mistnost;
-					command.Parameters.Add("p_rada", OracleDbType.Varchar2).Value = noveUmisteni.Rada;
-					command.Parameters.Add("p_regal", OracleDbType.Varchar2).Value = noveUmisteni.Regal;
-					command.Parameters.Add("p_pozice", OracleDbType.Varchar2).Value = noveUmisteni.Pozice;
-					command.Parameters.Add("p_datum", OracleDbType.Date).Value = noveUmisteni.Datum;
-					command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = noveUmisteni.Poznamka;
+						command.Parameters.Add("p_mistnost", OracleDbType.Varchar2).Value = noveUmisteni.Mistnost;
+						command.Parameters.Add("p_rada", OracleDbType.Varchar2).Value = noveUmisteni.Rada;
+						command.Parameters.Add("p_regal", OracleDbType.Varchar2).Value = noveUmisteni.Regal;
+						command.Parameters.Add("p_pozice", OracleDbType.Varchar2).Value = noveUmisteni.Pozice;
+						command.Parameters.Add("p_datum", OracleDbType.Date).Value = noveUmisteni.Datum;
+						command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = noveUmisteni.Poznamka;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
-				addSuccessful = true;
+				return true;
 			}
-			return addSuccessful;
+			catch
+			{
+				return false;
+			}
 		}
 
 		internal static Umisteni GetLocationById(int index)
@@ -417,27 +451,71 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			return getLocation;
 		}
 
-		internal static void EditLocation(Umisteni umisteni)
+		internal static bool EditLocation(Umisteni umisteni)
 		{
+			try
+			{
+				using (OracleConnection connection = OracleDbContext.GetConnection())
+				{
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_UMISTENI_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
+
+						command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = umisteni.IdUmisteni;
+						command.Parameters.Add("p_mistnost", OracleDbType.Varchar2).Value = umisteni.Mistnost;
+						command.Parameters.Add("p_rada", OracleDbType.Varchar2).Value = umisteni.Rada;
+						command.Parameters.Add("p_regal", OracleDbType.Varchar2).Value = umisteni.Regal;
+						command.Parameters.Add("p_pozice", OracleDbType.Varchar2).Value = umisteni.Pozice;
+						command.Parameters.Add("p_datum", OracleDbType.Date).Value = umisteni.Datum;
+						command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = umisteni.Poznamka;
+
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		internal static List<Kategorie> GetAllCategoriesIdNameAcronym()
+		{
+			List<Kategorie> kategorie = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_UMISTENI_V2", connection))
+				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					command.CommandText = "SELECT idkategorie, nazev, zkratka FROM kategorie";
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						Kategorie? specificCateogory = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificCateogory = new();
 
-					command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = umisteni.IdUmisteni;
-					command.Parameters.Add("p_mistnost", OracleDbType.Varchar2).Value = umisteni.Mistnost;
-					command.Parameters.Add("p_rada", OracleDbType.Varchar2).Value = umisteni.Rada;
-					command.Parameters.Add("p_regal", OracleDbType.Varchar2).Value = umisteni.Regal;
-					command.Parameters.Add("p_pozice", OracleDbType.Varchar2).Value = umisteni.Pozice;
-					command.Parameters.Add("p_datum", OracleDbType.Date).Value = umisteni.Datum;
-					command.Parameters.Add("p_poznamka", OracleDbType.Varchar2).Value = umisteni.Poznamka;
+								specificCateogory.IdKategorie = int.Parse(reader["idKategorie"].ToString());
+								specificCateogory.Nazev = reader["nazev"].ToString();
+								specificCateogory.Zkratka = reader["zkratka"].ToString();
 
-					command.ExecuteNonQuery();
+                                kategorie.Add(specificCateogory);
+							}
+						}
+						else
+						{
+							specificCateogory = null;
+						}
+					}
 				}
 				connection.Close();
 			}
+			return kategorie;
 		}
 	}
 }

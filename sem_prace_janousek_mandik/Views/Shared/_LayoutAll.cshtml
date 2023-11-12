@@ -21,15 +21,15 @@
 		{
 			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
 
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button>Zboží</button></a>
-			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
-			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
-			}
-
 			if (role.Equals("Admin"))
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button>Zákazníci</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListDatabaseObjects)"><button>Databázové objekty</button></a>
+			}
+
+			if (role.Equals("Zakaznik"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomer)"><button>Informace o zákazníkovi</button></a>
 			}
 
 			if (role.Equals("Manazer") || role.Equals("Admin"))
@@ -39,6 +39,8 @@
 
 			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
 			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button>Zboží</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button>Kategorie</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListLocations)"><button>Umístění</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.ListSuppliers)"><button>Dodavatelé</button></a>
@@ -57,6 +59,11 @@
 		else
 		{
 			<a asp-controller="Home" asp-action="Logout"><button>Odhlásit se</button></a>
+		}
+
+		@if (!ViewBag.EmulatedEmail.Equals(""))
+		{
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EndEmulation)"><button>Ukončit emulaci</button></a>
 		}
 	</div>
 

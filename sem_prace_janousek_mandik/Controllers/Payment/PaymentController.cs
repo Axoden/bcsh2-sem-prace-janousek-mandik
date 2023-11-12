@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Order;
+using sem_prace_janousek_mandik.Models.Order;
 using sem_prace_janousek_mandik.Models.Payment;
 
 namespace sem_prace_janousek_mandik.Controllers.Payment
@@ -19,6 +21,30 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 
 			// Přesměrování, pokud uživatel nemá povolen přístup
 			return RedirectToAction("Index", "Home");
+		}
+
+		// Načtení formuláře na přidání faktury
+		[HttpGet]
+		public IActionResult AddInvoice()
+		{
+			if (Role.Equals("Admin"))
+			{
+				return View();
+			}
+
+			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
+		}
+
+		// Příjem dat nové faktury
+		[HttpPost]
+		public IActionResult AddInvoice(Faktury invoice)
+		{
+			if (Role.Equals("Admin"))
+			{
+				PaymentSQL.AddInvoice(invoice);
+			}
+
+			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 		}
 
 		// Načtení formuláře na úpravu vybrané faktury
@@ -96,10 +122,68 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_FAKTURU", index);
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_PLATBU", index);
 			}
 
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 		}
-	}
+
+		// Načtení formuláře na přidání platby
+		[HttpGet]
+		public IActionResult AddPayment()
+		{
+			if (Role.Equals("Admin"))
+			{
+				return View();
+			}
+
+			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
+		}
+
+		// Příjem dat nové platby
+		[HttpPost]
+		public IActionResult AddPayment(Platby payment)
+		{
+			if (Role.Equals("Admin"))
+			{
+				PaymentSQL.AddPayment(payment);
+			}
+
+			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
+		}
+
+		// Platba faktury zákazníkem
+		[HttpPost]
+		public IActionResult AddPaymentCustomerGet(int index)
+		{
+			Objednavky_Zakaznici_Faktury customer = OrderSQL.GetCustomerOrderInvoice(index);
+
+			if (customer.Zakaznici.Email.Equals(Email))
+			{
+				PlatbyCustomerForm payment = new();
+				payment.IdFaktury = customer.Faktury.IdFaktury;
+				// spocitat celkovou castku
+				return View("AddPaymentCustomer", payment);
+			}
+
+			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
+		}
+
+        // Zpracování formuláře platby faktury zákazníkem
+        /*[HttpPost]
+        public IActionResult AddPaymentCustomerPost(int idFaktury)
+        {
+            Objednavky_Zakaznici_Faktury customer = OrderSQL.GetCustomerOrderInvoice(index);
+
+            if (customer.Zakaznici.Email.Equals(Email))
+            {
+                PlatbyCustomerForm payment = new();
+                payment.IdFaktury = customer.Faktury.IdFaktury;
+                // spocitat celkovou castku
+                return View("AddPaymentCustomer", payment);
+            }
+
+            return RedirectToAction(nameof(ListInvoices), nameof(Payment));
+        }*/
+    }
 }

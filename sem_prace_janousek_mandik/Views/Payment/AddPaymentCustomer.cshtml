@@ -1,0 +1,50 @@
+﻿@model sem_prace_janousek_mandik.Models.Payment.PlatbyCustomerForm
+@section Title{
+	Zaplacení faktury
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+@{
+    
+}
+
+<h1>Zaplacení faktury č. @Model.IdFaktury</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <p>@ViewBag.ErrorInfo</p>
+        <form asp-action="AddPaymentCustomerPost">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="TypPlatby">Typ platby</label>
+                <select asp-for="TypPlatby" class="form-control">
+                    <option value="Kartou">Kartou</option>
+                    <option value="Hotove">Hotove</option>
+                    <option value="Prevodem">Prevodem</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Castka" class="control-label"></label>
+                <input asp-for="Castka" class="form-control" />
+                <span asp-validation-for="Castka" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VariabilniSymbol" class="control-label"></label>
+                <input asp-for="VariabilniSymbol" class="form-control" />
+                <span asp-validation-for="VariabilniSymbol" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="hidden" name="idFaktury" value="@Model.IdFaktury" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Zaplatit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

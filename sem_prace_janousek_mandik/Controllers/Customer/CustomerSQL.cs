@@ -1,6 +1,7 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using sem_prace_janousek_mandik.Models.Customer;
 using sem_prace_janousek_mandik.Models.Employee;
+using System;
 using System.Data;
 
 namespace sem_prace_janousek_mandik.Controllers.Customer
@@ -184,8 +185,53 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			return zakazniciAdresy;
 		}
 
+		// Metoda vytáhne konkrétního zákazníka včetně adresy na základě emailu zákazníka
+		internal static Zakaznici_Adresy GetCustomerWithAddressByEmail(string? email)
+		{
+			Zakaznici_Adresy? zakaznikAdresa = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT z.jmeno, z.prijmeni, z.telefon, z.email, a.ulice, a.mesto, a.okres, a.zeme, a.psc" +
+						" FROM zakaznici z INNER JOIN adresy a ON z.idadresy = a.idadresy WHERE email = :email";
+					command.Parameters.Add(":email", email);
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								zakaznikAdresa = new();
+								zakaznikAdresa.Zakaznici = new();
+								zakaznikAdresa.Adresy = new();
+
+								zakaznikAdresa.Zakaznici.Jmeno = reader["jmeno"].ToString();
+								zakaznikAdresa.Zakaznici.Prijmeni = reader["prijmeni"].ToString();
+								zakaznikAdresa.Zakaznici.Telefon = reader["telefon"].ToString();
+								zakaznikAdresa.Zakaznici.Email = reader["email"].ToString();
+
+								zakaznikAdresa.Adresy.Ulice = reader["ulice"].ToString();
+								zakaznikAdresa.Adresy.Mesto = reader["mesto"].ToString();
+								zakaznikAdresa.Adresy.Okres = reader["okres"].ToString();
+								zakaznikAdresa.Adresy.Zeme = reader["zeme"].ToString();
+								zakaznikAdresa.Adresy.Psc = reader["psc"].ToString();
+							}
+						}
+						else
+						{
+							zakaznikAdresa = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return zakaznikAdresa;
+		}
+
 		// Metoda vytáhne konkrétního zákazníka včetně adresy na základě ID zákazníka
-        internal static Zakaznici_Adresy GetCustomerWithAddress(int index)
+		internal static Zakaznici_Adresy GetCustomerWithAddress(int index)
         {
 			Zakaznici_Adresy? zakaznikAdresa = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())

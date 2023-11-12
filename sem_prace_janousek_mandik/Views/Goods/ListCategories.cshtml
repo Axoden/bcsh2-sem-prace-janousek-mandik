@@ -1,4 +1,4 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Goods.Kategorie>
+﻿@model List<sem_prace_janousek_mandik.Models.Goods.Kategorie_NadrazenaKategorie>
 @using sem_prace_janousek_mandik.Controllers.Goods;
 @using sem_prace_janousek_mandik.Models.Goods;
 @section Title{
@@ -24,6 +24,7 @@
 			<td>Název</td>
 			<td>Zkratka</td>
 			<td>Popis</td>
+			<td>Nadřazená kategorie</td>
 			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 			{
 				<td>Upravit</td>
@@ -31,21 +32,27 @@
 			}
 		</tr>
 
-		@foreach (Kategorie item in Model)
+		@foreach (Kategorie_NadrazenaKategorie item in Model)
 		{
 			<tr>
-				<td>@item.Nazev</td>
-				<td>@item.Zkratka</td>
-				<td>@item.Popis</td>
+				<td>@item.Kategorie.Nazev</td>
+				<td>@item.Kategorie.Zkratka</td>
+				<td>@item.Kategorie.Popis</td>
+				<td>@(item.NadrazenaKategorie.Nazev ?? "")</td>
 				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 				{
 					<td>
 						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditCategoryGet)">
-							<input type="hidden" name="index" value="@item.IdKategorie" />
+							<input type="hidden" name="index" value="@item.Kategorie.IdKategorie" />
 							<input type="submit" value="Upravit" class="btn btn-primary" />
 						</form>
 					</td>
-					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteCategory)" asp-route-index="@item.IdKategorie">Smazat</a></td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteCategory)">
+							<input type="hidden" name="index" value="@item.Kategorie.IdKategorie" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 			</tr>
 		}

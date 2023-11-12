@@ -1,0 +1,44 @@
+﻿@using sem_prace_janousek_mandik.Controllers.Management;
+@section Title{
+	Výpis databázových objektů
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+@{
+	var list = new List<List<string>>() { ViewBag.Tables, ViewBag.Views, ViewBag.Indexes, ViewBag.Packages, ViewBag.Procedures, ViewBag.Functions, ViewBag.Triggers, ViewBag.Sequences };
+	int maxRows = list.Max(lmb => lmb?.Count ?? 0);
+}
+
+<div class="text-center">
+	<h2>Výpis všech databázových objektů:</h2>
+
+	<table border="1">
+		<tr>
+			<td style="font-weight: bold">Tabulky</td>
+			<td style="font-weight: bold">Pohledy</td>
+			<td style="font-weight: bold">Indexy</td>
+			<td style="font-weight: bold">Balíčky</td>
+			<td style="font-weight: bold">Procedury</td>
+			<td style="font-weight: bold">Funkce</td>
+			<td style="font-weight: bold">Triggery</td>
+			<td style="font-weight: bold">Sekvence</td>
+		</tr>
+
+		@for (int i = 0; i < maxRows; i++)
+		{
+			<tr>
+				<td>@(ViewBag.Tables.Count > i ? ViewBag.Tables[i] : "")</td>
+				<td>@(ViewBag.Views.Count > i ? ViewBag.Views[i] : "")</td>
+				<td>@(ViewBag.Indexes.Count > i ? ViewBag.Indexes[i] : "")</td>
+				<td>@(ViewBag.Packages.Count > i ? ViewBag.Packages[i] : "")</td>
+				<td>@(ViewBag.Procedures.Count > i ? ViewBag.Procedures[i] : "")</td>
+				<td>@(ViewBag.Functions.Count > i ? ViewBag.Functions[i] : "")</td>
+				<td>@(ViewBag.Triggers.Count > i ? ViewBag.Triggers[i] : "")</td>
+				<td>@(ViewBag.Sequences.Count > i ? ViewBag.Sequences[i] : "")</td>
+			</tr>
+		}
+	</table>
+</div>

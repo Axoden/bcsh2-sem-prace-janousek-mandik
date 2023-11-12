@@ -66,8 +66,18 @@
 				<td>@item.Dodavatele.Prijmeni</td>
 				<td>@item.Dodavatele.Telefon</td>
 				<td>@item.Dodavatele.Email</td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoods)" asp-route-index="@item.Zbozi.IdZbozi">Upravit</a></td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)" asp-route-idZbozi="@item.Zbozi.IdZbozi">Smazat</a></td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">
+						<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
+						<input type="submit" value="Upravit" class="btn btn-primary" />
+					</form>
+				</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)">
+						<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
+						<input type="submit" value="Smazat" class="btn btn-primary" />
+					</form>
+				</td>
 			</tr>
 		}
 	</table>
