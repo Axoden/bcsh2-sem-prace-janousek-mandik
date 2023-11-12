@@ -5,7 +5,7 @@ using sem_prace_janousek_mandik.Models.Employee;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
 {
-    public class ManagementController : BaseController
+	public class ManagementController : BaseController
 	{
 		// Výpis všech pozic
 		public IActionResult ListPositions()
@@ -134,9 +134,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return RedirectToAction("Index", "Home");
 		}
 
+		// Metoda vypíše všechny databázové objekty
 		public IActionResult ListDatabaseObjects()
 		{
-            if (Role.Equals("Admin"))
+			if (Role.Equals("Admin"))
 			{
 				ViewBag.Tables = ManagementSQL.GetAllObjects("table_name", "user_tables");
 				ViewBag.Views = ManagementSQL.GetAllObjects("view_name", "user_views");
@@ -149,7 +150,19 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 				return View();
 			}
-            return RedirectToAction("Index", "Home");
-        }
+			return RedirectToAction("Index", "Home");
+		}
+
+		// Metoda vypíše změny dat v tabulkách
+		public IActionResult ListLogs()
+		{
+			if (Role.Equals("Admin"))
+			{
+				List<LogTableInsUpdDel> logs = ManagementSQL.GetAllLogs();
+
+				return View(logs);
+			}
+			return RedirectToAction("Index", "Home");
+		}
 	}
 }

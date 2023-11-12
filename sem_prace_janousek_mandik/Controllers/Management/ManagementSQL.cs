@@ -4,44 +4,44 @@ using System.Data;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
 {
-    public static class ManagementSQL
+	public static class ManagementSQL
 	{
-        // Metoda vytáhne všechny pozice
-        public static List<Pozice> GetAllPositions()
-        {
-            List<Pozice> pozice = new();
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT * FROM pozice";
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        Pozice? jednaPozice = new();
-                        if (reader.HasRows)
-                        {
-                            while (reader.Read())
-                            {
-                                jednaPozice = new();
-                                jednaPozice.IdPozice = int.Parse(reader["idPozice"].ToString());
-                                jednaPozice.Nazev = reader["nazev"].ToString();
+		// Metoda vytáhne všechny pozice
+		public static List<Pozice> GetAllPositions()
+		{
+			List<Pozice> pozice = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM pozice";
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						Pozice? jednaPozice = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								jednaPozice = new();
+								jednaPozice.IdPozice = int.Parse(reader["idPozice"].ToString());
+								jednaPozice.Nazev = reader["nazev"].ToString();
 
-                                pozice.Add(jednaPozice);
-                            }
-                        }
-                        else
-                        {
-                            jednaPozice = null;
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return pozice;
-        }
+								pozice.Add(jednaPozice);
+							}
+						}
+						else
+						{
+							jednaPozice = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return pozice;
+		}
 
-        // Zavolá proceduru na vložení pozice
+		// Zavolá proceduru na vložení pozice
 		internal static bool RegisterPosition(Pozice novaPozice)
 		{
 			bool registerSuccessful = false;
@@ -52,8 +52,8 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
-                    // Vstupní parametr procedury
-                    command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = novaPozice.Nazev;
+					// Vstupní parametr procedury
+					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = novaPozice.Nazev;
 
 					command.ExecuteNonQuery();
 				}
@@ -75,7 +75,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 					command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = pozice.IdPozice;
 					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = pozice.Nazev;
-					
+
 					command.ExecuteNonQuery();
 				}
 				connection.Close();
@@ -193,7 +193,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 					{
 						command.CommandText = "SELECT object_name AS nazev FROM user_procedures WHERE procedure_name IS NOT NULL";
 					}
-					
+
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
 						string? specificObject = null;
@@ -215,6 +215,46 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				connection.Close();
 			}
 			return objectNames;
+		}
+
+		// Metoda vrátí všechny logy o změnách dat v tabulkách
+		internal static List<LogTableInsUpdDel> GetAllLogs()
+		{
+			List<LogTableInsUpdDel> logs = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM log_table_ins_upd_del ORDER BY change_time DESC";
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						LogTableInsUpdDel? log = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								log = new();
+								log.LogId = int.Parse(reader["log_id"].ToString());
+								log.TableName = reader["table_name"].ToString();
+								log.Operation = reader["operation"].ToString();
+								log.ChangeTime = DateTime.Parse(reader["change_time"].ToString());
+								log.Username = reader["username"].ToString();
+								log.OldData = reader["old_data"].ToString();
+								log.NewData = reader["new_data"].ToString();
+
+								logs.Add(log);
+							}
+						}
+						else
+						{
+							log = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return logs;
 		}
 	}
 }

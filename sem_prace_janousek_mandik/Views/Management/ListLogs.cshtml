@@ -1,0 +1,36 @@
+﻿@model List<sem_prace_janousek_mandik.Models.LogTableInsUpdDel>
+
+@section Title{
+    Výpis logů
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+    <h2>Výpis všech logů:</h2>
+
+    <table border="1">
+        <tr>
+            <td>Tabulka</td>
+            <td>Operace</td>
+            <td>Čas změny</td>
+            <td>Uživatel</td>
+            <td>Stará data</td>
+            <td>Nová data</td>
+        </tr>
+
+        @foreach (LogTableInsUpdDel item in Model)
+        {
+            <tr>
+                <td>@item.TableName</td>
+                <td>@item.Operation</td>
+                <td>@item.ChangeTime</td>
+                <td>@item.Username</td>
+                <td>@item.OldData</td>
+                <td>@item.NewData</td>
+            </tr>
+        }
+    </table>
+</div>

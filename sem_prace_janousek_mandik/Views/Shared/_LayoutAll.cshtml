@@ -25,6 +25,7 @@
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button>Zákazníci</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListDatabaseObjects)"><button>Databázové objekty</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListLogs)"><button>Logování</button></a>
 			}
 
 			if (role.Equals("Zakaznik"))
