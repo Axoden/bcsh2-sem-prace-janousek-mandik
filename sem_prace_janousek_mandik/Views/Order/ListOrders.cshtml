@@ -57,7 +57,8 @@
 		@{
 			List<ZboziObjednavek_Zbozi> zboziObjednavek = ViewBag.ListOfGoodsOrders;
 			List<Platby> platby = ViewBag.ListOfPayments;
-			bool printedHeaderTr = false;
+			bool printedHeaderGoods = false;
+			bool printedHeaderPayment = false;
 		}
 
 		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
@@ -71,7 +72,8 @@
 				var celkovaSumaPlateb = platby.Where(p => p.IdFaktury == item.Faktury.IdFaktury).Sum(p => p.Castka);
 				bool jeFakturaZaplacena = celkovaSumaPlateb >= sumJednotkovaCenaDph;
 				bool jeSplatnostPrekrocena = !jeFakturaZaplacena && DateTime.Now > item.Faktury.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
-				printedHeaderTr = false;
+				printedHeaderGoods = false;
+				printedHeaderPayment = false;
 				<tr></tr>
 				<tr></tr>
 				<tr></tr>
@@ -146,16 +148,17 @@
 					}
 				</tr>
 
+				<!-- Výpis objednaného zboží -->
 				List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
 				@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
 				{
-					@if (!printedHeaderTr)
+					@if (!printedHeaderGoods)
 					{
 						<tr></tr>
 						<tr></tr>
 						<tr></tr>
 						<tr>
-							<td></td>
+							<td style="font-weight: bold;">Zboží</td>
 							<td style="font-weight: bold;">Název zboží</td>
 							<td style="font-weight: bold;">Množství</td>
 							<td style="font-weight: bold;">Cena za kus</td>
@@ -166,7 +169,7 @@
 								<td style="font-weight: bold;">Odstranit</td>
 							}
 						</tr>
-						printedHeaderTr = true;
+						printedHeaderGoods = true;
 					}
 
 					<tr>
@@ -180,6 +183,37 @@
 							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="EditGoodsOrder" asp-route-index="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Upravit</a></td>
 							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="DeleteGoodsOrder" asp-route-index="@itemZbozi.ZboziObjednavek.IdZboziObjednavky">Smazat</a></td>
 						}
+					</tr>
+				}
+
+
+				<!-- Výpis všech plateb -->
+				List<Platby> specificPayment = platby.Where((lmb) => lmb.IdFaktury == item.Faktury.IdFaktury).ToList();
+				@foreach (Platby itemPlatba in specificPayment)
+				{
+					@if (!printedHeaderPayment)
+					{
+						<tr></tr>
+						<tr></tr>
+						<tr></tr>
+						<tr>
+							<td></td>
+							<td style="font-weight: bold;">Platby</td>
+							<td style="font-weight: bold;">Datum platby</td>
+							<td style="font-weight: bold;">Částka</td>
+							<td style="font-weight: bold;">Typ platby</td>
+							<td style="font-weight: bold;">Variabilní symbol</td>
+						</tr>
+						printedHeaderPayment = true;
+					}
+
+					<tr>
+						<td></td>
+						<td>>>>>></td>
+						<td>@itemPlatba.DatumPlatby</td>
+						<td>@itemPlatba.Castka</td>
+						<td>@itemPlatba.TypPlatby</td>
+						<td>@itemPlatba.VariabilniSymbol</td>
 					</tr>
 				}
 			}
@@ -200,7 +234,8 @@
 					var celkovaSumaPlateb = platby.Where(p => p.IdFaktury == item.Faktury.IdFaktury).Sum(p => p.Castka);
 					bool jeFakturaZaplacena = celkovaSumaPlateb >= sumJednotkovaCenaDph;
 					bool jeSplatnostPrekrocena = !jeFakturaZaplacena && DateTime.Now > item.Faktury.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
-					printedHeaderTr = false;
+					printedHeaderGoods = false;
+					printedHeaderPayment = false;
 					<tr></tr>
 					<tr></tr>
 					<tr></tr>
@@ -212,7 +247,7 @@
 						<td>@item.Zamestnanci.Prijmeni</td>
 						<td>@item.Zamestnanci.Email</td>
 						<td>
-							<a href="">Faktura</a>
+							<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DownloadInvoice)" asp-route-idFaktury="@item.Faktury.IdFaktury"><button type="submit">Faktura</button></a>
 						</td>
 						<td>
 							@if (Math.Abs(sumJednotkovaCenaDph) < 0.0001f)
@@ -246,17 +281,18 @@
 							else
 							{
 								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddPaymentCustomerGet)">
-									<input type="hidden" name="index" value="@item.Objednavky.IdObjednavky" />
+									<input type="hidden" name="idObjednavky" value="@item.Objednavky.IdObjednavky" />
 									<input type="submit" value="Zaplatit" class="btn btn-primary" />
 								</form>
 							}
 						</td>
 					</tr>
 
+					<!-- Výpis objednaného zboží -->
 					List<ZboziObjednavek_Zbozi> konkretniZbozi = zboziObjednavek.Where((lmb) => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).ToList();
 					@foreach (ZboziObjednavek_Zbozi itemZbozi in konkretniZbozi)
 					{
-						@if (!printedHeaderTr)
+						@if (!printedHeaderGoods)
 						{
 							<tr></tr>
 							<tr></tr>
@@ -267,7 +303,7 @@
 								<td style="font-weight: bold;">Množství</td>
 								<td style="font-weight: bold;">Cena za kus</td>
 							</tr>
-							printedHeaderTr = true;
+							printedHeaderGoods = true;
 						}
 
 						<tr>
@@ -275,6 +311,37 @@
 							<td>@itemZbozi.Zbozi.Nazev</td>
 							<td>@itemZbozi.ZboziObjednavek.Mnozstvi</td>
 							<td>@itemZbozi.ZboziObjednavek.JednotkovaCena</td>
+						</tr>
+					}
+
+
+					<!-- Výpis všech plateb -->
+					List<Platby> specificPayment = platby.Where((lmb) => lmb.IdFaktury == item.Faktury.IdFaktury).ToList();
+					@foreach (Platby itemPlatba in specificPayment)
+					{
+						@if (!printedHeaderPayment)
+						{
+							<tr></tr>
+							<tr></tr>
+							<tr></tr>
+							<tr>
+								<td></td>
+								<td style="font-weight: bold;">Platby</td>
+								<td style="font-weight: bold;">Datum platby</td>
+								<td style="font-weight: bold;">Částka</td>
+								<td style="font-weight: bold;">Typ platby</td>
+								<td style="font-weight: bold;">Variabilní symbol</td>
+							</tr>
+							printedHeaderPayment = true;
+						}
+
+						<tr>
+							<td></td>
+							<td>>>>>></td>
+							<td>@itemPlatba.DatumPlatby</td>
+							<td>@itemPlatba.Castka</td>
+							<td>@itemPlatba.TypPlatby</td>
+							<td>@itemPlatba.VariabilniSymbol</td>
 						</tr>
 					}
 				}

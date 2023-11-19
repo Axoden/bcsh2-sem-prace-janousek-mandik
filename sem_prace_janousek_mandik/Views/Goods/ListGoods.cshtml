@@ -1,4 +1,4 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Goods.Zbozi_Umisteni_Kategorie_Dodavatele>
+﻿@model List<sem_prace_janousek_mandik.Models.Goods.Zbozi_Um_Kat_Dod_Soubory>
 @using sem_prace_janousek_mandik.Controllers.Goods;
 @using sem_prace_janousek_mandik.Models.Goods;
 @section Title{
@@ -19,8 +19,15 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchGoods)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
+			<td>Foto</td>
 			<td>Název</td>
 			<td>Jednotková cena</td>
 			<td>Počet kusů na skladě</td>
@@ -33,8 +40,7 @@
 			<td>Rada</td>
 			<td>Regál</td>
 			<td>Pozice</td>
-			<td>Datum umístění</td>
-			<td>Poznámka</td>
+			<td>Poslední změna na umístění</td>
 			<td>Název</td>
 			<td>Jméno</td>
 			<td>Příjmení</td>
@@ -44,9 +50,26 @@
 			<td>Odstranit</td>
 		</tr>
 
-		@foreach (Zbozi_Umisteni_Kategorie_Dodavatele item in Model)
+		@foreach (Zbozi_Um_Kat_Dod_Soubory item in Model)
 		{
+			string imageDataURL = "";
+			if (item.Soubory.Data != null)
+			{
+				string base64String = Convert.ToBase64String(item.Soubory.Data);
+				imageDataURL = $"data:image/png;base64,{base64String}";
+			}
+
 			<tr>
+				<td>
+					@if (item.Soubory.Data != null)
+					{
+						<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
+					}
+					else
+					{
+
+					}
+				</td>
 				<td>@item.Zbozi.Nazev</td>
 				<td>@item.Zbozi.JednotkovaCena</td>
 				<td>@item.Zbozi.PocetNaSklade</td>
@@ -60,7 +83,6 @@
 				<td>@item.Umisteni.Regal</td>
 				<td>@item.Umisteni.Pozice</td>
 				<td>@item.Umisteni.Datum</td>
-				<td>@item.Umisteni.Poznamka</td>
 				<td>@item.Dodavatele.Nazev</td>
 				<td>@item.Dodavatele.Jmeno</td>
 				<td>@item.Dodavatele.Prijmeni</td>

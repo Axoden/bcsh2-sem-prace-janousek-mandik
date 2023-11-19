@@ -1,6 +1,6 @@
 ﻿@using sem_prace_janousek_mandik.Models.Goods;
 @using sem_prace_janousek_mandik.Models.Supplier;
-@model sem_prace_janousek_mandik.Models.Goods.Zbozi_Umisteni_Kategorie_Dodavatele
+@model sem_prace_janousek_mandik.Models.Goods.Zbozi_Um_Kat_DodList
 @section Title{
 	Úprava zboží
 }
@@ -44,17 +44,10 @@
 				<span asp-validation-for="Zbozi.Poznamka" class="text-danger"></span>
 			</div>
 
-
-			@{
-				List<Kategorie> kategorie = ViewBag.ListOfCategories;
-				List<Umisteni> umisteni = ViewBag.ListOfLocations;
-				List<Dodavatele_Adresy> dodavatel = ViewBag.ListOfSuppliers;
-			}
-
 			<div class="form-group">
 				<label asp-for="Kategorie">Kategorie</label>
 				<select asp-for="Zbozi.IdKategorie" class="form-control">
-					@foreach (Kategorie item in kategorie)
+					@foreach (Kategorie item in Model.Kategorie)
 					{
 						<option value="@item.IdKategorie">@item.Nazev, @item.Zkratka</option>
 					}
@@ -63,7 +56,7 @@
 			<div class="form-group">
 				<label asp-for="Umisteni">Umístění</label>
 				<select asp-for="Zbozi.IdUmisteni" class="form-control">
-					@foreach (Umisteni item in umisteni)
+					@foreach (Umisteni item in Model.Umisteni)
 					{
 						<option value="@item.IdUmisteni">@item.Mistnost, @item.Rada, @item.Regal, @item.Pozice</option>
 					}
@@ -72,15 +65,20 @@
 			<div class="form-group">
 				<label asp-for="Dodavatele">Dodavatel</label>
 				<select asp-for="Zbozi.IdDodavatele" class="form-control">
-					@foreach (Dodavatele_Adresy item in dodavatel)
+					@foreach (Dodavatele item in Model.Dodavatele)
 					{
-						<option value="@item.Dodavatele.IdDodavatele">@item.Dodavatele.Nazev</option>
+						<option value="@item.IdDodavatele">@item.Nazev</option>
 					}
 				</select>
 			</div>
 
 			<div class="form-group">
-				<input type="hidden" name="index" value="@Model.Zbozi.IdZbozi" />
+				<label>Obrázek zboží: </label>
+				<input type="file" name="soubor" />
+			</div>
+
+			<div class="form-group">
+				<input type="hidden" asp-for="Zbozi.IdZbozi" value="@Model.Zbozi.IdZbozi" />
 			</div>
 
 			<div class="form-group">

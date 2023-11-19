@@ -19,13 +19,19 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchLocations)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td>Místnost</td>
 			<td>Řada</td>
 			<td>Regál</td>
 			<td>Pozice</td>
-			<td>Datum</td>
+			<td>Poslední změna na umístění</td>
 			<td>Poznámka</td>
 			<td>Upravit</td>
 			<td>Odstranit</td>

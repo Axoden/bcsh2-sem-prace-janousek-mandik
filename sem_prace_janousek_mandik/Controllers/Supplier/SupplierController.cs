@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Models.Supplier;
 
 namespace sem_prace_janousek_mandik.Controllers.Supplier
 {
-	public class SupplierController : BaseController
+    public class SupplierController : BaseController
 	{
-		// Výpis všech dodavatelů
+		/// <summary>
+		/// Výpis všech dodavatelů
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListSuppliers()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
@@ -13,12 +17,35 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 				List<Dodavatele_Adresy> dodavatele = SupplierSQL.GetAllSuppliers();
 				return View(dodavatele);
 			}
-
 			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Načtení formuláře na přidání nového dodavatele
+		/// <summary>
+		/// Vyhledávání ve výpisu všech dodavatelů
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SearchSuppliers(string search)
+		{
+			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			{
+				ViewBag.Search = search;
+				List<Dodavatele_Adresy> dodavatele = SupplierSQL.GetAllSuppliers();
+				if (search != null)
+				{
+					dodavatele = dodavatele.Where(lmb => lmb.Dodavatele.Nazev.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Telefon.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Email.ToLower().Contains(search.ToLower()) || lmb.Adresy.Ulice.ToLower().Contains(search.ToLower()) || lmb.Adresy.Mesto.ToLower().Contains(search.ToLower()) || lmb.Adresy.Okres.ToLower().Contains(search.ToLower()) || lmb.Adresy.Zeme.ToLower().Contains(search.ToLower()) || lmb.Adresy.Psc.ToLower().Contains(search.ToLower())).ToList();
+				}
+				return View(nameof(ListSuppliers), dodavatele);
+			}
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+		}
+
+		/// <summary>
+		/// Načtení formuláře na přidání nového dodavatele
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult AddSupplier()
 		{
@@ -26,11 +53,14 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 			{
 				return View();
 			}
-
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}
 
+		/// <summary>
 		// Příjem dat z formuláře na přidání dodavatele
+		/// </summary>
+		/// <param name="novyDodavatel">Model s daty nového dodavatele</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult AddSupplier(Dodavatele_Adresy novyDodavatel)
 		{
@@ -45,57 +75,81 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 						return View(novyDodavatel);
 					}
 
-					bool uspesnaRegistrace = SupplierSQL.AddSupplier(novyDodavatel);
-
-					if (uspesnaRegistrace == true)
+					if (SupplierSQL.AddSupplier(novyDodavatel))
 					{
-						// Úspěšná registrace, přesměrování na výpis dodavatelů
 						return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 					}
 				}
 				return View(novyDodavatel);
 			}
-
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}
 
-		// Načtení formuláře na úpravu vybraného dodavatele
-		[HttpGet]
-		public IActionResult EditSupplier(int index)
+		/// <summary>
+		/// Načtení formuláře na úpravu vybraného dodavatele
+		/// </summary>
+		/// <param name="index">ID upravovaného dodavatele</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult EditSupplierGet(int index)
 		{
 			// Kontrola oprávnění na načtení parametrů dodavatele
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
 			{
 				Dodavatele_Adresy dodavateleAdresy = SupplierSQL.GetSupplierWithAddress(index);
-				return View(dodavateleAdresy);
+				return View("EditSupplier", dodavateleAdresy);
 			}
-
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}
 
-		// Příjem upravených dat vybraného dodavatele
+		/// <summary>
+		/// Příjem upravených dat vybraného dodavatele
+		/// </summary>
+		/// <param name="editSupplier">Model s upravenými daty dodavatele</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditSupplier(Dodavatele_Adresy dodavateleAdresy, int idDodavatele, int idAdresy)
+		public IActionResult EditSupplierPost(Dodavatele_Adresy editSupplier)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
 			{
-				dodavateleAdresy.Dodavatele.IdDodavatele = idDodavatele;
-				dodavateleAdresy.Dodavatele.IdAdresy = idAdresy;
-				SupplierSQL.EditSupplier(dodavateleAdresy);
-			}
+				if (ModelState.IsValid)
+				{
+                    string emailSupplier = SupplierSQL.GetEmailByIdSupplier(editSupplier.Dodavatele.IdDodavatele);
+                    // Kontrola zda již neexistuje dodavatel s tímto emailem
+                    if (!emailSupplier.Equals(editSupplier.Dodavatele.Email))
+                    {
+                        if (SupplierSQL.CheckExistsSupplier(editSupplier.Dodavatele.Email) == true)
+                        {
+                            ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
+                            return View("EditSupplier", editSupplier);
+                        }
+                    }
 
+					if (!SupplierSQL.EditSupplier(editSupplier)){
+                        return View("EditSupplier", editSupplier);
+                    }
+				}
+				else
+				{
+					return View("EditSupplier", editSupplier);
+				}
+			}
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}
 
-		// Formální metoda pro odstranění vybraného zaměstnance
-		[HttpGet]
+		/// <summary>
+		/// Metoda pro odstranění vybraného zaměstnance
+		/// </summary>
+		/// <param name="idDodavatele">ID dodavatele</param>
+		/// <param name="idAdresy">ID adresy</param>
+		/// <returns></returns>
+		[HttpPost]
 		public IActionResult DeleteSupplier(int idDodavatele, int idAdresy)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SupplierSQL.DeleteSupplier(idDodavatele, idAdresy);
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_DODAVATELE", idDodavatele, idAdresy);
 			}
-
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}
 	}

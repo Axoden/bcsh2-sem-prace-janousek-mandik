@@ -2,7 +2,7 @@
 
 namespace sem_prace_janousek_mandik.Models.Goods
 {
-	public class Zbozi_Umisteni_Kategorie_Dodavatele
+	public class Zbozi_Um_Kat_Dod_Soubory
 	{
 		public Zbozi? Zbozi { get; set; }
 
@@ -11,5 +11,7 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public Kategorie? Kategorie { get; set; }
 
 		public Dodavatele? Dodavatele { get; set; }
-	}
+
+        public Soubory? Soubory { get; set; }
+    }
 }

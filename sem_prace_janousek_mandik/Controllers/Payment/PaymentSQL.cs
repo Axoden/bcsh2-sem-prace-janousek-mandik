@@ -1,5 +1,7 @@
 ﻿using Oracle.ManagedDataAccess.Client;
+using sem_prace_janousek_mandik.Models.Order;
 using sem_prace_janousek_mandik.Models.Payment;
+using System;
 using System.Data;
 
 namespace sem_prace_janousek_mandik.Controllers.Payment
@@ -233,5 +235,65 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 			}
 			return specificPayment;
 		}
+
+		// Metoda vytáhne všechny platby konkrétní faktury
+		internal static List<Platby> GetAllPaymentsByInvoiceId(int idInvoice)
+		{
+			List<Platby> payments = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM platby WHERE idFaktury = :idInvoice";
+					command.Parameters.Add(":idInvoice", OracleDbType.Int32).Value = idInvoice;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						Platby? specificPayment = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificPayment = new();
+								specificPayment.IdPlatby = int.Parse(reader["idPlatby"].ToString());
+								specificPayment.DatumPlatby = DateTime.Parse(reader["datumPlatby"].ToString());
+								specificPayment.Castka = float.Parse(reader["castka"].ToString());
+								specificPayment.TypPlatby = char.Parse(reader["typPlatby"].ToString());
+								specificPayment.VariabilniSymbol = reader["variabilniSymbol"].ToString();
+								specificPayment.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+
+								payments.Add(specificPayment);
+							}
+						}
+						else
+						{
+							specificPayment = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return payments;
+		}
+
+        internal static void AddCustomerPayment(PlatbyCustomerForm payment)
+        {
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = new("P_ZAPLAT_OBJEDNAVKU", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
+                    command.Parameters.Add("p_typPlatby", OracleDbType.Char).Value = payment.TypPlatby;
+                    command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Castka;
+                    command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
+
+                    command.ExecuteNonQuery();
+                }
+                connection.Close();
+            }
+        }
 	}
 }

@@ -55,32 +55,78 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 			return dodavateleAdresy;
 		}
 
-		// Zavolá proceduru na úpravu dodavatele
-		public static void EditSupplier(Dodavatele_Adresy dodavatel)
+        // Metoda vytáhne ID a jméno všech dodavatelů
+        public static List<Dodavatele> GetAllSuppliersName()
+        {
+            List<Dodavatele> suppliers = new();
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT idDodavatele, nazev FROM dodavatele";
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        Dodavatele? specificSupplier = new();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                specificSupplier = new();
+
+                                specificSupplier.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
+                                specificSupplier.Nazev = reader["nazev"].ToString();
+
+                                suppliers.Add(specificSupplier);
+                            }
+                        }
+                        else
+                        {
+                            specificSupplier = null;
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return suppliers;
+        }
+
+        // Zavolá proceduru na úpravu dodavatele
+        public static bool EditSupplier(Dodavatele_Adresy dodavatel)
 		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_DODAVATELE_V2", connection))
+
+
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_DODAVATELE_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdDodavatele;
-                    command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Nazev;
-                    command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Jmeno;
-					command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Prijmeni;
-					command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Telefon;
-					command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Email;
-					command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdAdresy;
-					command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = dodavatel.Adresy.Ulice;
-					command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = dodavatel.Adresy.Mesto;
-					command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = dodavatel.Adresy.Okres;
-					command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = dodavatel.Adresy.Zeme;
-					command.Parameters.Add("p_psc", OracleDbType.Char).Value = dodavatel.Adresy.Psc;
+						command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdDodavatele;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Nazev;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Email;
+						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdAdresy;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = dodavatel.Adresy.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = dodavatel.Adresy.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = dodavatel.Adresy.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = dodavatel.Adresy.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = dodavatel.Adresy.Psc;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 
@@ -132,25 +178,6 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
             return dodavatelAdresa;
         }
 
-        // Zavolá proceduru na odstranění dodavatele
-        public static void DeleteSupplier(int idDodavatele, int idAdresy)
-		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
-			{
-				connection.Open();
-				using (OracleCommand command = new("P_SMAZAT_DODAVATELE", connection))
-				{
-					command.CommandType = CommandType.StoredProcedure;
-
-					command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = idDodavatele;
-					command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = idAdresy;
-
-					command.ExecuteNonQuery();
-				}
-				connection.Close();
-			}
-		}
-
 		// Kontrola existence emailu (dodavatele) v databázi - kontrola při přidávání nového dodavatele
 		public static bool CheckExistsSupplier(string email)
 		{
@@ -160,7 +187,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT * FROM dodavatele WHERE email = :email";
+					command.CommandText = "SELECT idDodavatele FROM dodavatele WHERE email = :email";
 					command.Parameters.Add(":email", email);
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
@@ -209,5 +236,31 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 			}
 			return registerSuccessful;
 		}
-	}
+
+        internal static string GetEmailByIdSupplier(int idDodavatele)
+        {
+            string? email = null;
+            using (OracleConnection connection = OracleDbContext.GetConnection())
+            {
+                connection.Open();
+                using (OracleCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT email FROM dodavatele WHERE idDodavatele = :idDodavatele";
+                    command.Parameters.Add(":idDodavatele", idDodavatele);
+                    using (OracleDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                email = reader["email"].ToString();
+                            }
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            return email;
+        }
+    }
 }

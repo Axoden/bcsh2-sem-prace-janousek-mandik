@@ -19,6 +19,12 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.SearchSuppliers)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td>Název</td>
@@ -57,11 +63,23 @@
 
 				@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
 				{
-					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplier)" asp-route-index="@item.Dodavatele.IdDodavatele">Upravit</a></td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplierGet)">
+							<input type="hidden" name="index" value="@item.Dodavatele.IdDodavatele" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)" asp-route-idDodavatele="@item.Dodavatele.IdDodavatele" asp-route-idAdresy="@item.Dodavatele.IdAdresy">Smazat</a></td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)">
+							<input type="hidden" name="idDodavatele" value="@item.Dodavatele.IdDodavatele" />
+
+							<input type="hidden" name="idAdresy" value="@item.Adresy.IdAdresy" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 			</tr>
 		}

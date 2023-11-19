@@ -477,7 +477,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 				connection.Open();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT z.email, f.idFaktury, f.castkaObjednavka, f.castkaDoprava, f.dph FROM objednavky o" +
+					command.CommandText = "SELECT o.idObjednavky, z.email, f.idFaktury, f.castkaObjednavka, f.castkaDoprava, f.dph FROM objednavky o" +
 						" INNER JOIN zakaznici z ON o.idZakaznika = z.idZakaznika" +
 						" INNER JOIN faktury f ON o.idFaktury = f.idFaktury" +
 						" WHERE idObjednavky = :idObjednavky";
@@ -493,7 +493,8 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 								customer.Faktury = new();
 
 								customer.Zakaznici.Email = reader["email"].ToString();
-								customer.Faktury.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+                                customer.Objednavky.IdObjednavky = int.Parse(reader["idObjednavky"].ToString());
+                                customer.Faktury.IdFaktury = int.Parse(reader["idFaktury"].ToString());
 								customer.Faktury.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
 								customer.Faktury.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
 								customer.Faktury.Dph = float.Parse(reader["dph"].ToString());
@@ -504,6 +505,81 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 				connection.Close();
 			}
 			return customer;
+		}
+
+		// Metoda vytáhne všechno objednáné zboží konkrétní objednávky
+		internal static List<ZboziObjednavek> GetAllGoodsOrdersById(int idObjednavky)
+		{
+			List<ZboziObjednavek> zboziObjednavek = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM zbozi_objednavek WHERE idObjednavky = :idObjednavky";
+					command.Parameters.Add(":idObjednavky", OracleDbType.Int32).Value = idObjednavky;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						ZboziObjednavek? zboziObjednavky = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								zboziObjednavky = new();
+
+								zboziObjednavky.IdZboziObjednavky = int.Parse(reader["idZboziObjednavky"].ToString());
+								zboziObjednavky.Mnozstvi = int.Parse(reader["mnozstvi"].ToString());
+								zboziObjednavky.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
+								zboziObjednavky.IdObjednavky = int.Parse(reader["idObjednavky"].ToString());
+								zboziObjednavky.IdZbozi = int.Parse(reader["idZbozi"].ToString());
+
+								zboziObjednavek.Add(zboziObjednavky);
+							}
+						}
+						else
+						{
+							zboziObjednavky = null;
+						}
+					}
+				}
+				connection.Close();
+			}
+			return zboziObjednavek;
+		}
+
+		internal static List<ZboziObjednavek_Zbozi> GetGoodsOrderByIdInvoice(int idFaktury)
+		{
+			List<ZboziObjednavek_Zbozi> zbozi = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT zo.*, z.nazev AS nazev FROM zbozi_objednavek zo INNER JOIN zbozi z ON zo.idZbozi = z.idZbozi INNER JOIN objednavky o ON zo.idObjednavky = o.idObjednavky INNER JOIN faktury f ON o.idFaktury = f.idFaktury WHERE f.idFaktury = :idFaktury";
+					command.Parameters.Add(":idFaktury", OracleDbType.Int32).Value = idFaktury;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						ZboziObjednavek_Zbozi specificGoods = new();
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								specificGoods = new();
+								specificGoods.ZboziObjednavek = new();
+								specificGoods.Zbozi = new();
+								specificGoods.ZboziObjednavek.IdZboziObjednavky = int.Parse(reader["idZboziObjednavky"].ToString());
+								specificGoods.ZboziObjednavek.Mnozstvi = int.Parse(reader["mnozstvi"].ToString());
+								specificGoods.ZboziObjednavek.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
+								specificGoods.Zbozi.Nazev = reader["nazev"].ToString();
+
+								zbozi.Add(specificGoods);
+							}
+						}
+					}
+				}
+				connection.Close();
+			}
+			return zbozi;
 		}
 	}
 }

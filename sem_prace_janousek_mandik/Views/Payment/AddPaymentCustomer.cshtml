@@ -11,7 +11,7 @@
     
 }
 
-<h1>Zaplacení faktury č. @Model.IdFaktury</h1>
+<h1>Zaplacení faktury</h1>
 
 <hr />
 <div class="row">
@@ -20,7 +20,7 @@
         <form asp-action="AddPaymentCustomerPost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="TypPlatby">Typ platby</label>
+                <label asp-for="TypPlatby"></label>
                 <select asp-for="TypPlatby" class="form-control">
                     <option value="Kartou">Kartou</option>
                     <option value="Hotove">Hotove</option>
@@ -40,6 +40,10 @@
 
             <div class="form-group">
                 <input type="hidden" name="idFaktury" value="@Model.IdFaktury" />
+            </div>
+
+            <div class="form-group">
+                <input type="hidden" name="idObjednavky" value="@ViewBag.idObjednavky" />
             </div>
 
             <div class="form-group">
