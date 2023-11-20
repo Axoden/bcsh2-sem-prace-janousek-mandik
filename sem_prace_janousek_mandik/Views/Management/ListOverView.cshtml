@@ -1,0 +1,81 @@
+﻿@model sem_prace_janousek_mandik.Models.OverView
+@using sem_prace_janousek_mandik.Controllers.Management;
+@using sem_prace_janousek_mandik.Models.Customer;
+@using sem_prace_janousek_mandik.Models.Goods;
+@section Title{
+    Přehledy
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+    <h2>Přehledy:</h2>
+
+    <form asp-action="ListOverViewCus">
+
+        <div class="form-group">
+            <label>Zákazník: </label>
+            <select name="idZakaznika" class="form-control">
+                @foreach (Zakaznici item in Model.Zakaznici)
+                {
+                    <option value="@item.IdZakaznika">@item.Jmeno, @item.Prijmeni</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Spustit" class="btn btn-primary" />
+        </div>
+
+    </form>
+
+    @if (ViewBag.CustomerValue != null)
+    {
+        <p>Hodnota objednávek je: @ViewBag.CustomerValue</p>
+    }
+
+    <br />
+    <br />
+
+    <form asp-action="ListOverViewSuppliers">
+
+        <div class="form-group">
+            <input type="submit" value="Spustit" class="btn btn-primary" />
+        </div>
+
+    </form>
+
+    @if (ViewBag.SupplierValue != null)
+    {
+        <p>@ViewBag.SupplierValue</p>
+    }
+
+    <br />
+    <br />
+
+    <form asp-action="ListOverViewCategories">
+
+        <div class="form-group">
+            <label>Kategorie: </label>
+            <select name="idKategorie" class="form-control">
+                @foreach (Kategorie item in Model.Kategorie)
+                {
+                    <option value="@item.IdKategorie">@item.Nazev, @item.Zkratka</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Spustit" class="btn btn-primary" />
+        </div>
+
+    </form>
+
+    @if (ViewBag.MaxGoods != null)
+    {
+        <p>Nejvíce zboží v kategorii: @ViewBag.MaxGoods</p>
+    }
+
+</div>
