@@ -1,4 +1,5 @@
-﻿@model sem_prace_janousek_mandik.Models.Customer.Zakaznici_Adresy
+﻿@using sem_prace_janousek_mandik.Controllers.Customer;
+@model sem_prace_janousek_mandik.Models.Customer.Zakaznici_Adresy
 
 @section Title{
 	Úprava zákazníka
@@ -15,7 +16,7 @@
 <div class="row">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="EditCustomer">
+        <form asp-action="@nameof(CustomerController.EditCustomerPost)">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Zakaznici.Jmeno" class="control-label"></label>
@@ -39,12 +40,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Zakaznici.Heslo" class="control-label"></label>
-                <input asp-for="Zakaznici.Heslo" class="form-control" />
+                <input asp-for="Zakaznici.Heslo" class="form-control" placeholder="Nevyplňujte, pokud nechcete změnit" />
                 <span asp-validation-for="Zakaznici.Heslo" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Zakaznici.HesloZnova" class="control-label"></label>
-                <input asp-for="Zakaznici.HesloZnova" class="form-control" />
+                <input asp-for="Zakaznici.HesloZnova" class="form-control" placeholder="Nevyplňujte, pokud nechcete změnit" />
                 <span asp-validation-for="Zakaznici.HesloZnova" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -73,7 +74,14 @@
                 <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Upravit" class="btn btn-primary" asp-route-idZakaznika="@Model.Zakaznici.IdZakaznika" asp-route-idAdresy="@Model.Adresy.IdAdresy" />
+                <input type="hidden" asp-for="Zakaznici.IdZakaznika" value="@Model.Zakaznici.IdZakaznika" />
+            </div>
+
+            <div class="form-group">
+                <input type="hidden" asp-for="Zakaznici.IdAdresy" value="@Model.Zakaznici.IdAdresy" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Upravit" class="btn btn-primary" />
             </div>
         </form>
     </div>

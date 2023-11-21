@@ -191,7 +191,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
             if (Role.Equals("Admin") || Role.Equals("Manazer"))
             {
                 OverView overView = new();
-                overView.Zakaznici = CustomerSQL.GetAllCustomers();
+                overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
                 overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
                 return View(overView);
             }
@@ -207,7 +207,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
                 ViewBag.CustomerValue = customerValue;
 
                 OverView overView = new();
-                overView.Zakaznici = CustomerSQL.GetAllCustomers();
+                overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
                 overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
                 return View("ListOverView", overView);
             }
@@ -223,7 +223,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
                 ViewBag.SupplierValue = supplierValue;
 
                 OverView overView = new();
-                overView.Zakaznici = CustomerSQL.GetAllCustomers();
+                overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
                 overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
                 return View("ListOverView", overView);
             }
@@ -235,12 +235,19 @@ namespace sem_prace_janousek_mandik.Controllers.Management
         {
             if (Role.Equals("Admin") || Role.Equals("Manazer"))
             {
-                int idZbozi = ManagementSQL.ListOverViewCategories(idKategorie);
-                Zbozi zbozi = GoodsSQL.GetGoodsById(idZbozi);
-                ViewBag.MaxGoods = zbozi.Nazev;
+                int idGoods = ManagementSQL.ListOverViewCategories(idKategorie);
+                if (idGoods != 0)
+                {
+                    Zbozi zbozi = GoodsSQL.GetGoodsById(idGoods);
+                    ViewBag.MaxGoods = zbozi.Nazev;
+                }
+                else
+                {
+                    ViewBag.MaxGoods = "chyba";
+				}
 
                 OverView overView = new();
-                overView.Zakaznici = CustomerSQL.GetAllCustomers();
+                overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
                 overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
                 return View("ListOverView", overView);
             }

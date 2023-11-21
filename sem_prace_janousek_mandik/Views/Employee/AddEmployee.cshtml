@@ -1,4 +1,4 @@
-﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_Pozice
+﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
 
 @section Title{
 	Přidání zaměstnance
@@ -78,13 +78,10 @@
                 <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
             </div>
 
-            @{
-                List<Pozice> pozice = ViewBag.ListOfPositions;
-            }
             <div class="form-group">
-                <label asp-for="Pozice.Nazev">Pozice</label>
+                <label>@Html.DisplayNameFor(x => x.Pozice[0].Nazev)</label>
                 <select asp-for="Zamestnanci.IdPozice" class="form-control">
-                    @foreach (Pozice item in pozice)
+                    @foreach (Pozice item in Model.Pozice)
                     {
                         <option value="@item.IdPozice">@item.Nazev</option>
                     }

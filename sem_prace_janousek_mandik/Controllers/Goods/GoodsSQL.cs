@@ -263,13 +263,6 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 
 								jednoZbozi.Soubory.Data = reader["data"] as byte[];
 								jednoZbozi.Soubory.Nazev = reader["souborNazev"].ToString();
-								jednoZbozi.Soubory.TypSouboru = reader["typSouboru"].ToString();
-								jednoZbozi.Soubory.PriponaSouboru = reader["priponaSouboru"].ToString();
-								if (reader["datumModifikace"].ToString() != null)
-								{
-									jednoZbozi.Soubory.DatumModifikace = DateTime.Parse(reader["datumModifikace"].ToString());
-								}
-								jednoZbozi.Soubory.UpravenoUzivatelem = reader["upravenoUzivatelem"].ToString();
 
 								zbozi.Add(jednoZbozi);
 							}
@@ -441,8 +434,8 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						command.Parameters.Add("p_nazevSouboru", OracleDbType.Varchar2).Value = files.Nazev;
 						command.Parameters.Add("p_typ", OracleDbType.Varchar2).Value = files.TypSouboru;
 						command.Parameters.Add("p_pripona", OracleDbType.Varchar2).Value = files.PriponaSouboru;
-						command.Parameters.Add("p_uzivatel", OracleDbType.Varchar2).Value = files.UpravenoUzivatelem;
 						command.Parameters.Add("p_data", OracleDbType.Blob).Value = files.Data;
+						command.Parameters.Add("p_idZamestnanec", OracleDbType.Int32).Value = files.idZamestnance;
 
 						command.ExecuteNonQuery();
 					}
@@ -613,8 +606,8 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						command.Parameters.Add("p_nazevSouboru", OracleDbType.Varchar2).Value = files.Nazev;
 						command.Parameters.Add("p_typ", OracleDbType.Varchar2).Value = files.TypSouboru;
 						command.Parameters.Add("p_pripona", OracleDbType.Varchar2).Value = files.PriponaSouboru;
-						command.Parameters.Add("p_uzivatel", OracleDbType.Varchar2).Value = files.UpravenoUzivatelem;
 						command.Parameters.Add("p_data", OracleDbType.Blob).Value = files.Data;
+						command.Parameters.Add("p_idZamestnance", OracleDbType.Int32).Value = files.idZamestnance;
 
 						command.ExecuteNonQuery();
 					}

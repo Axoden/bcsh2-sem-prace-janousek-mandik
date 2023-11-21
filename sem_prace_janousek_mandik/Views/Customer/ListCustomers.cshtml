@@ -21,6 +21,12 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.SearchCustomers)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td>Jméno</td>
@@ -55,9 +61,25 @@
 				<td>@item.Adresy.Okres</td>
 				<td>@item.Adresy.Zeme</td>
 				<td>@item.Adresy.Psc</td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomer)" asp-route-index="@item.Zakaznici.IdZakaznika">Upravit</a></td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)" asp-route-idZakaznika="@item.Zakaznici.IdZakaznika" asp-route-idAdresy="@item.Zakaznici.IdAdresy">Smazat</a></td>
-				<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationCustomer)" asp-route-emailCustomer="@item.Zakaznici.Email">Emulovat</a></td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomerGet)">
+						<input type="hidden" name="index" value="@item.Zakaznici.IdZakaznika" />
+						<input type="submit" value="Upravit" class="btn btn-primary" />
+					</form>
+				</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)">
+						<input type="hidden" name="idZakaznika" value="@item.Zakaznici.IdZakaznika" />
+						<input type="hidden" name="idAdresy" value="@item.Zakaznici.IdAdresy" />
+						<input type="submit" value="Smazat" class="btn btn-primary" />
+					</form>
+				</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationCustomer)">
+						<input type="hidden" name="emailCustomer" value="@item.Zakaznici.Email" />
+						<input type="submit" value="Emulovat" class="btn btn-primary" />
+					</form>
+				</td>
 			</tr>
 		}
 	</table>

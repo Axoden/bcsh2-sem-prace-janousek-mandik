@@ -1,4 +1,4 @@
-﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_Pozice
+﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
 @section Title{
 	Úprava zaměstnance
 }
@@ -13,7 +13,7 @@
 <div class="row">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="EditEmployee">
+        <form asp-action="EditEmployeePost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             @if (ViewBag.Role.Equals("Admin"))
             {
@@ -91,12 +91,10 @@
 
             @if (ViewBag.Role.Equals("Admin"))
             {
-                List<Pozice> pozice = ViewBag.ListOfPositions;
-
                 <div class="form-group">
-                    <label asp-for="Pozice.Nazev">Pozice</label>
-                    <select asp-for="Pozice.IdPozice" class="form-control">
-                        @foreach (Pozice item in pozice)
+                    <label>@Html.DisplayNameFor(x => x.Pozice[0].Nazev)</label>
+                    <select asp-for="Zamestnanci.IdPozice" class="form-control">
+                        @foreach (Pozice item in Model.Pozice)
                         {
                             <option value="@item.IdPozice">@item.Nazev</option>
                         }
@@ -104,9 +102,11 @@
                 </div>
             }
 
+            <input type="hidden" asp-for="Zamestnanci.IdZamestnance" value="@Model.Zamestnanci.IdZamestnance" />
+            <input type="hidden" asp-for="Zamestnanci.IdAdresy" value="@Model.Zamestnanci.IdAdresy" />
+
             <div class="form-group">
-                <input type="submit" value="Upravit" class="btn btn-primary" asp-route-idZamestnance="@Model.Zamestnanci.IdZamestnance"
-                       asp-route-idAdresy="@Model.Adresy.IdAdresy" asp-route-idPozice="@Model.Pozice.IdPozice" />
+                <input type="submit" value="Upravit" class="btn btn-primary" />
             </div>
         </form>
     </div>

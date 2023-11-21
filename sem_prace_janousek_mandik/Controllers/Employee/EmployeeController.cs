@@ -1,13 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Employee;
 
 namespace sem_prace_janousek_mandik.Controllers.Employee
 {
-	public class EmployeeController : BaseController
+    public class EmployeeController : BaseController
 	{
-		// Výpis všech zaměstnanců
+		/// <summary>
+		/// Výpis všech zaměstnanců
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListEmployees()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
@@ -15,130 +19,164 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 				List<Zamestnanci_Adresy_Pozice> zamestnanci = EmployeeSQL.GetAllEmployeesWithAddressPosition();
 				return View(zamestnanci);
 			}
+            return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+        }
 
-			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
-		}
+		/// <summary>
+		/// Metoda pro vyhledávání ve výpisu zaměstnanců
+		/// </summary>
+		/// <param name="search"></param>
+		/// <returns></returns>
+        [HttpPost]
+        public IActionResult SearchEmployees(string search)
+        {
+            if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+            {
+                ViewBag.Search = search;
+                List<Zamestnanci_Adresy_Pozice> zamestnanci = EmployeeSQL.GetAllEmployeesWithAddressPosition();
+                if (search != null)
+                {
+                    zamestnanci = zamestnanci.Where(lmb => lmb.Zamestnanci.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.DatumNarozeni.ToString().ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Telefon.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Email.ToLower().Contains(search.ToLower()) || lmb.Adresy.Ulice.ToLower().Contains(search.ToLower()) || lmb.Adresy.Mesto.ToLower().Contains(search.ToLower()) || lmb.Adresy.Okres.ToLower().Contains(search.ToLower()) || lmb.Adresy.Zeme.ToLower().Contains(search.ToLower()) || lmb.Adresy.Psc.ToLower().Contains(search.ToLower())).ToList();
+                }
+                return View(nameof(ListEmployees), zamestnanci);
+            }
+            return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+        }
 
-		// Načtení formuláře na přidání nového zaměstnance
-		[HttpGet]
+        /// <summary>
+        /// Načtení formuláře na přidání nového zaměstnance
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
 		public IActionResult AddEmployee()
 		{
-			// Dostupné pouze pro administrátora
 			if (Role.Equals("Admin"))
 			{
-				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-				return View();
+				Zamestnanci_Adresy_PoziceList employees = new();
+				employees.Pozice = ManagementSQL.GetAllPositions();
+				return View(employees);
 			}
-
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}
 
-		// Příjem dat z formuláře na přidání zaměstnance
+		/// <summary>
+		/// Příjem dat z formuláře na přidání zaměstnance
+		/// </summary>
+		/// <param name="newEmployee">Model s daty nového zaměstnance</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddEmployee(Zamestnanci_Adresy_Pozice novyZamestnanec)
+		public IActionResult AddEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
 		{
-			// Dostupné pouze pro administrátora
 			if (Role.Equals("Admin"))
 			{
-				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-				if (ModelState.IsValid == true)
+                if (ModelState.IsValid == true)
 				{
 					// Kontrola zda již není zaregistrován zaměstnanec s tímto emailem
-					if (EmployeeSQL.CheckExistsEmployee(novyZamestnanec.Zamestnanci.Email) == true)
+					if (EmployeeSQL.CheckExistsEmployee(newEmployee.Zamestnanci.Email) == true)
 					{
 						ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-						return View(novyZamestnanec);
-					}
+						return ReturnBad();
 
-					Zamestnanci_Adresy_Pozice inputZamestnanecEdited = novyZamestnanec;
-					inputZamestnanecEdited.Zamestnanci.Heslo = SharedSQL.HashPassword(novyZamestnanec.Zamestnanci.Heslo);
-					bool uspesnaRegistrace = EmployeeSQL.RegisterEmployee(inputZamestnanecEdited);
+                    }
 
-					if (uspesnaRegistrace == true)
+                    newEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(newEmployee.Zamestnanci.Heslo);
+					if (EmployeeSQL.RegisterEmployee(newEmployee))
 					{
-						// Úspěšná registrace, přesměrování na výpis zaměstnanců
 						return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 					}
 				}
-				return View(novyZamestnanec);
-			}
+				return ReturnBad();
 
-			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
-		}
+            }
 
-		// Načtení formuláře na úpravu vybraného zaměstnance
-		[HttpGet]
-		public IActionResult EditEmployee(int index)
-		{
-			Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice = EmployeeSQL.GetEmployeeWithAddressPosition(index);
-
-			// Kontrola oprávnění na načtení parametrů zaměstnance
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") && zamestnanciAdresyPozice.Zamestnanci.Email.Equals(Email) ||
-				Role.Equals("Logistik") && zamestnanciAdresyPozice.Zamestnanci.Email.Equals(Email))
+            IActionResult ReturnBad()
 			{
-				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-				return View(zamestnanciAdresyPozice);
-			}
+                newEmployee.Pozice = ManagementSQL.GetAllPositions();
+                return View(newEmployee);
+            }
 
+            return RedirectToAction(nameof(ListEmployees), nameof(Employee));
+		}
+
+		/// <summary>
+		/// Načtení formuláře na úpravu vybraného zaměstnance
+		/// </summary>
+		/// <param name="index">ID upravovaného zaměstnance</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult EditEmployeeGet(int index)
+		{
+            Zamestnanci_Adresy_Pozice employee = EmployeeSQL.GetEmployeeWithAddressPosition(index);
+            if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") && employee.Zamestnanci.Email.Equals(Email) ||
+				Role.Equals("Logistik") && employee.Zamestnanci.Email.Equals(Email))
+			{
+				Zamestnanci_Adresy_PoziceList emp = new();
+				emp.Zamestnanci = employee.Zamestnanci;
+				emp.Adresy = employee.Adresy;
+				emp.Pozice = ManagementSQL.GetAllPositions();
+                return View("EditEmployee", emp);
+			}
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}
 
-		// Příjem upravených dat vybraného zaměstnance
+		/// <summary>
+		/// Příjem upravených dat vybraného zaměstnance
+		/// </summary>
+		/// <param name="editedEmployee">Model s upravenými daty zaměstnance</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditEmployee(Zamestnanci_Adresy_Pozice zamestnanciAdresyPozice, int idZamestnance, int idAdresy, int idPozice)
+		public IActionResult EditEmployeePost(Zamestnanci_Adresy_PoziceList editedEmployee)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				ViewBag.ListOfPositions = ManagementSQL.GetAllPositions();
-				zamestnanciAdresyPozice.Zamestnanci.IdZamestnance = idZamestnance;
-				zamestnanciAdresyPozice.Zamestnanci.IdAdresy = idAdresy;
-				if (zamestnanciAdresyPozice.Pozice != null)
-				{
-					idPozice = zamestnanciAdresyPozice.Pozice.IdPozice;
-				}
-
-				zamestnanciAdresyPozice.Zamestnanci.IdPozice = idPozice;
-				EmployeeSQL.EditEmployee(zamestnanciAdresyPozice);
+				editedEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(editedEmployee.Zamestnanci.Heslo);
+				EmployeeSQL.EditEmployee(editedEmployee);
 			}
-
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}
 
-		// Formální metoda pro odstranění vybraného zaměstnance
-		[HttpGet]
+		/// <summary>
+		/// Metoda pro odstranění vybraného zaměstnance
+		/// </summary>
+		/// <param name="idZamestnance">ID odstraňovaného zaměstnance</param>
+		/// <param name="idAdresy">ID odstraňované adresy</param>
+		/// <returns></returns>
+		[HttpPost]
 		public IActionResult DeleteEmployee(int idZamestnance, int idAdresy)
 		{
 			if (Role.Equals("Admin"))
 			{
-				EmployeeSQL.DeleteEmployee(idZamestnance, idAdresy);
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZAMESTNANCE", idZamestnance, idAdresy);
 			}
-
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}
 
-		// Načtení přihlašovacího formuláře pro zaměstnance
+		/// <summary>
+		/// Načtení přihlašovacího formuláře pro zaměstnance
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult LoginEmployee()
 		{
 			return View();
 		}
 
-		// Příjem dat z přihlašovacího formuláře pro zaměstnance
+		/// <summary>
+		/// Příjem dat z přihlašovacího formuláře pro zaměstnance
+		/// </summary>
+		/// <param name="inputEmployee">Model s emailem a heslem zaměstnance</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult LoginEmployee(ZamestnanciLoginForm inputZamestnanec)
+		public IActionResult LoginEmployee(ZamestnanciLoginForm inputEmployee)
 		{
-			// Informativní zpráva při chybném vyplnění
 			ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
-
 			if (ModelState.IsValid)
 			{
-				Zamestnanci? dbZamestnanec = EmployeeSQL.AuthEmployee(inputZamestnanec.Email);
-
+				Zamestnanci? dbZamestnanec = EmployeeSQL.AuthEmployee(inputEmployee.Email);
 				if (dbZamestnanec != null)
 				{
 					// Kontrola hashe hesel
-					if (dbZamestnanec.Heslo.Equals(SharedSQL.HashPassword(inputZamestnanec.Heslo)))
+					if (dbZamestnanec.Heslo.Equals(SharedSQL.HashPassword(inputEmployee.Heslo)))
 					{
 						Pozice? pozice = EmployeeSQL.GetPosition(dbZamestnanec.IdPozice);
 						if (pozice != null)
@@ -147,13 +185,11 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 							HttpContext.Session.SetString("role", pozice.Nazev);
 							HttpContext.Session.SetString("email", dbZamestnanec.Email);
 						}
-
-						// Přesměrování při úspěšném přihlášení
-						return RedirectToAction("Index", "Home");
-					}
+                        return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+                    }
 				}
 			}
-			return View(inputZamestnanec);
+			return View(inputEmployee);
 		}
 	}
 }

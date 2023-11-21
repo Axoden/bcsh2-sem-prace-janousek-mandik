@@ -22,9 +22,9 @@ namespace sem_prace_janousek_mandik.Models
 		public DateTime DatumModifikace { get; set; }
 
 		[Required]
-		public string? UpravenoUzivatelem { get; set; }
-
-		[Required]
 		public byte[]? Data { get; set; }
-    }
+
+		[Browsable(false)]
+		public int? idZamestnance { get; set; }
+	}
 }

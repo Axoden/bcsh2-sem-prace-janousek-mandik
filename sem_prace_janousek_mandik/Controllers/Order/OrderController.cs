@@ -66,7 +66,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
         {
             if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
             {
-                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomers();
+                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomersNameSurname();
                 return View();
             }
 
@@ -103,8 +103,8 @@ namespace sem_prace_janousek_mandik.Controllers.Order
             {
                 Objednavky objednavka = OrderSQL.GetOrderById(index);
                 ViewBag.ListOfInvoices = PaymentSQL.GetAllInvoices();
-                ViewBag.ListOfEmployees = EmployeeSQL.GetAllEmployees();
-                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomers();
+                ViewBag.ListOfEmployees = EmployeeSQL.GetAllEmployeesNameSurname();
+                ViewBag.ListOfCustomers = CustomerSQL.GetAllCustomersNameSurname();
 
                 return View(objednavka);
             }

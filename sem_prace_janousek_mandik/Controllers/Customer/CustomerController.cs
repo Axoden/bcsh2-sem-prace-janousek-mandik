@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Models.Customer;
 using sem_prace_janousek_mandik.Models.Employee;
 
@@ -6,23 +7,28 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 {
 	public class CustomerController : BaseController
 	{
-		// Načtení přihlašovacího formuláře pro zákazníky
+		/// <summary>
+		/// Načtení přihlašovacího formuláře pro zákazníky
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult LoginCustomer()
 		{
 			return View();
 		}
 
+		/// <summary>
 		// Příjem dat z přihlašovacího formuláře zákazníka
+		/// </summary>
+		/// <param name="inputZakaznik">Přihlašovací údaje</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult LoginCustomer(ZamestnanciLoginForm inputZakaznik)
 		{
-			// Informativní zpráva při chybném vyplnění
 			ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
 			if (ModelState.IsValid == true)
 			{
 				Zakaznici? dbZakaznik = CustomerSQL.AuthCustomer(inputZakaznik.Email);
-
 				if (dbZakaznik != null)
 				{
 					// Kontrola hashe hesel
@@ -30,41 +36,51 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 					{
 						HttpContext.Session.SetString("email", inputZakaznik.Email);
 						HttpContext.Session.SetString("role", "Zakaznik");
-						return RedirectToAction("Index", "Home");
-					}
+                        return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+                    }
 				}
 			}
 			return View(inputZakaznik);
 		}
 
-		// Načtení registračního formuláře
+		/// <summary>
+		/// Načtení registračního formuláře
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult RegisterCustomer()
 		{
 			return View();
 		}
 
-		// Příjem dat z registrační formuláře zákazníka
+		/// <summary>
+		/// Příjem dat z registrační formuláře zákazníka	
+		/// </summary>
+		/// <param name="inputZakaznik">Registrační údaje zákazníka</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult RegisterCustomer(Zakaznici_Adresy inputZakaznik)
 		{
-			// Informativní zpráva při chybném vyplnění
 			ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
-
 			if (ModelState.IsValid == true)
 			{
 				// Kontrola zda již není zaregistrován zákazník s tímto emailem
-				if (CustomerSQL.CheckExistsCustomer(inputZakaznik.Zakaznici.Email) == true)
+				if (CustomerSQL.CheckExistsCustomerEmail(inputZakaznik.Zakaznici.Email) == true)
 				{
 					ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
 					return View(inputZakaznik);
 				}
 
-				Zakaznici_Adresy inputZakaznikHashed = inputZakaznik;
-				inputZakaznikHashed.Zakaznici.Heslo = SharedSQL.HashPassword(inputZakaznik.Zakaznici.Heslo);
-				bool uspesnaRegistrace = CustomerSQL.RegisterCustomer(inputZakaznikHashed);
+                // Kontrola zda již není zaregistrován zákazník s tímto telefonním číslem
+                if (CustomerSQL.CheckExistsCustomerPhone(inputZakaznik.Zakaznici.Telefon) == true)
+                {
+                    ViewBag.ErrorInfo = "Toto telefonní číslo je již zaregistrováno!";
+                    return View(inputZakaznik);
+                }
 
-				if (uspesnaRegistrace == true)
+                inputZakaznik.Zakaznici.Heslo = SharedSQL.HashPassword(inputZakaznik.Zakaznici.Heslo);
+
+				if (CustomerSQL.RegisterCustomer(inputZakaznik))
 				{
 					if (Role.Equals("Admin"))
 					{
@@ -77,42 +93,58 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			return View(inputZakaznik);
 		}
 
-		// Informativní stránka po úspěšné registraci
+		/// <summary>
+		/// Informativní stránka po úspěšné registraci
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult RegisterSuccessful()
 		{
 			return View();
 		}
 
-		// Načtení formuláře na úpravu vybraného zákazníka
-		[HttpGet]
-		public IActionResult EditCustomer(int index)
+		/// <summary>
+		/// Načtení formuláře na úpravu vybraného zákazníka
+		/// </summary>
+		/// <param name="index">ID upravovaného zákazníka</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult EditCustomerGet(int index)
 		{
-			// Kontrola oprávnění na načtení parametrů zaměstnance
 			if (Role.Equals("Admin"))
 			{
 				Zakaznici_Adresy zakazniciAdresy = CustomerSQL.GetCustomerWithAddress(index);
-				return View(zakazniciAdresy);
+				return View("EditCustomer", zakazniciAdresy);
 			}
-
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 		}
 
-		// Příjem upravených dat vybraného zákazníka
+		/// <summary>
+		/// Příjem upravených dat vybraného zákazníka
+		/// </summary>
+		/// <param name="customer"></param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditCustomer(Zakaznici_Adresy zakazniciAdresy, int idZakaznika, int idAdresy)
+		public IActionResult EditCustomerPost(Zakaznici_Adresy customer)
 		{
 			if (Role.Equals("Admin"))
 			{
-				zakazniciAdresy.Zakaznici.IdZakaznika = idZakaznika;
-				zakazniciAdresy.Zakaznici.IdAdresy = idAdresy;
+				if(customer.Zakaznici.Heslo != null)
+				{
+                    customer.Zakaznici.Heslo = SharedSQL.HashPassword(customer.Zakaznici.Heslo);
+                }
 
-				CustomerSQL.EditCustomer(zakazniciAdresy);
+				if (!CustomerSQL.EditCustomer(customer))
+				{
+                    return View("EditCustomer", customer);
+                }
 			}
-
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 		}
 
-		// Výpis všech zaměstnanců
+		/// <summary>
+		/// Výpis všech zákazníků
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListCustomers()
 		{
 			if (Role.Equals("Admin"))
@@ -120,12 +152,34 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 				List<Zakaznici_Adresy> zakazniciAdresy = CustomerSQL.GetAllCustomersWithAddresses();
 				return View(zakazniciAdresy);
 			}
-
-			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Výpis informací o konkrétním zákazníkovi
+		/// <summary>
+		/// Vyhledávání ve výpisu všech zákazníků
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SearchCustomers(string search)
+		{
+			if (Role.Equals("Admin"))
+			{
+				ViewBag.Search = search;
+				List<Zakaznici_Adresy> customers = CustomerSQL.GetAllCustomersWithAddresses();
+				if (search != null)
+				{
+					customers = customers.Where(lmb => lmb.Zakaznici.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Telefon.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Email.ToLower().Contains(search.ToLower()) || lmb.Adresy.Ulice.ToLower().Contains(search.ToLower()) || lmb.Adresy.Mesto.ToLower().Contains(search.ToLower()) || lmb.Adresy.Okres.ToLower().Contains(search.ToLower()) || lmb.Adresy.Zeme.ToLower().Contains(search.ToLower()) || lmb.Adresy.Psc.ToLower().Contains(search.ToLower())).ToList();
+				}
+				return View(nameof(ListCustomers), customers);
+			}
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+		}
+
+		/// <summary>
+		/// Výpis evidovaných informací o zákazníkovi přihlášenému zákazníkovi
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListCustomer()
 		{
 			if (Role.Equals("Zakaznik"))
@@ -133,20 +187,22 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 				Zakaznici_Adresy customerAddress = CustomerSQL.GetCustomerWithAddressByEmail(Email);
 				return View(customerAddress);
 			}
-
-			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Formální metoda pro odstranění vybraného zákazníka
-		[HttpGet]
+		/// <summary>
+		/// Metoda pro odstranění vybraného zákazníka
+		/// </summary>
+		/// <param name="idZakaznika">ID odstraňovaného zákazníka</param>
+		/// <param name="idAdresy">ID odstraňované adresy</param>
+		/// <returns></returns>
+		[HttpPost]
 		public IActionResult DeleteCustomer(int idZakaznika, int idAdresy)
 		{
 			if (Role.Equals("Admin"))
 			{
 				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZAKAZNIKA", idZakaznika, idAdresy);
 			}
-
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 		}
 	}

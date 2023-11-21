@@ -1,5 +1,6 @@
 ﻿@model List<sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_Pozice>
 @using sem_prace_janousek_mandik.Controllers.Employee;
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Models.Employee;
 @section Title{
 	Výpis zaměstnanců
@@ -106,13 +107,34 @@
 
 				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.Zamestnanci.IdZamestnance">Upravit</a></td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
+							<input type="hidden" name="index" value="@item.Zamestnanci.IdZamestnance" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 				else if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="Employee" asp-action="EditEmployee" asp-route-index="@item.Zamestnanci.IdZamestnance">Upravit</a></td>
-					<td><a asp-controller="Employee" asp-action="DeleteEmployee" asp-route-idZamestnance="@item.Zamestnanci.IdZamestnance" asp-route-idAdresy="@item.Zamestnanci.IdAdresy">Smazat</a></td>
-					<td><a asp-controller="Management" asp-action="StartEmulationEmployee" asp-route-idEmployee="@item.Zamestnanci.IdZamestnance">Emulovat</a></td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
+							<input type="hidden" name="index" value="@item.Zamestnanci.IdZamestnance" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.DeleteEmployee)">
+							<input type="hidden" name="idZamestnance" value="@item.Zamestnanci.IdZamestnance" />
+							<input type="hidden" name="idAdresy" value="@item.Zamestnanci.IdAdresy" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationEmployee)">
+							<input type="hidden" name="idEmployee" value="@item.Zamestnanci.IdZamestnance" />
+							<input type="submit" value="Emulovat" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 				else
 				{

@@ -7,6 +7,7 @@ namespace sem_prace_janousek_mandik.Models
 		[Browsable(false)]
 		public int IdPozice { get; set; }
 
-		public string? Nazev { get; set; }
+        [DisplayName("Název pozice: ")]
+        public string? Nazev { get; set; }
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using sem_prace_janousek_mandik.Models;
 using System.Data;
 
@@ -400,7 +401,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
         internal static int ListOverViewCategories(int idKategorie)
         {
-            int goodsCount;
+            int idGoods = 0;
             using (OracleConnection connection = OracleDbContext.GetConnection())
             {
                 connection.Open();
@@ -419,11 +420,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
                     command.Parameters.Add("p_idkategorie", OracleDbType.Int32).Value = idKategorie;
                     command.ExecuteNonQuery();
 
-                    goodsCount = int.Parse(returnValue.Value.ToString());
+					if (!((OracleDecimal)returnValue.Value).IsNull)
+					{
+						idGoods = int.Parse(returnValue.Value.ToString());
+                    }
                 }
                 connection.Close();
             }
-            return goodsCount;
+            return idGoods;
         }
     }
 }

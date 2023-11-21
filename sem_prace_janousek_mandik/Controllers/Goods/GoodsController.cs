@@ -3,6 +3,7 @@ using sem_prace_janousek_mandik.Models.Goods;
 using sem_prace_janousek_mandik.Controllers.Supplier;
 using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Employee;
 
 namespace sem_prace_janousek_mandik.Controllers.Goods
 {
@@ -228,6 +229,30 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		}
 
 		/// <summary>
+		/// Metoda převede obrázek do pole bytů a přidá dodačné informace
+		/// </summary>
+		/// <param name="file">Vstupní obrázek</param>
+		/// <returns>Model Souboru s upravenými daty</returns>
+		private Soubory CreateImage(IFormFile file)
+		{
+			Soubory newFile = new();
+			if (file != null && file.Length > 0)
+			{
+				newFile.idZamestnance = EmployeeSQL.GetEmployeeIdByEmail(Email);
+				newFile.Nazev = file.FileName;
+				string[] arr = file.ContentType.Split("/");
+				newFile.TypSouboru = arr[0];
+				newFile.PriponaSouboru = arr[1];
+				using (var memoryStream = new MemoryStream())
+				{
+					file.CopyTo(memoryStream);
+					newFile.Data = memoryStream.ToArray();
+				}
+			}
+			return newFile;
+		}
+
+		/// <summary>
 		/// Příjem dat z formuláře na přidání nového zboží
 		/// </summary>
 		/// <param name="newGoods">Model s daty nového zboží</param>
@@ -247,22 +272,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						return ReturnBad();
 					}
 
-					Soubory newFile = new();
-					if (soubor != null && soubor.Length > 0)
-					{
-						newFile.UpravenoUzivatelem = Email;
-						newFile.Nazev = soubor.FileName;
-						string[] arr = soubor.ContentType.Split("/");
-						newFile.TypSouboru = arr[0];
-						newFile.PriponaSouboru = arr[1];
-						using (var memoryStream = new MemoryStream())
-						{
-							soubor.CopyTo(memoryStream);
-							newFile.Data = memoryStream.ToArray();
-						}
-					}
-
-					if (GoodsSQL.RegisterGoods(newGoods.Zbozi, newFile))
+					if (GoodsSQL.RegisterGoods(newGoods.Zbozi, CreateImage(soubor)))
 					{
 						return RedirectToAction(nameof(ListGoods), nameof(Goods));
 					}
@@ -326,22 +336,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						}
 					}
 
-					Soubory newFile = new();
-					if (soubor != null && soubor.Length > 0)
-					{
-						newFile.UpravenoUzivatelem = Email;
-						newFile.Nazev = soubor.FileName;
-						string[] arr = soubor.ContentType.Split("/");
-						newFile.TypSouboru = arr[0];
-						newFile.PriponaSouboru = arr[1];
-						using (var memoryStream = new MemoryStream())
-						{
-							soubor.CopyTo(memoryStream);
-							newFile.Data = memoryStream.ToArray();
-						}
-					}
-
-					if (!GoodsSQL.EditGoods(editZbozi.Zbozi, newFile))
+					if (!GoodsSQL.EditGoods(editZbozi.Zbozi, CreateImage(soubor)))
 					{
 						return ReturnBad();
 					}
