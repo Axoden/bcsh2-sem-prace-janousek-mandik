@@ -1,0 +1,60 @@
+﻿@using sem_prace_janousek_mandik.Controllers.Management;
+@model List<sem_prace_janousek_mandik.Models.Soubory_Vypis>
+@section Title{
+	Výpis souborů
+}
+
+@{
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
+}
+
+<div class="text-center">
+	<h2>Výpis všech souborů:</h2>
+
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchFiles)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
+	<table border="1">
+		<tr>
+			<td>Obrázek</td>
+			<td>Název</td>
+			<td>Typ souboru</td>
+			<td>Přípona</td>
+			<td>Čas nahrání</td>
+			<td>Čas poslední úpravy</td>
+			<td>Poslední úpravu provedl</td>
+			<td>Kde je používán</td>
+			<td>Upravit</td>
+			<td>Odstranit</td>
+		</tr>
+
+		@foreach (Soubory_Vypis item in Model)
+		{
+			<tr>
+				<td></td>
+				<td>@item.Soubory.Nazev</td>
+				<td>@item.Soubory.TypSouboru</td>
+				<td>@item.Soubory.PriponaSouboru</td>
+				<td>@item.Soubory.DatumNahrani</td>
+				<td>@item.Soubory.DatumModifikace</td>
+				<td>@(item.JmenoZamestnance + " " + item.PrijmeniZamestnance)</td>
+				<td>@item.KdePouzito</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditFileGet)">
+						<input type="hidden" name="index" value="@item.Soubory.IdSouboru" />
+						<input type="submit" value="Upravit" class="btn btn-primary" />
+					</form>
+				</td>
+				<td>
+					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeleteFile)">
+						<input type="hidden" name="index" value="@item.Soubory.IdSouboru" />
+						<input type="submit" value="Smazat" class="btn btn-primary" />
+					</form>
+				</td>
+			</tr>
+		}
+	</table>
+</div>
