@@ -362,7 +362,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
 		/// <summary>
@@ -426,22 +426,53 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				}
 				return View(nameof(ListFiles), soubory);
 			}
-			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult EditFileGet()
+		public IActionResult EditFileGet(int idSouboru)
 		{
-			return View();
+			if (Role.Equals("Admin"))
+			{
+				Soubory_Edit fileEdit = new();
+				fileEdit.Soubory = ManagementSQL.GetFileById(idSouboru);
+				fileEdit.Zamestnanci = EmployeeSQL.GetAllEmployeesNameSurname();
+				return View("EditFile", fileEdit);
+			}
+			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult EditFilePost()
+		public IActionResult EditFilePost(Soubory_Edit fileEdit, IFormFile file)
 		{
-			return View();
+			if (Role.Equals("Admin"))
+			{
+				if (fileEdit.Soubory != null)
+				{
+					if (file != null && file.Length > 0)
+					{
+						using (var memoryStream = new MemoryStream())
+						{
+							file.CopyTo(memoryStream);
+							fileEdit.Soubory.Data = memoryStream.ToArray();
+						}
+						ManagementSQL.EditFile(fileEdit);
+					}
+					ManagementSQL.EditFile(fileEdit);
+				}
+				else
+				{
+					return View("EditFile", fileEdit);
+				}
+			}
+			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult DeleteFile()
+		public IActionResult DeleteFile(int index)
 		{
-			return View();
+			if (Role.Equals("Admin"))
+			{
+				SharedSQL.CallDeleteProcedure("P_SMAZAT_SOUBOR", index);
+			}
+			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 	}
 }

@@ -13,6 +13,7 @@
 <div class="text-center">
     <h2>Přehledy:</h2>
 
+    <h3>Výpis hodnot všech objendávek vybraného zákaníka:</h3>
     <form asp-action="ListOverViewCus">
 
         <div class="form-group">
@@ -39,6 +40,7 @@
     <br />
     <br />
 
+    <h3>Výpis největšího dodavatele (nejvíce dodávaného zboží)</h3>
     <form asp-action="ListOverViewSuppliers">
 
         <div class="form-group">
@@ -55,6 +57,7 @@
     <br />
     <br />
 
+    <h3>Nejvíce kusů zboží na skladě vybrané kategorie</h3>
     <form asp-action="ListOverViewCategories">
 
         <div class="form-group">
@@ -75,7 +78,7 @@
 
     @if (ViewBag.MaxGoods != null)
     {
-        <p>Nejvíce zboží v kategorii: @ViewBag.MaxGoods</p>
+        <p>Nejvíce kusů na skladě je u zboží: @ViewBag.MaxGoods</p>
     }
 
 </div>

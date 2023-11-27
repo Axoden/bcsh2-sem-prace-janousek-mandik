@@ -26,15 +26,26 @@
 			<td>Čas nahrání</td>
 			<td>Čas poslední úpravy</td>
 			<td>Poslední úpravu provedl</td>
-			<td>Kde je používán</td>
+			<td>Je používán u zboží s názvem</td>
 			<td>Upravit</td>
 			<td>Odstranit</td>
 		</tr>
 
 		@foreach (Soubory_Vypis item in Model)
 		{
+			string imageDataURL = "";
+			if (item.Soubory.Data != null)
+			{
+				string base64String = Convert.ToBase64String(item.Soubory.Data);
+				imageDataURL = $"data:image/png;base64,{base64String}";
+			}
 			<tr>
-				<td></td>
+				<td>
+					@if (item.Soubory.Data != null)
+					{
+						<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
+					}
+				</td>
 				<td>@item.Soubory.Nazev</td>
 				<td>@item.Soubory.TypSouboru</td>
 				<td>@item.Soubory.PriponaSouboru</td>
@@ -44,7 +55,7 @@
 				<td>@item.KdePouzito</td>
 				<td>
 					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditFileGet)">
-						<input type="hidden" name="index" value="@item.Soubory.IdSouboru" />
+						<input type="hidden" name="idSouboru" value="@item.Soubory.IdSouboru" />
 						<input type="submit" value="Upravit" class="btn btn-primary" />
 					</form>
 				</td>

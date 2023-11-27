@@ -10,7 +10,8 @@
 
 <div class="text-center">
 	<h2>Sestavy:</h2>
-
+	<br/>
+	<h3>Vypíše faktury, zakázníky a kým byla faktura vytvořena </h3>
 	<table border="1">
 		<tr>
 			<td>@Html.DisplayNameFor(item => item.Faktury[0].CisloFaktury)</td>
@@ -43,6 +44,11 @@
 	<br />
 	<br />
 
+	<br />
+	<h3>
+		Vypíše informace o zaměstnancích, jejich pozici a adresu ve specifikovaném formátu,
+		a také počet objednávek, které každý zaměstnanec vytvořil.
+	</h3>
 	<table border="1">
 		<tr>
 			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Jmeno)</td>
@@ -69,6 +75,8 @@
 	<br />
 	@if (ViewBag.Role.Equals("Admin"))
 	{
+		<br />
+		<h3>Vypíše zboží jeho umístění a kategorie, které je momentálně na skladě </h3>
 		<table border="1">
 			<tr>
 				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].Nazev)</td>

@@ -524,5 +524,69 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			}
 			return files;
 		}
+
+		internal static Soubory? GetFileById(int idSouboru)
+		{
+			Soubory getFiles = new();
+			using (OracleConnection connection = OracleDbContext.GetConnection())
+			{
+				connection.Open();
+				using (OracleCommand command = connection.CreateCommand())
+				{
+					command.CommandText = "SELECT * FROM soubory WHERE idSouboru = :idSouboru";
+					command.Parameters.Add(":idSouboru", OracleDbType.Int32).Value = idSouboru;
+					using (OracleDataReader reader = command.ExecuteReader())
+					{
+						if (reader.HasRows)
+						{
+							while (reader.Read())
+							{
+								getFiles.IdSouboru = int.Parse(reader["idSouboru"].ToString());
+								getFiles.Nazev = reader["nazev"].ToString();
+								getFiles.TypSouboru = reader["typSouboru"].ToString();
+								getFiles.PriponaSouboru = reader["priponaSouboru"].ToString();
+								getFiles.DatumNahrani = DateTime.Parse(reader["datumNahrani"].ToString());
+								getFiles.DatumModifikace = DateTime.Parse(reader["datumModifikace"].ToString());
+								getFiles.idZamestnance = int.Parse(reader["idZamestnance"].ToString());
+							}
+						}
+					}
+				}
+				connection.Close();
+			}
+			return getFiles;
+		}
+
+		internal static bool EditFile(Soubory_Edit fileEdit)
+		{
+			try
+			{
+				using (OracleConnection connection = OracleDbContext.GetConnection())
+				{
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_SOUBOR", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
+
+						command.Parameters.Add("p_idsouboru", OracleDbType.Int32).Value = fileEdit.Soubory.IdSouboru;
+						command.Parameters.Add("p_nazev_souboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.Nazev;
+						command.Parameters.Add("p_typsouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.TypSouboru;
+						command.Parameters.Add("p_priponasouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.PriponaSouboru;
+						command.Parameters.Add("p_datumnahrani", OracleDbType.Date).Value = fileEdit.Soubory.DatumNahrani;
+						command.Parameters.Add("p_datummodifikace", OracleDbType.Date).Value = fileEdit.Soubory.DatumModifikace;
+						command.Parameters.Add("p_data", OracleDbType.Blob).Value = fileEdit.Soubory.Data;
+						command.Parameters.Add("p_idzamestnance", OracleDbType.Int32).Value = fileEdit.Soubory.idZamestnance;
+
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
 	}
 }
