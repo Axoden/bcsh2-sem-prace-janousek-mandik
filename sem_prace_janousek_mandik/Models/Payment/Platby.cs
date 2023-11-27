@@ -8,19 +8,21 @@ namespace sem_prace_janousek_mandik.Models.Payment
         [Browsable(false)]
         public int IdPlatby { get; set; }
 
-        [Required]
+		[Required]
 		[DisplayName("Datum platby: ")]
 		public DateTime DatumPlatby { get; set; }
 
         [Required]
 		[DisplayName("Částka: ")]
+		[Range(0, float.MaxValue)]
 		public float Castka { get; set; }
 
         [Required]
 		[DisplayName("Typ platby: ")]
-		public char TypPlatby { get; set; }
+		public char? TypPlatby { get; set; }
 
 		[DisplayName("Variabilní symbol: ")]
+		[Range(0, 99999999999999)]
 		public string? VariabilniSymbol { get; set; }
 
         [Browsable(false)]

@@ -6,7 +6,7 @@ using sem_prace_janousek_mandik.Models.Employee;
 
 namespace sem_prace_janousek_mandik.Controllers.Employee
 {
-    public class EmployeeController : BaseController
+	public class EmployeeController : BaseController
 	{
 		/// <summary>
 		/// Výpis všech zaměstnanců
@@ -71,22 +71,21 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 			{
                 if (ModelState.IsValid == true)
 				{
-					// Kontrola zda již není zaregistrován zaměstnanec s tímto emailem
-					if (EmployeeSQL.CheckExistsEmployee(newEmployee.Zamestnanci.Email) == true)
-					{
-						ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-						return ReturnBad();
-
-                    }
-
                     newEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(newEmployee.Zamestnanci.Heslo);
-					if (EmployeeSQL.RegisterEmployee(newEmployee))
+
+					string? err = EmployeeSQL.RegisterEmployee(newEmployee);
+
+					if (err == null)
 					{
 						return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
+						return ReturnBad();
+					}
 				}
 				return ReturnBad();
-
             }
 
             IActionResult ReturnBad()
@@ -129,8 +128,22 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				editedEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(editedEmployee.Zamestnanci.Heslo);
-				EmployeeSQL.EditEmployee(editedEmployee);
+				if (editedEmployee.Zamestnanci.Heslo != null)
+				{
+					editedEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(editedEmployee.Zamestnanci.Heslo);
+				}
+
+				string? err = EmployeeSQL.EditEmployee(editedEmployee);
+
+				if (err == null)
+				{
+					return RedirectToAction(nameof(ListEmployees), nameof(Employee));
+				}
+				else
+				{
+					ViewBag.ErrorInfo = err;
+					return View("EditEmployee", editedEmployee);
+				}
 			}
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}

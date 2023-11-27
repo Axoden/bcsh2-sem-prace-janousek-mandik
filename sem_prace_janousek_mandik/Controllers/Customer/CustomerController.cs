@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Goods;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Customer;
 using sem_prace_janousek_mandik.Models.Employee;
 
@@ -36,8 +38,8 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 					{
 						HttpContext.Session.SetString("email", inputZakaznik.Email);
 						HttpContext.Session.SetString("role", "Zakaznik");
-                        return RedirectToAction(nameof(HomeController.Index), nameof(Home));
-                    }
+						return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+					}
 				}
 			}
 			return View(inputZakaznik);
@@ -64,23 +66,10 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 			ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
 			if (ModelState.IsValid == true)
 			{
-				// Kontrola zda již není zaregistrován zákazník s tímto emailem
-				if (CustomerSQL.CheckExistsCustomerEmail(inputZakaznik.Zakaznici.Email) == true)
-				{
-					ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-					return View(inputZakaznik);
-				}
+				inputZakaznik.Zakaznici.Heslo = SharedSQL.HashPassword(inputZakaznik.Zakaznici.Heslo);
+				string? err = CustomerSQL.RegisterCustomer(inputZakaznik);
 
-                // Kontrola zda již není zaregistrován zákazník s tímto telefonním číslem
-                if (CustomerSQL.CheckExistsCustomerPhone(inputZakaznik.Zakaznici.Telefon) == true)
-                {
-                    ViewBag.ErrorInfo = "Toto telefonní číslo je již zaregistrováno!";
-                    return View(inputZakaznik);
-                }
-
-                inputZakaznik.Zakaznici.Heslo = SharedSQL.HashPassword(inputZakaznik.Zakaznici.Heslo);
-
-				if (CustomerSQL.RegisterCustomer(inputZakaznik))
+				if (err == null)
 				{
 					if (Role.Equals("Admin"))
 					{
@@ -88,6 +77,11 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 					}
 					// Úspěšná registrace, přesměrování na přihlášení
 					return RedirectToAction(nameof(RegisterSuccessful), nameof(Customer));
+				}
+				else
+				{
+					ViewBag.ErrorInfo = err;
+					return View(inputZakaznik);
 				}
 			}
 			return View(inputZakaznik);
@@ -128,15 +122,39 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		{
 			if (Role.Equals("Admin"))
 			{
-				if(customer.Zakaznici.Heslo != null)
+				ModelState.Remove($"{nameof(Zakaznici_Adresy.Zakaznici)}.{nameof(Zakaznici.Heslo)}");
+				ModelState.Remove($"{nameof(Zakaznici_Adresy.Zakaznici)}.{nameof(Zakaznici.HesloZnova)}");
+				if (ModelState.IsValid)
 				{
-                    customer.Zakaznici.Heslo = SharedSQL.HashPassword(customer.Zakaznici.Heslo);
-                }
+					if (customer.Zakaznici.Heslo != null)
+					{
+						if(customer.Zakaznici.Heslo.Length < 6)
+						{
+							ViewBag.ErrorInfo = "Délka hesla musí být minimálně 6 znaků";
+							return View("EditCustomer", customer);
+						}
 
-				if (!CustomerSQL.EditCustomer(customer))
-				{
-                    return View("EditCustomer", customer);
-                }
+						if (!customer.Zakaznici.Heslo.Equals(customer.Zakaznici.HesloZnova))
+						{
+							ViewBag.ErrorInfo = "Hesla se neshodují";
+							return View("EditCustomer", customer);
+						}
+						customer.Zakaznici.Heslo = SharedSQL.HashPassword(customer.Zakaznici.Heslo);
+					}
+
+					string? err = CustomerSQL.EditCustomer(customer);
+
+					if (err == null)
+					{
+						return RedirectToAction(nameof(ListCustomers), nameof(Customer));
+					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
+						return View("EditCustomer", customer);
+					}
+				}
+				return View("EditCustomer", customer);
 			}
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 		}

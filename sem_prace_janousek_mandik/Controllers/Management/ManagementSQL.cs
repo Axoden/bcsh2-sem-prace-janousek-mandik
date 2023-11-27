@@ -7,7 +7,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 {
 	public static class ManagementSQL
 	{
-		// Metoda vytáhne všechny pozice
+		/// <summary>
+		/// Metoda vytáhne všechny pozice
+		/// </summary>
+		/// <returns>List všech pozic</returns>
 		public static List<Pozice> GetAllPositions()
 		{
 			List<Pozice> pozice = new();
@@ -42,8 +45,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return pozice;
 		}
 
-		// Zavolá proceduru na vložení pozice
-		internal static bool RegisterPosition(Pozice novaPozice)
+		/// <summary>
+		/// Zavolá proceduru na vložení pozice
+		/// </summary>
+		/// <param name="newPosition">Model nové pozice</param>
+		/// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
+		internal static bool RegisterPosition(Pozice newPosition)
 		{
 			bool registerSuccessful = false;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
@@ -53,8 +60,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
-					// Vstupní parametr procedury
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = novaPozice.Nazev;
+					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newPosition.Nazev;
 
 					command.ExecuteNonQuery();
 				}
@@ -64,26 +70,42 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return registerSuccessful;
 		}
 
-		// Zavolá proceduru na úpravu pozice
-		public static void EditPosition(Pozice pozice)
+		/// <summary>
+		/// Zavolá proceduru na úpravu pozice
+		/// </summary>
+		/// <param name="pozice">Model s upravenými daty pozice</param>
+		/// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
+		public static bool EditPosition(Pozice pozice)
 		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_UPRAVIT_POZICI_V2", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					connection.Open();
+					using (OracleCommand command = new("P_UPRAVIT_POZICI_V2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = pozice.IdPozice;
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = pozice.Nazev;
+						command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = pozice.IdPozice;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = pozice.Nazev;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
+					connection.Close();
 				}
-				connection.Close();
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 
-		// Metoda vrátí pozici na základě ID pozice
+		/// <summary>
+		/// Metoda vrátí pozici na základě ID pozice
+		/// </summary>
+		/// <param name="idPozice">ID pozice</param>
+		/// <returns>Model konkrétní pozice</returns>
 		public static Pozice GetPositionById(int idPozice)
 		{
 			Pozice getPozice = new();
@@ -111,7 +133,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return getPozice;
 		}
 
-		// Metoda vytáhne všechny objekty použité v DB dle vstupního parametru
+		/// <summary>
+		/// Metoda vytáhne všechny objekty použité v DB dle vstupního parametru
+		/// </summary>
+		/// <param name="name">Název sloupce</param>
+		/// <param name="dbObject">Název tabulky</param>
+		/// <returns>List vybraných objektů</returns>
 		public static List<string> GetAllObjects(string name, string dbObject)
 		{
 			List<string> objectNames = new();
@@ -144,7 +171,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return objectNames;
 		}
 
-		// Metoda vytáhne všechny balíčky použíté v DB
+		/// <summary>
+		/// Metoda vytáhne všechny balíčky použíté v DB
+		/// </summary>
+		/// <returns>List balíčků</returns>
 		public static List<string> GetAllPackages()
 		{
 			List<string> objectNames = new();
@@ -177,7 +207,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return objectNames;
 		}
 
-		// Metoda vytáhne všechny procedury/funkce použíté v DB dle vstupního parametru
+		/// <summary>
+		/// Metoda vytáhne všechny procedury/funkce použíté v DB dle vstupního parametru
+		/// </summary>
+		/// <param name="procedure">true => procedury, false => funkce</param>
+		/// <returns>List procedur/funkcí</returns>
 		public static List<string> GetAllProceduresFunctions(bool procedure)
 		{
 			List<string> objectNames = new();
@@ -218,7 +252,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return objectNames;
 		}
 
-		// Metoda vrátí všechny logy o změnách dat v tabulkách
+		/// <summary>
+		/// Metoda vrátí všechny logy o změnách dat v tabulkách
+		/// </summary>
+		/// <returns>List všech logů</returns>
 		internal static List<LogTableInsUpdDel> GetAllLogs()
 		{
 			List<LogTableInsUpdDel> logs = new();
@@ -246,10 +283,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 								logs.Add(log);
 							}
-						}
-						else
-						{
-							log = null;
 						}
 					}
 				}
@@ -307,7 +340,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 								emp.Jmeno = reader["jmeno"].ToString();
 								emp.Prijmeni = reader["prijmeni"].ToString();
 								emp.NazevPozice = reader["pozice"].ToString();
-								emp.Adresa = reader["jmeno"].ToString();
+								emp.Adresa = reader["adresa_zamestnance"].ToString();
 								emp.PocetObjednavek = int.Parse(reader["pocet_objednavek"].ToString());
 
 								report.ZamestnanciObjednavky.Add(emp);
@@ -343,6 +376,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return report;
 		}
 
+		/// <summary>
+		/// Metoda spustí funkci celkové hodnoty objenávek zákazníka
+		/// </summary>
+		/// <param name="idZakaznika">ID zákazníka</param>
+		/// <returns>Hodnota objednávek</returns>
 		public static float ListOverViewCus(int idZakaznika)
 		{
 			float celkovaHodnota;
@@ -371,6 +409,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return celkovaHodnota;
 		}
 
+		/// <summary>
+		/// Metoda zavolá funkci na zjistění největšího dodavatele
+		/// </summary>
+		/// <returns>Název dodavatele</returns>
 		internal static string ListOverViewSuppliers()
 		{
 			string supplierOutput;
@@ -399,6 +441,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return supplierOutput;
 		}
 
+		/// <summary>
+		/// Metoda zavolá funkci na zjištění nejvíce objednávaného zboží v kategorii
+		/// </summary>
+		/// <param name="idKategorie">ID kategorie</param>
+		/// <returns>ID zboží</returns>
 		internal static int ListOverViewCategories(int idKategorie)
 		{
 			int idGoods = 0;
@@ -430,6 +477,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return idGoods;
 		}
 
+		/// <summary>
+		/// Metoda získá všechny soubory vč. podrobností
+		/// </summary>
+		/// <returns>List všech souborů</returns>
 		internal static List<Soubory_Vypis> GetAllFiles()
 		{
 			List<Soubory_Vypis> files = new();

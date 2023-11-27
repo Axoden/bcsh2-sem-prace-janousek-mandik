@@ -125,12 +125,12 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
             return zamestnanecAdresa;
         }
 
-        /// <summary>
-        /// Zavolá proceduru na úpravu zaměstnance
-        /// </summary>
-        /// <param name="employee">Model s daty upraveného zaměstnance</param>
-        /// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
-        public static bool EditEmployee(Zamestnanci_Adresy_PoziceList employee)
+		/// <summary>
+		/// Zavolá proceduru na úpravu zaměstnance
+		/// </summary>
+		/// <param name="employee">Model s daty upraveného zaměstnance</param>
+		/// <returns>Chybovou hlášku, pokud není, tak null</returns>
+		public static string? EditEmployee(Zamestnanci_Adresy_PoziceList employee)
         {
             try
             {
@@ -171,52 +171,35 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
                     }
                     connection.Close();
                 }
-                return true;
+                return null;
             }
-            catch
-            {
-                return false;
-            }
-        }
+			catch (OracleException ex)
+			{
+				if (ex.Number == 20001)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else if (ex.Number == 20001)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
+			}
+		}
 
-        /// <summary>
-        /// Kontrola existence emailu (zaměstnance) v databázi - kontrola při vytváření nového zaměstnance
-        /// </summary>
-        /// <param name="email">Kontrolovaný email</param>
-        /// <returns>true, pokud již existuje zaměstnanec s tímto emailem, jinak false</returns>
-        public static bool CheckExistsEmployee(string email)
-        {
-            bool exists = true;
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT idZamestnance FROM zamestnanci WHERE email = :email";
-                    command.Parameters.Add(":email", email);
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            exists = true;
-                        }
-                        else
-                        {
-                            exists = false;
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return exists;
-        }
-
-        /// <summary>
-        /// Zavolání procedury na registraci zaměstnance
-        /// </summary>
-        /// <param name="newEmployee">Model s daty nového zaměstnance</param>
-        /// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
-        public static bool RegisterEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
+		/// <summary>
+		/// Zavolání procedury na registraci zaměstnance
+		/// </summary>
+		/// <param name="newEmployee">Model s daty nového zaměstnance</param>
+		/// <returns>Chybovou hlášku, pokud není, tak null</returns>
+		public static string? RegisterEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
         {
             try
             {
@@ -244,13 +227,28 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
                     }
                     connection.Close();
                 }
-                return true;
+                return null;
             }
-            catch
-            {
-                return false;
-            }
-        }
+			catch (OracleException ex)
+			{
+				if (ex.Number == 20001)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else if (ex.Number == 20002)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
+			}
+		}
 
         /// <summary>
         /// Metoda ověří zaměstnance a vrátí celý objekt Zamestnanec

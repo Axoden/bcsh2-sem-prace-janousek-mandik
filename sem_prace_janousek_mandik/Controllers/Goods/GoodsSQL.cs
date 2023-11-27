@@ -51,35 +51,35 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
-				using (OracleCommand command = connection.CreateCommand())
+
+				using (OracleCommand cmd = new("PROCEDURE1", connection))
 				{
-					command.CommandText = "SELECT c.idkategorie, c.nazev, c.zkratka, c.popis, k.nazev AS nazevNadrizena" +
-						" FROM kategorie c LEFT JOIN kategorie k ON c.idnadrazenekategorie = k.idkategorie" +
-						" START WITH c.idnadrazenekategorie IS NULL CONNECT BY PRIOR c.idkategorie = c.idnadrazenekategorie" +
-						" ORDER SIBLINGS BY c.nazev";
-					using (OracleDataReader reader = command.ExecuteReader())
+					cmd.CommandType = CommandType.StoredProcedure;
+					Kategorie_NadrazenaKategorie specificCategory = new();
+					// Define the REF CURSOR output parameter
+					OracleParameter p_hierarchy = new();
+					p_hierarchy.OracleDbType = OracleDbType.RefCursor;
+					p_hierarchy.Direction = ParameterDirection.Output;
+					cmd.Parameters.Add(p_hierarchy);
+
+					// Execute the command
+					using (OracleDataReader reader = cmd.ExecuteReader())
 					{
-						Kategorie_NadrazenaKategorie? specificCateogory = new();
-						if (reader.HasRows)
+						while (reader.Read())
 						{
-							while (reader.Read())
-							{
-								specificCateogory = new();
-								specificCateogory.Kategorie = new();
-								specificCateogory.NadrazenaKategorie = new();
+							// Assuming you're fetching data from the reader
+							// Replace these with the actual column names and data types
+							specificCategory = new();
+							specificCategory.Kategorie = new();
+							specificCategory.NadrazenaKategorie = new();
 
-								specificCateogory.Kategorie.IdKategorie = int.Parse(reader["idKategorie"].ToString());
-								specificCateogory.Kategorie.Nazev = reader["nazev"].ToString();
-								specificCateogory.Kategorie.Zkratka = reader["zkratka"].ToString();
-								specificCateogory.Kategorie.Popis = reader["popis"].ToString();
-								specificCateogory.NadrazenaKategorie.Nazev = reader["nazevNadrizena"].ToString();
+							specificCategory.Kategorie.IdKategorie = reader.GetInt32(0);
+							specificCategory.Kategorie.Nazev = reader.GetString(1);
+							specificCategory.Kategorie.Zkratka = reader.GetString(2);
+							specificCategory.Kategorie.Popis = reader.IsDBNull(3) ? null : reader.GetString(3);
+							specificCategory.NadrazenaKategorie.Nazev = reader.IsDBNull(4) ? null : reader.GetString(4);
 
-								kategorie.Add(specificCateogory);
-							}
-						}
-						else
-						{
-							specificCateogory = null;
+							kategorie.Add(specificCategory);
 						}
 					}
 				}
@@ -215,7 +215,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT z.*, k.*, u.*, d.*, k.nazev AS kategorieNazev, d.nazev AS dodavatelNazev, u.poznamka AS poznamkaUmisteni," +
-						" s.data, s.nazev AS souborNazev, s.typSouboru, s.priponaSouboru, s.datumModifikace, s.upravenoUzivatelem FROM zbozi z INNER JOIN kategorie k ON z.idkategorie = k.idkategorie INNER JOIN umisteni u ON z.idumisteni = u.idumisteni " +
+						" s.data, s.nazev AS souborNazev FROM zbozi z INNER JOIN kategorie k ON z.idkategorie = k.idkategorie INNER JOIN umisteni u ON z.idumisteni = u.idumisteni " +
 						"INNER JOIN dodavatele d ON z.iddodavatele = d.iddodavatele LEFT JOIN soubory s ON z.idsouboru = s.idsouboru";
 					using (OracleDataReader reader = command.ExecuteReader())
 					{
@@ -410,7 +410,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="newGoods">Model nového zboží</param>
 		/// <param name="files">Obrázek včetně parametrů (nepovinný)</param>
 		/// <returns>vrací true, pokud SQL příkaz proběhne úspěšně, jinak false</returns>
-		internal static bool RegisterGoods(Zbozi newGoods, Soubory files)
+		internal static string? AddGoods(Zbozi newGoods, Soubory files)
 		{
 			try
 			{
@@ -421,7 +421,6 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						// Vstupní parametry procedury
 						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newGoods.Nazev;
 						command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = newGoods.JednotkovaCena;
 						command.Parameters.Add("p_pocetNaSklade", OracleDbType.Int32).Value = newGoods.PocetNaSklade;
@@ -441,13 +440,28 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					}
 					connection.Close();
 				}
-				return true;
+				return null;
 			}
-			catch
-			{
-				return false;
-			}
-		}
+            catch (OracleException ex)
+            {
+                if (ex.Number == 20001)
+                {
+                    string fullMessage = ex.Message;
+                    string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+                }
+                else if (ex.Number == 20002)
+                {
+                    string fullMessage = ex.Message;
+                    string firstLine = fullMessage.Split('\n')[0];
+                    return firstLine;
+                }
+                else
+                {
+                    return ex.Message;
+                }
+            }
+        }
 
 		/// <summary>
 		/// Metoda získá konkrétní zboží na základě ID zboží
@@ -480,7 +494,15 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 								getZbozi.IdDodavatele = int.Parse(reader["idDodavatele"].ToString());
 								getZbozi.IdUmisteni = int.Parse(reader["idUmisteni"].ToString());
 								getZbozi.IdKategorie = int.Parse(reader["idKategorie"].ToString());
-							}
+								if (reader["idSouboru"].ToString().Equals(""))
+								{
+									getZbozi.IdSouboru = 0;
+                                }
+								else
+								{
+									getZbozi.IdSouboru = int.Parse(reader["idSouboru"].ToString());
+								}
+                            }
 						}
 					}
 				}
@@ -581,7 +603,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="zbozi">Model upraveného zboží</param>
 		/// <param name="files">Obrázek včetně parametrů (nepovinný)</param>
 		/// <returns>vrací true, pokud SQL příkaz proběhne úspěšně, jinak false</returns>
-		internal static bool EditGoods(Zbozi zbozi, Soubory files)
+		internal static string? EditGoods(Zbozi zbozi, Soubory files)
 		{
 			try
 			{
@@ -592,7 +614,6 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						// Vstupní parametry procedury
 						command.Parameters.Add("p_idZbozi", OracleDbType.Int32).Value = zbozi.IdZbozi;
 						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = zbozi.Nazev;
 						command.Parameters.Add("p_jednotkovaCena", OracleDbType.BinaryFloat).Value = zbozi.JednotkovaCena;
@@ -603,6 +624,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						command.Parameters.Add("p_idUmisteni", OracleDbType.Int32).Value = zbozi.IdUmisteni;
 						command.Parameters.Add("p_idKategorie", OracleDbType.Int32).Value = zbozi.IdKategorie;
 
+						command.Parameters.Add("p_idSouboru", OracleDbType.Int32).Value = zbozi.IdSouboru;
 						command.Parameters.Add("p_nazevSouboru", OracleDbType.Varchar2).Value = files.Nazev;
 						command.Parameters.Add("p_typ", OracleDbType.Varchar2).Value = files.TypSouboru;
 						command.Parameters.Add("p_pripona", OracleDbType.Varchar2).Value = files.PriponaSouboru;
@@ -613,11 +635,26 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					}
 					connection.Close();
 				}
-				return true;
+				return null;
 			}
-			catch
+			catch (OracleException ex)
 			{
-				return false;
+				if (ex.Number == 20001)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else if (ex.Number == 20002)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
 			}
 		}
 

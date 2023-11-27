@@ -46,8 +46,11 @@
 			<td>Příjmení</td>
 			<td>Telefon</td>
 			<td>Email</td>
-			<td>Upravit</td>
-			<td>Odstranit</td>
+			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+			{
+				<td>Upravit</td>
+				<td>Odstranit</td>
+			}
 		</tr>
 
 		@foreach (Zbozi_Um_Kat_Dod_Soubory item in Model)
@@ -64,10 +67,6 @@
 					@if (item.Soubory.Data != null)
 					{
 						<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
-					}
-					else
-					{
-
 					}
 				</td>
 				<td>@item.Zbozi.Nazev</td>
@@ -88,18 +87,21 @@
 				<td>@item.Dodavatele.Prijmeni</td>
 				<td>@item.Dodavatele.Telefon</td>
 				<td>@item.Dodavatele.Email</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">
-						<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
-						<input type="submit" value="Upravit" class="btn btn-primary" />
-					</form>
-				</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)">
-						<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
-						<input type="submit" value="Smazat" class="btn btn-primary" />
-					</form>
-				</td>
+				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+				{
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">
+							<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)">
+							<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
+				}
 			</tr>
 		}
 	</table>

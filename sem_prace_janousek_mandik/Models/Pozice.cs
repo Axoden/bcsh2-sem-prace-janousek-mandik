@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace sem_prace_janousek_mandik.Models
 {
@@ -7,7 +8,8 @@ namespace sem_prace_janousek_mandik.Models
 		[Browsable(false)]
 		public int IdPozice { get; set; }
 
-        [DisplayName("Název pozice: ")]
+		[Required]
+		[DisplayName("Název pozice: ")]
         public string? Nazev { get; set; }
 	}
 }

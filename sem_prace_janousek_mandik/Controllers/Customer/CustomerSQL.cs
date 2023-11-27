@@ -48,43 +48,11 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
         }
 
         /// <summary>
-        /// Kontrola existence emailu (zákazníka) v databázi - kontrola při registraci
-        /// </summary>
-        /// <param name="email">Email zákazníka</param>
-        /// <returns>true, pokud email již existuje, jinak false</returns>
-        internal static bool CheckExistsCustomerEmail(string email)
-        {
-            bool exists = true;
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT idZakaznika FROM zakaznici WHERE email = :email";
-                    command.Parameters.Add(":email", email);
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            exists = true;
-                        }
-                        else
-                        {
-                            exists = false;
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return exists;
-        }
-
-        /// <summary>
         /// Metoda zavolá proceduru na úpravu zákazníka
         /// </summary>
         /// <param name="zakaznikAdresa">Model s upravenými data zákazníka</param>
-        /// <returns>true, pokud přikaz proběhl úspěšně, jinak false</returns>
-        internal static bool EditCustomer(Zakaznici_Adresy zakaznikAdresa)
+        /// <returns>Chybovou hlášku, pokud není, tak null</returns>
+        internal static string? EditCustomer(Zakaznici_Adresy zakaznikAdresa)
         {
             using (OracleConnection connection = OracleDbContext.GetConnection())
             {
@@ -112,13 +80,28 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
                         command.ExecuteNonQuery();
                     }
                     connection.Close();
-                    return true;
+                    return null;
                 }
-                catch
-                {
-                    return false;
-                }
-            }
+				catch (OracleException ex)
+				{
+					if (ex.Number == 20005)
+					{
+						string fullMessage = ex.Message;
+						string firstLine = fullMessage.Split('\n')[0];
+						return firstLine;
+					}
+					else if (ex.Number == 20006)
+					{
+						string fullMessage = ex.Message;
+						string firstLine = fullMessage.Split('\n')[0];
+						return firstLine;
+					}
+					else
+					{
+						return ex.Message;
+					}
+				}
+			}
         }
 
         /// <summary>
@@ -309,12 +292,12 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
             return zakaznikAdresa;
         }
 
-        /// <summary>
-        /// Metoda zavolá proceduru na registraci zákazníka
-        /// </summary>
-        /// <param name="newCustomer">Model s daty nového zákazníka</param>
-        /// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
-        internal static bool RegisterCustomer(Zakaznici_Adresy newCustomer)
+		/// <summary>
+		/// Metoda zavolá proceduru na registraci zákazníka
+		/// </summary>
+		/// <param name="newCustomer">Model s daty nového zákazníka</param>
+		/// <returns>Chybovou hlášku, pokud není, tak null</returns>
+		internal static string? RegisterCustomer(Zakaznici_Adresy newCustomer)
         {
             try
             {
@@ -340,44 +323,27 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
                     }
                     connection.Close();
                 }
-                return true;
+                return null;
             }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Metoda zjistí, zda již neexistuje zákazník se stejným telefonním číslem
-        /// </summary>
-        /// <param name="telefon">Ověřované telefonní číslo</param>
-        /// <returns>true, pokud již existuje zákazník s tímto telefonním číslem, jinak false</returns>
-        internal static bool CheckExistsCustomerPhone(string? telefon)
-        {
-            bool exists = true;
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT idZakaznika FROM zakaznici WHERE telefon = :telefon";
-                    command.Parameters.Add(":telefon", telefon);
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            exists = true;
-                        }
-                        else
-                        {
-                            exists = false;
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return exists;
-        }
+			catch (OracleException ex)
+			{
+				if (ex.Number == 20005)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else if (ex.Number == 20006)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
+			}
+		}
     }
 }

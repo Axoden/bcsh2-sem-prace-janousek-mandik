@@ -15,6 +15,12 @@
 <div class="text-center">
 	<h2>Výpis všech databázových objektů:</h2>
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchDatabaseObjects)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td style="font-weight: bold">Tabulky</td>

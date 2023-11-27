@@ -21,7 +21,7 @@
 <div class="row">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="AddGoodsToOrder">
+        <form asp-action="AddGoodsToOrderPost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Zbozi">Zboží</label>
@@ -37,9 +37,12 @@
                 <input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
                 <span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="ZboziObjednavek.IdObjednavky" value="@idObjednavky" />
+            </div>
 
             <div class="form-group">
-                <input type="submit" value="Přidat zboží do objednávky" class="btn btn-primary" asp-route-idObjednavky="@idObjednavky" />
+                <input type="submit" value="Přidat zboží do objednávky" class="btn btn-primary" />
             </div>
         </form>
     </div>

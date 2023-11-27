@@ -18,6 +18,12 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchPositions)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td>Název</td>
@@ -28,22 +34,24 @@
 			}
 		</tr>
 
-		@{
-			string hidden = "<skryté>";
-		}
-
 		@foreach (Pozice item in Model)
 		{
 			<tr>
 				<td>@item.Nazev</td>
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPosition)" asp-route-index="@item.IdPozice">Upravit</a></td>
-					<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeletePosition)" asp-route-index="@item.IdPozice">Smazat</a></td>
-				}
-				else
-				{
-					<td>@hidden</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPositionGet)">
+							<input type="hidden" name="index" value="@item.IdPozice" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeletePosition)">
+							<input type="hidden" name="index" value="@item.IdPozice" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
 				}
 			</tr>
 		}

@@ -10,6 +10,7 @@ namespace sem_prace_janousek_mandik.Models.Payment
 
         [Required]
 		[DisplayName("Číslo faktury: ")]
+		[Range(90000, 99999)]
 		public int CisloFaktury { get; set; }
 
 		[Required]
@@ -23,14 +24,17 @@ namespace sem_prace_janousek_mandik.Models.Payment
 		public DateOnly? DatumSplatnosti { get; set; }
 
 		[Required]
+		[Range(0, float.MaxValue)]
 		[DisplayName("Celková částka za objednávku: ")]
 		public float CastkaObjednavka { get; set; }
 
 		[Required]
+		[Range(0, float.MaxValue)]
 		[DisplayName("Částka za dopravu: ")]
 		public float CastkaDoprava { get; set; }
 
 		[Required]
+		[Range(0, float.MaxValue)]
 		[DisplayName("DPH: ")]
 		public float Dph { get; set; }
     }

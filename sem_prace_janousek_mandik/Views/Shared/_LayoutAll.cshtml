@@ -39,10 +39,14 @@
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListPositions)"><button>Pozice</button></a>
 			}
 
+			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
+			}
+
 			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button>Zboží</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button>Kategorie</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListLocations)"><button>Umístění</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.ListSuppliers)"><button>Dodavatelé</button></a>

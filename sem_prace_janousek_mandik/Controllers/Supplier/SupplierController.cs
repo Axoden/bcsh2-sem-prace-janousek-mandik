@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Models.Supplier;
 
 namespace sem_prace_janousek_mandik.Controllers.Supplier
 {
-    public class SupplierController : BaseController
+	public class SupplierController : BaseController
 	{
 		/// <summary>
 		/// Výpis všech dodavatelů
@@ -66,18 +67,18 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
 			{
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
-					// Kontrola zda již není zaregistrován dodavatel s tímto emailem
-					if (SupplierSQL.CheckExistsSupplier(novyDodavatel.Dodavatele.Email) == true)
-					{
-						ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-						return View(novyDodavatel);
-					}
+					string? err = SupplierSQL.AddSupplier(novyDodavatel);
 
-					if (SupplierSQL.AddSupplier(novyDodavatel))
+					if (err == null)
 					{
 						return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
+					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
+						return View(novyDodavatel);
 					}
 				}
 				return View(novyDodavatel);
@@ -114,25 +115,19 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 			{
 				if (ModelState.IsValid)
 				{
-                    string emailSupplier = SupplierSQL.GetEmailByIdSupplier(editSupplier.Dodavatele.IdDodavatele);
-                    // Kontrola zda již neexistuje dodavatel s tímto emailem
-                    if (!emailSupplier.Equals(editSupplier.Dodavatele.Email))
-                    {
-                        if (SupplierSQL.CheckExistsSupplier(editSupplier.Dodavatele.Email) == true)
-                        {
-                            ViewBag.ErrorInfo = "Tento email je již zaregistrován!";
-                            return View("EditSupplier", editSupplier);
-                        }
-                    }
+					string? err = SupplierSQL.EditSupplier(editSupplier);
 
-					if (!SupplierSQL.EditSupplier(editSupplier)){
-                        return View("EditSupplier", editSupplier);
-                    }
+					if (err == null)
+					{
+						return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
+					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
+						return View("EditSupplier", editSupplier);
+					}
 				}
-				else
-				{
-					return View("EditSupplier", editSupplier);
-				}
+				return View("EditSupplier", editSupplier);
 			}
 			return RedirectToAction(nameof(ListSuppliers), nameof(Supplier));
 		}

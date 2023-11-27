@@ -11,7 +11,10 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 {
 	public class ManagementController : BaseController
 	{
-		// Výpis všech pozic
+		/// <summary>
+		/// Výpis všech pozic
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListPositions()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin"))
@@ -19,87 +22,125 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				List<Pozice> pozice = ManagementSQL.GetAllPositions();
 				return View(pozice);
 			}
-
-			// Přesměrování, pokud uživatel nemá povolen přístup
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Načtení formuláře na přidání nové pozice
+		/// <summary>
+		/// Vyhledávání ve výpisu všech pozice
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SearchPositions(string search)
+		{
+			if (Role.Equals("Manazer") || Role.Equals("Admin"))
+			{
+				ViewBag.Search = search;
+				List<Pozice> pozice = ManagementSQL.GetAllPositions();
+				if (search != null)
+				{
+					pozice = pozice.Where(lmb => (lmb.Nazev?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+
+				}
+				return View(nameof(ListPositions), pozice);
+			}
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+		}
+
+		/// <summary>
+		/// Načtení formuláře na přidání nové pozice
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult AddPosition()
 		{
-			// Dostupné pouze pro administrátora
 			if (Role.Equals("Admin"))
 			{
 				return View();
 			}
-
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
 
-		// Příjem dat z formuláře na přidání pozice
+		/// <summary>
+		/// Příjem dat z formuláře na přidání pozice
+		/// </summary>
+		/// <param name="newPosition">Model s daty nové pozice</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddPosition(Pozice novaPozice)
+		public IActionResult AddPosition(Pozice newPosition)
 		{
-			// Dostupné pouze pro administrátora
 			if (Role.Equals("Admin"))
 			{
 				if (ModelState.IsValid == true)
 				{
-					bool uspesnaRegistrace = ManagementSQL.RegisterPosition(novaPozice);
-
-					if (uspesnaRegistrace == true)
+					if (ManagementSQL.RegisterPosition(newPosition))
 					{
-						// Úspěšná registrace, přesměrování na výpis pozic
 						return RedirectToAction(nameof(ListPositions), nameof(Management));
 					}
 				}
-				return View(novaPozice);
+				return View(newPosition);
 			}
-
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
 
-		// Načtení formuláře na úpravu vybrané pozice
-		[HttpGet]
-		public IActionResult EditPosition(int index)
-		{
-			// Kontrola oprávnění na načtení parametru pozice
-			if (Role.Equals("Admin"))
-			{
-				Pozice pozice = ManagementSQL.GetPositionById(index);
-				return View(pozice);
-			}
-
-			return RedirectToAction(nameof(ListPositions), nameof(Management));
-		}
-
-		// Příjem upravených dat vybrané pozice
+		/// <summary>
+		/// Načtení formuláře na úpravu vybrané pozice
+		/// </summary>
+		/// <param name="index">ID upravované pozice</param>
+		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditPosition(Pozice pozice, int idPozice)
+		public IActionResult EditPositionGet(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				pozice.IdPozice = idPozice;
-				ManagementSQL.EditPosition(pozice);
+				Pozice position = ManagementSQL.GetPositionById(index);
+				return View("EditPosition", position);
 			}
-
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
 
-		// Formální metoda pro odstranění vybrané pozice
-		[HttpGet]
+		/// <summary>
+		/// Příjem upravených dat vybrané pozice
+		/// </summary>
+		/// <param name="position">Model s upravenými daty pozice</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult EditPositionPost(Pozice position)
+		{
+			if (Role.Equals("Admin"))
+			{
+				if (ModelState.IsValid == true)
+				{
+					ManagementSQL.EditPosition(position);
+				}
+				else
+				{
+					return View("EditPosition", position);
+				}
+			}
+			return RedirectToAction(nameof(ListPositions), nameof(Management));
+		}
+
+		/// <summary>
+		/// Metoda pro odstranění vybrané pozice
+		/// </summary>
+		/// <param name="index">ID pozice</param>
+		/// <returns></returns>
+		[HttpPost]
 		public IActionResult DeletePosition(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
 				SharedSQL.CallDeleteProcedure("P_SMAZAT_POZICI", index);
 			}
-
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
 
-		// Metoda emuluje admina za vybraného zákazníka
+		/// <summary>
+		/// Metoda emuluje admina za vybraného zákazníka
+		/// </summary>
+		/// <param name="emailCustomer">email zákazníka</param>
+		/// <returns></returns>
 		public IActionResult StartEmulationCustomer(string emailCustomer)
 		{
 			if (Role.Equals("Admin"))
@@ -108,24 +149,30 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				HttpContext.Session.SetString("email", emailCustomer);
 				HttpContext.Session.SetString("role", "Zakaznik");
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Metoda emuluje admina za vybraného zaměstnance
+		/// <summary>
+		/// Metoda emuluje admina za vybraného zaměstnance
+		/// </summary>
+		/// <param name="idEmployee">ID zaměstnance</param>
+		/// <returns></returns>
 		public IActionResult StartEmulationEmployee(int idEmployee)
 		{
 			if (Role.Equals("Admin"))
 			{
-				// Vytáhnutí emailu a role zaměstnance
 				Zamestnanci_Pozice employee = EmployeeSQL.GetEmployeeRoleEmailById(idEmployee);
 				HttpContext.Session.SetString("emulatedEmail", Email);
 				HttpContext.Session.SetString("email", employee.Zamestnanci.Email);
 				HttpContext.Session.SetString("role", employee.Pozice.Nazev);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Metoda ukončí emulaci a přepne zpět na původního admina
+		/// <summary>
+		/// Metoda ukončí emulaci a přepne zpět na původního admina
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult EndEmulation()
 		{
 			if (!EmulatedEmail.Equals(""))
@@ -135,10 +182,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				HttpContext.Session.SetString("email", adminEmail);
 				HttpContext.Session.SetString("role", "Admin");
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Metoda vypíše všechny databázové objekty
+		/// <summary>
+		/// Metoda vypíše všechny databázové objekty
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListDatabaseObjects()
 		{
 			if (Role.Equals("Admin"))
@@ -154,21 +204,93 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 				return View();
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
-		// Metoda vypíše změny dat v tabulkách
+		/// <summary>
+		/// Vyhledávání ve výpisu všech databázových objektů
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SearchDatabaseObjects(string search)
+		{
+			if (Role.Equals("Admin"))
+			{
+				ViewBag.Search = search;
+				List<string> tables = ManagementSQL.GetAllObjects("table_name", "user_tables");
+				List<string> views = ManagementSQL.GetAllObjects("view_name", "user_views");
+				List<string> indexes = ManagementSQL.GetAllObjects("index_name", "user_indexes");
+				List<string> packages = ManagementSQL.GetAllPackages();
+				List<string> procedures = ManagementSQL.GetAllProceduresFunctions(true);
+				List<string> functions = ManagementSQL.GetAllProceduresFunctions(false);
+				List<string> triggers = ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
+				List<string> sequences = ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
+				if (search != null)
+				{
+					tables = tables.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					views = views.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					indexes = indexes.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					packages = packages.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					procedures = procedures.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					functions = functions.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					triggers = triggers.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					sequences = sequences.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+				}
+
+				ViewBag.Tables = tables;
+				ViewBag.Views = views;
+				ViewBag.Indexes = indexes;
+				ViewBag.Packages = packages;
+				ViewBag.Procedures = procedures;
+				ViewBag.Functions = functions;
+				ViewBag.Triggers = triggers;
+				ViewBag.Sequences = sequences;
+				return View("ListDatabaseObjects");
+			}
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+		}
+
+		/// <summary>
+		/// Metoda vypíše změny dat v tabulkách
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListLogs()
 		{
 			if (Role.Equals("Admin"))
 			{
 				List<LogTableInsUpdDel> logs = ManagementSQL.GetAllLogs();
-
 				return View(logs);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Vyhledávání ve výpisu všech logů
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
+		[HttpPost]
+		public IActionResult SearchLogs(string search)
+		{
+			if (Role.Equals("Admin"))
+			{
+				ViewBag.Search = search;
+				List<LogTableInsUpdDel> logs = ManagementSQL.GetAllLogs();
+				if (search != null)
+				{
+					logs = logs.Where(lmb => (lmb?.TableName?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Operation?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.ChangeTime?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Username?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.OldData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.NewData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+				}
+				return View(nameof(ListLogs), logs);
+			}
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
+		}
+
+		/// <summary>
+		/// Metoda vypíše všechny sestavy (pohledy)
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet]
 		public IActionResult ListReports()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
@@ -182,9 +304,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				Sestavy reports = ManagementSQL.GetAllReports(false);
 				return View(reports);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Metoda vypíše přehledy (funkce)
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public IActionResult ListOverView()
 		{
@@ -195,9 +321,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
 				return View(overView);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Metoda provede funkci celkové hodnoty objednávek zákazníka
+		/// </summary>
+		/// <param name="idZakaznika">ID zákazníka</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult ListOverViewCus(int idZakaznika)
 		{
@@ -211,9 +342,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Metoda provede funkci největšího dodavatele
+		/// </summary>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult ListOverViewSuppliers()
 		{
@@ -230,6 +365,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return RedirectToAction("Index", "Home");
 		}
 
+		/// <summary>
+		/// Metoda provede funkci nejvíce objednaného zboží v kategorii
+		/// </summary>
+		/// <param name="idKategorie">ID kategorie</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult ListOverViewCategories(int idKategorie)
 		{
@@ -251,9 +391,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Metoda vypíše seznam všech souborů
+		/// </summary>
+		/// <returns></returns>
 		public IActionResult ListFiles()
 		{
 			if (Role.Equals("Admin"))
@@ -261,9 +405,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				List<Soubory_Vypis> soubory = ManagementSQL.GetAllFiles();
 				return View(soubory);
 			}
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
+		/// <summary>
+		/// Metoda slouží k vyhledávání ve výpisu všech souborů
+		/// </summary>
+		/// <param name="search">Vyhledávaná fráze</param>
+		/// <returns></returns>
 		[HttpPost]
 		public IActionResult SearchFiles(string search)
 		{

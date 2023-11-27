@@ -23,7 +23,7 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public int PocetNaSklade { get; set; }
 
 		[Required]
-		[Range(0, int.MaxValue)]
+		[Range(0, Int64.MaxValue)]
 		[DisplayName("Čárový kód: ")]
 		public string? CarovyKod { get; set; }
 

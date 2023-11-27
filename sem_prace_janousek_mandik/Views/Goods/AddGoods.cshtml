@@ -17,8 +17,8 @@
 	<div class="col-md-4">
 		<p>@ViewBag.ErrorInfo</p>
 		<form asp-action="@nameof(GoodsController.AddGoods)" enctype="multipart/form-data">
+			@Html.AntiForgeryToken()
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
 			<div class="form-group">
 				<label asp-for="Zbozi.Nazev" class="control-label"></label>
 				<input asp-for="Zbozi.Nazev" class="form-control" />

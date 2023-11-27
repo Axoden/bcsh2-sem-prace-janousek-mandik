@@ -12,12 +12,9 @@
 <div class="text-center">
 	<h2>Výpis všech umístění:</h2>
 
-	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik") || ViewBag.Role.Equals("Skladnik"))
-	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddLocation)"><button type="submit">Přidat umístění</button></a>
-		<br />
-		<br />
-	}
+	<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddLocation)"><button type="submit">Přidat umístění</button></a>
+	<br />
+	<br />
 
 	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchLocations)">
 		<input name="search" value="@ViewBag.Search" />

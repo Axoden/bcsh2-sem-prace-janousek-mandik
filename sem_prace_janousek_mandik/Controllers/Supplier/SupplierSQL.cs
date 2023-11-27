@@ -6,7 +6,10 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 {
 	public static class SupplierSQL
 	{
-		// Metoda vytáhne všechny dodavatele včetně adres
+		/// <summary>
+		/// Metoda vytáhne všechny dodavatele včetně adres
+		/// </summary>
+		/// <returns>List všech dodavatelů</returns>
 		public static List<Dodavatele_Adresy> GetAllSuppliers()
 		{
 			List<Dodavatele_Adresy> dodavateleAdresy = new();
@@ -44,10 +47,6 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 								dodavateleAdresy.Add(dodavatel);
 							}
 						}
-						else
-						{
-							dodavatel = null;
-						}
 					}
 				}
 				connection.Close();
@@ -55,7 +54,10 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 			return dodavateleAdresy;
 		}
 
-        // Metoda vytáhne ID a jméno všech dodavatelů
+		/// <summary>
+        /// Metoda vytáhne ID a jméno všech dodavatelů
+		/// </summary>
+		/// <returns>List ID a názvů dodavatelů</returns>
         public static List<Dodavatele> GetAllSuppliersName()
         {
             List<Dodavatele> suppliers = new();
@@ -80,10 +82,6 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
                                 suppliers.Add(specificSupplier);
                             }
                         }
-                        else
-                        {
-                            specificSupplier = null;
-                        }
                     }
                 }
                 connection.Close();
@@ -91,13 +89,15 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
             return suppliers;
         }
 
-        // Zavolá proceduru na úpravu dodavatele
-        public static bool EditSupplier(Dodavatele_Adresy dodavatel)
+		/// <summary>
+        /// Zavolá proceduru na úpravu dodavatele
+		/// </summary>
+		/// <param name="supplier">Model s upravenými daty dodavatele</param>
+		/// <returns>Chybovou hlášku, pokud není, tak null</returns>
+        public static string? EditSupplier(Dodavatele_Adresy supplier)
 		{
 			try
 			{
-
-
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
 					connection.Open();
@@ -105,32 +105,51 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdDodavatele;
-						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Nazev;
-						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Jmeno;
-						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Prijmeni;
-						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Telefon;
-						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = dodavatel.Dodavatele.Email;
-						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = dodavatel.Dodavatele.IdAdresy;
-						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = dodavatel.Adresy.Ulice;
-						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = dodavatel.Adresy.Mesto;
-						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = dodavatel.Adresy.Okres;
-						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = dodavatel.Adresy.Zeme;
-						command.Parameters.Add("p_psc", OracleDbType.Char).Value = dodavatel.Adresy.Psc;
+						command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = supplier.Dodavatele.IdDodavatele;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = supplier.Dodavatele.Nazev;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = supplier.Dodavatele.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = supplier.Dodavatele.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = supplier.Dodavatele.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = supplier.Dodavatele.Email;
+						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = supplier.Dodavatele.IdAdresy;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = supplier.Adresy.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = supplier.Adresy.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = supplier.Adresy.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = supplier.Adresy.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = supplier.Adresy.Psc;
 
 						command.ExecuteNonQuery();
 					}
 					connection.Close();
 				}
-				return true;
+				return null;
 			}
-			catch
+			catch (OracleException ex)
 			{
-				return false;
+				if (ex.Number == 20003)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else if (ex.Number == 20004)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
 			}
 		}
 
-		// Vytáhne dodavatele včetně adresy
+		/// <summary>
+		/// Vytáhne dodavatele včetně adresy
+		/// </summary>
+		/// <param name="idDodavatele">ID dodavatele</param>
+		/// <returns>Model konkrétního dodavatele</returns>
         public static Dodavatele_Adresy GetSupplierWithAddress(int idDodavatele)
         {
             Dodavatele_Adresy? dodavatelAdresa = new();
@@ -167,10 +186,6 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
                                 dodavatelAdresa.Adresy.Psc = reader["psc"].ToString();
                             }
                         }
-                        else
-                        {
-                            dodavatelAdresa = null;
-                        }
                     }
                 }
                 connection.Close();
@@ -178,89 +193,58 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
             return dodavatelAdresa;
         }
 
-		// Kontrola existence emailu (dodavatele) v databázi - kontrola při přidávání nového dodavatele
-		public static bool CheckExistsSupplier(string email)
+		/// <summary>
+		/// Zavolání procedury na přidání dodavatele
+		/// </summary>
+		/// <param name="newSupplier">Model s daty nového dodavatele</param>
+		/// <returns>Chybovou hlášku, pokud není, tak null</returns>
+		public static string? AddSupplier(Dodavatele_Adresy newSupplier)
 		{
-			bool exists = true;
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = connection.CreateCommand())
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandText = "SELECT idDodavatele FROM dodavatele WHERE email = :email";
-					command.Parameters.Add(":email", email);
-					using (OracleDataReader reader = command.ExecuteReader())
+					connection.Open();
+					using (OracleCommand command = new("P_VLOZIT_DODAVATELE_V2", connection))
 					{
-						if (reader.HasRows)
-						{
-							exists = true;
-						}
-						else
-						{
-							exists = false;
-						}
+						command.CommandType = CommandType.StoredProcedure;
+
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newSupplier.Dodavatele.Nazev;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = newSupplier.Dodavatele.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = newSupplier.Dodavatele.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = newSupplier.Dodavatele.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = newSupplier.Dodavatele.Email;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = newSupplier.Adresy.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = newSupplier.Adresy.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = newSupplier.Adresy.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = newSupplier.Adresy.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = newSupplier.Adresy.Psc;
+
+						command.ExecuteNonQuery();
 					}
+					connection.Close();
 				}
-				connection.Close();
+				return null;
 			}
-			return exists;
-		}
-
-		// Zavolání procedury na přidání dodavatele
-		public static bool AddSupplier(Dodavatele_Adresy novyDodavatel)
-		{
-			bool registerSuccessful = false;
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			catch (OracleException ex)
 			{
-				connection.Open();
-				using (OracleCommand command = new("P_VLOZIT_DODAVATELE_V2", connection))
+				if (ex.Number == 20003)
 				{
-					command.CommandType = CommandType.StoredProcedure;
-
-                    // Vstupní parametry procedury
-                    command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = novyDodavatel.Dodavatele.Nazev;
-                    command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = novyDodavatel.Dodavatele.Jmeno;
-					command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = novyDodavatel.Dodavatele.Prijmeni;
-					command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = novyDodavatel.Dodavatele.Telefon;
-					command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = novyDodavatel.Dodavatele.Email;
-					command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = novyDodavatel.Adresy.Ulice;
-					command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = novyDodavatel.Adresy.Mesto;
-					command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = novyDodavatel.Adresy.Okres;
-					command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = novyDodavatel.Adresy.Zeme;
-					command.Parameters.Add("p_psc", OracleDbType.Char).Value = novyDodavatel.Adresy.Psc;
-
-					command.ExecuteNonQuery();
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
 				}
-				connection.Close();
-				registerSuccessful = true;
+				else if (ex.Number == 20004)
+				{
+					string fullMessage = ex.Message;
+					string firstLine = fullMessage.Split('\n')[0];
+					return firstLine;
+				}
+				else
+				{
+					return ex.Message;
+				}
 			}
-			return registerSuccessful;
 		}
-
-        internal static string GetEmailByIdSupplier(int idDodavatele)
-        {
-            string? email = null;
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT email FROM dodavatele WHERE idDodavatele = :idDodavatele";
-                    command.Parameters.Add(":idDodavatele", idDodavatele);
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            while (reader.Read())
-                            {
-                                email = reader["email"].ToString();
-                            }
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return email;
-        }
     }
 }

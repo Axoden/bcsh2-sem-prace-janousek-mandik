@@ -1,8 +1,8 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Payment.Faktury>
+﻿@model sem_prace_janousek_mandik.Models.Payment.Faktury_Platby
 @using sem_prace_janousek_mandik.Controllers.Payment;
 @using sem_prace_janousek_mandik.Models.Payment
 @section Title{
-	Výpis faktur
+	Výpis faktur a plateb
 }
 
 @{
@@ -19,6 +19,12 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.SearchInvoices)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td style="font-weight: bold;">Č. faktury</td>
@@ -33,17 +39,17 @@
 			{
 				<td style="font-weight: bold;">Upravit</td>
 				<td style="font-weight: bold;">Odstranit</td>
+				<td style="font-weight: bold;">Přidat platbu</td>
 			}
 		</tr>
 
 		@{
-			List<Platby> platby = ViewBag.ListOfPayments;
 			bool printedHeaderTr = false;
 		}
 
 		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 		{
-			@foreach (Faktury item in Model)
+			@foreach (Faktury item in Model.Faktury)
 			{
 				printedHeaderTr = false;
 				float celkemBezDph = item.CastkaObjednavka + item.CastkaDoprava;
@@ -63,13 +69,28 @@
 					<td>@celkemDph</td>
 					@if (ViewBag.Role.Equals("Admin"))
 					{
-						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditInvoice)" asp-route-index="@item.IdFaktury">Upravit</a></td>
-						<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeleteInvoice)" asp-route-index="@item.IdFaktury">Smazat</a></td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditInvoiceGet)">
+								<input type="hidden" name="index" value="@item.IdFaktury" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeleteInvoice)">
+								<input type="hidden" name="index" value="@item.IdFaktury" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddPaymentGet)">
+								<input type="hidden" name="idInvoice" value="@item.IdFaktury" />
+								<input type="submit" value="Přidat" class="btn btn-primary" />
+							</form>
+						</td>
 					}
 				</tr>
 
-				List<Platby> konkretniPlatba = platby.Where((lmb) => lmb.IdFaktury == item.IdFaktury).ToList();
-				@foreach (Platby itemZbozi in konkretniPlatba)
+				@foreach (Platby itemZbozi in Model.Platby.Where((lmb) => lmb.IdFaktury == item.IdFaktury).ToList())
 				{
 					@if (!printedHeaderTr)
 					{
@@ -84,7 +105,6 @@
 							<td style="font-weight: bold;">Variabilní symbol</td>
 							@if (ViewBag.Role.Equals("Admin"))
 							{
-								<td style="font-weight: bold;">Přidat platbu</td>
 								<td style="font-weight: bold;">Upravit</td>
 								<td style="font-weight: bold;">Odstranit</td>
 							}
@@ -94,15 +114,37 @@
 
 					<tr>
 						<td>>>></td>
-						<td>@itemZbozi.TypPlatby</td>
+						<td>
+							@if (itemZbozi.TypPlatby == 'K')
+							{
+								<p>Kartou</p>
+							}
+							else if (itemZbozi.TypPlatby == 'P')
+							{
+								<p>Prevodem</p>
+							}
+							else
+							{
+								<p>Hotove</p>
+							}
+						</td>
 						<td>@itemZbozi.Castka</td>
 						<td>@itemZbozi.DatumPlatby</td>
 						<td>@itemZbozi.VariabilniSymbol</td>
 						@if (ViewBag.Role.Equals("Admin"))
 						{
-							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddPayment)">Přidat</a></td>
-							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPayment)" asp-route-index="@itemZbozi.IdPlatby">Upravit</a></td>
-							<td><a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeletePayment)" asp-route-index="@itemZbozi.IdPlatby">Smazat</a></td>
+							<td>
+								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPaymentGet)">
+									<input type="hidden" name="index" value="@itemZbozi.IdPlatby" />
+									<input type="submit" value="Upravit" class="btn btn-primary" />
+								</form>
+							</td>
+							<td>
+								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeletePayment)">
+									<input type="hidden" name="index" value="@itemZbozi.IdPlatby" />
+									<input type="submit" value="Smazat" class="btn btn-primary" />
+								</form>
+							</td>
 						}
 					</tr>
 				}

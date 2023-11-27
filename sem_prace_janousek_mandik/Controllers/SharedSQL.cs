@@ -1,5 +1,4 @@
 ﻿using Oracle.ManagedDataAccess.Client;
-using sem_prace_janousek_mandik.Models;
 using System.Data;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,46 +7,11 @@ namespace sem_prace_janousek_mandik.Controllers
 {
     public class SharedSQL
     {
-        // Metoda vytáhne všechny adresy
-        public static List<Adresy> GetAllAddresses()
-        {
-            Adresy? adresa;
-            List<Adresy> adresy = new();
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = connection.CreateCommand())
-                {
-                    command.CommandText = "SELECT * FROM adresy";
-                    using (OracleDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.HasRows)
-                        {
-                            while (reader.Read())
-                            {
-                                adresa = new();
-                                adresa.IdAdresy = int.Parse(reader["idAdresy"].ToString());
-                                adresa.Ulice = reader["ulice"].ToString();
-                                adresa.Mesto = reader["mesto"].ToString();
-                                adresa.Okres = reader["okres"].ToString();
-                                adresa.Zeme = reader["zeme"].ToString();
-                                adresa.Psc = reader["psc"].ToString();
-
-                                adresy.Add(adresa);
-                            }
-                        }
-                        else
-                        {
-                            adresa = null;
-                        }
-                    }
-                }
-                connection.Close();
-            }
-            return adresy;
-        }
-
-        // Vygenerování hashe z hesla
+        /// <summary>
+        /// Vygenerování hashe z hesla
+        /// </summary>
+        /// <param name="password">Nezahashované heslo</param>
+        /// <returns>Zahashované heslo</returns>
         public static string? HashPassword(string password)
         {
             if (password != null)
@@ -59,7 +23,11 @@ namespace sem_prace_janousek_mandik.Controllers
             return null;
         }
 
-        // Zavolá proceduru na smazání
+        /// <summary>
+        /// Zavolá proceduru na smazání
+        /// </summary>
+        /// <param name="procedureName">Název procedury</param>
+        /// <param name="id">Vstupní parametr ID procedury</param>
         internal static void CallDeleteProcedure(string procedureName, int id)
         {
             using (OracleConnection connection = OracleDbContext.GetConnection())
@@ -75,8 +43,13 @@ namespace sem_prace_janousek_mandik.Controllers
             }
         }
 
-		// Zavolá proceduru na smazání vč. adresy
-		internal static void CallDeleteProcedure(string procedureName, int id, int idAdresy)
+        /// <summary>
+		// Zavolá proceduru na smazání
+        /// </summary>
+        /// <param name="procedureName">Název procedury</param>
+        /// <param name="id">Vstupní parametr ID procedury</param>
+        /// <param name="idAdresy">Vstupní parametr ID procedury</param>
+		internal static void CallDeleteProcedure(string procedureName, int id, int secondId)
 		{
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
@@ -85,7 +58,7 @@ namespace sem_prace_janousek_mandik.Controllers
 				{
 					command.CommandType = CommandType.StoredProcedure;
 					command.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
-					command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = idAdresy;
+					command.Parameters.Add("p_idě", OracleDbType.Int32).Value = secondId;
 					command.ExecuteNonQuery();
 				}
 				connection.Close();

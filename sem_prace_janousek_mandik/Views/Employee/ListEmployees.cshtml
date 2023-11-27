@@ -20,6 +20,12 @@
 		<br />
 	}
 
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.SearchEmployees)">
+		<input name="search" value="@ViewBag.Search" />
+		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	</form>
+	<br />
+
 	<table border="1">
 		<tr>
 			<td>Jméno</td>

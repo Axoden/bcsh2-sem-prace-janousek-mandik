@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using sem_prace_janousek_mandik.Models.Goods;
+using sem_prace_janousek_mandik.Controllers.Employee;
+using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Controllers.Supplier;
 using sem_prace_janousek_mandik.Models;
-using sem_prace_janousek_mandik.Controllers.Home;
-using sem_prace_janousek_mandik.Controllers.Employee;
+using sem_prace_janousek_mandik.Models.Goods;
 
 namespace sem_prace_janousek_mandik.Controllers.Goods
 {
@@ -39,7 +39,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 				if (search != null)
 				{
 					categories = categories.Where(lmb => lmb.Kategorie.Nazev.ToLower().Contains(search.ToLower()) || lmb.Kategorie.Zkratka.ToLower().Contains(search.ToLower()) ||
-					lmb.Kategorie.Popis.ToLower().Contains(search.ToLower()) || lmb.NadrazenaKategorie.Nazev.ToLower().Contains(search.ToLower())).ToList();
+					lmb.Kategorie.Popis.ToLower().Contains(search.ToLower()) || (lmb.NadrazenaKategorie?.Nazev?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
 				}
 				return View(nameof(ListCategories), categories);
 			}
@@ -63,11 +63,12 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		}
 
 		/// <summary>
-		// Příjem dat z formuláře na přidání kategorie
+		/// Příjem dat z formuláře na přidání kategorie
 		/// </summary>
 		/// <param name="newCategory">Model s daty nové kategorie</param>
 		/// <returns></returns>
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		public IActionResult AddCategory(Kategorie_NadrazenaKategorie_List newCategory)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
@@ -119,6 +120,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="category">Model s upravenými daty kategorie</param>
 		/// <returns></returns>
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		public IActionResult EditCategoryPost(Kategorie_NadrazenaKategorie_List category)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
@@ -258,6 +260,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="newGoods">Model s daty nového zboží</param>
 		/// <returns></returns>
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		public IActionResult AddGoods(Zbozi_Um_Kat_DodList newGoods, IFormFile soubor)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
@@ -272,10 +275,17 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						return ReturnBad();
 					}
 
-					if (GoodsSQL.RegisterGoods(newGoods.Zbozi, CreateImage(soubor)))
+					string? err = GoodsSQL.AddGoods(newGoods.Zbozi, CreateImage(soubor));
+
+                    if (err == null)
 					{
 						return RedirectToAction(nameof(ListGoods), nameof(Goods));
 					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
+                        return ReturnBad();
+                    }
 				}
 				return ReturnBad();
 			}
@@ -318,11 +328,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="editZbozi">Model s upravenými daty zboží</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditGoodsPost(Zbozi_Um_Kat_DodList editZbozi, IFormFile soubor)
+		[ValidateAntiForgeryToken]
+		public IActionResult EditGoodsPost(Zbozi_Um_Kat_DodList editZbozi, IFormFile soubor, bool checkBoxDelete)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				ModelState.Remove("soubor");
+				ModelState.Remove("checkBoxDelete");
 				if (ModelState.IsValid)
 				{
 					string barcode = GoodsSQL.GetBarcodeByIdGoods(editZbozi.Zbozi.IdZbozi);
@@ -336,8 +348,20 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 						}
 					}
 
-					if (!GoodsSQL.EditGoods(editZbozi.Zbozi, CreateImage(soubor)))
+					if(checkBoxDelete == true)
 					{
+						editZbozi.Zbozi.IdSouboru = -1;
+					}
+
+					string? err = GoodsSQL.EditGoods(editZbozi.Zbozi, CreateImage(soubor));
+
+					if (err == null)
+					{
+						return RedirectToAction(nameof(ListGoods), nameof(Goods));
+					}
+					else
+					{
+						ViewBag.ErrorInfo = err;
 						return ReturnBad();
 					}
 				}
@@ -424,6 +448,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="newLocation">Model s daty nového umístění</param>
 		/// <returns></returns>
 		[HttpPost]
+		[ValidateAntiForgeryToken]
 		public IActionResult AddLocation(Umisteni newLocation)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
@@ -462,7 +487,8 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="umisteni"></param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditLocationPost(Umisteni umisteni)
+        [ValidateAntiForgeryToken]
+        public IActionResult EditLocationPost(Umisteni umisteni)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{

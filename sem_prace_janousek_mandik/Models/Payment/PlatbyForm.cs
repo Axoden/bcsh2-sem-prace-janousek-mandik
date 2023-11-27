@@ -3,12 +3,16 @@ using System.ComponentModel;
 
 namespace sem_prace_janousek_mandik.Models.Payment
 {
-	public class PlatbyCustomerForm
+	public class PlatbyForm
 	{
 		[Browsable(false)]
 		public int IdPlatby { get; set; }
 
-		[Required]
+        [Required]
+        [DisplayName("Datum platby: ")]
+        public DateTime DatumPlatby { get; set; }
+
+        [Required]
 		[Range(0, float.MaxValue)]
 		[DisplayName("Částka: ")]
 		public float Castka { get; set; }
