@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using sem_prace_janousek_mandik.Controllers.Goods;
 using sem_prace_janousek_mandik.Controllers.Home;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Customer;
 using sem_prace_janousek_mandik.Models.Employee;
 
@@ -20,17 +18,18 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		}
 
 		/// <summary>
-		// Příjem dat z přihlašovacího formuláře zákazníka
+		/// Příjem dat z přihlašovacího formuláře zákazníka
 		/// </summary>
 		/// <param name="inputZakaznik">Přihlašovací údaje</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult LoginCustomer(ZamestnanciLoginForm inputZakaznik)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> LoginCustomer(ZamestnanciLoginForm inputZakaznik)
 		{
 			ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
 			if (ModelState.IsValid == true)
 			{
-				Zakaznici? dbZakaznik = CustomerSQL.AuthCustomer(inputZakaznik.Email);
+				Zakaznici? dbZakaznik = await CustomerSQL.AuthCustomer(inputZakaznik.Email);
 				if (dbZakaznik != null)
 				{
 					// Kontrola hashe hesel
@@ -61,17 +60,18 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <param name="inputZakaznik">Registrační údaje zákazníka</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult RegisterCustomer(Zakaznici_Adresy inputZakaznik)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> RegisterCustomer(Zakaznici_Adresy inputZakaznik)
 		{
 			ViewBag.ErrorInfo = "Některá pole nejsou správně vyplněna!";
-			if (ModelState.IsValid == true)
+			if (ModelState.IsValid)
 			{
 				inputZakaznik.Zakaznici.Heslo = SharedSQL.HashPassword(inputZakaznik.Zakaznici.Heslo);
-				string? err = CustomerSQL.RegisterCustomer(inputZakaznik);
+				string? err = await CustomerSQL.RegisterCustomer(inputZakaznik);
 
 				if (err == null)
 				{
-					if (Role.Equals("Admin"))
+					if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 					{
 						return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 					}
@@ -102,11 +102,11 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <param name="index">ID upravovaného zákazníka</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditCustomerGet(int index)
+		public async Task<IActionResult> EditCustomerGet(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				Zakaznici_Adresy zakazniciAdresy = CustomerSQL.GetCustomerWithAddress(index);
+				Zakaznici_Adresy zakazniciAdresy = await CustomerSQL.GetCustomerWithAddress(index);
 				return View("EditCustomer", zakazniciAdresy);
 			}
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
@@ -118,10 +118,12 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <param name="customer"></param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditCustomerPost(Zakaznici_Adresy customer)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditCustomerPost(Zakaznici_Adresy customer)
 		{
-			if (Role.Equals("Admin"))
+			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
+				// Nevyžadovat validaci, když se heslo nemění
 				ModelState.Remove($"{nameof(Zakaznici_Adresy.Zakaznici)}.{nameof(Zakaznici.Heslo)}");
 				ModelState.Remove($"{nameof(Zakaznici_Adresy.Zakaznici)}.{nameof(Zakaznici.HesloZnova)}");
 				if (ModelState.IsValid)
@@ -142,7 +144,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 						customer.Zakaznici.Heslo = SharedSQL.HashPassword(customer.Zakaznici.Heslo);
 					}
 
-					string? err = CustomerSQL.EditCustomer(customer);
+					string? err = await CustomerSQL.EditCustomer(customer);
 
 					if (err == null)
 					{
@@ -163,11 +165,11 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// Výpis všech zákazníků
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListCustomers()
+		public async Task<IActionResult> ListCustomers()
 		{
-			if (Role.Equals("Admin"))
+			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				List<Zakaznici_Adresy> zakazniciAdresy = CustomerSQL.GetAllCustomersWithAddresses();
+				List<Zakaznici_Adresy> zakazniciAdresy = await CustomerSQL.GetAllCustomersWithAddresses();
 				return View(zakazniciAdresy);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -178,16 +180,17 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchCustomers(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchCustomers(string search)
 		{
 			if (Role.Equals("Admin"))
 			{
 				ViewBag.Search = search;
-				List<Zakaznici_Adresy> customers = CustomerSQL.GetAllCustomersWithAddresses();
+				List<Zakaznici_Adresy> customers = await CustomerSQL.GetAllCustomersWithAddresses();
 				if (search != null)
 				{
-					customers = customers.Where(lmb => lmb.Zakaznici.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Telefon.ToLower().Contains(search.ToLower()) || lmb.Zakaznici.Email.ToLower().Contains(search.ToLower()) || lmb.Adresy.Ulice.ToLower().Contains(search.ToLower()) || lmb.Adresy.Mesto.ToLower().Contains(search.ToLower()) || lmb.Adresy.Okres.ToLower().Contains(search.ToLower()) || lmb.Adresy.Zeme.ToLower().Contains(search.ToLower()) || lmb.Adresy.Psc.ToLower().Contains(search.ToLower())).ToList();
+					search = search.ToLower();
+					customers = customers.Where(lmb => (lmb.Zakaznici?.Jmeno ?? string.Empty).ToLower().Contains(search) || (lmb.Zakaznici?.Prijmeni ?? string.Empty).ToLower().Contains(search) || (lmb.Zakaznici?.Telefon ?? string.Empty).ToLower().Contains(search) || (lmb.Zakaznici?.Email ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Ulice ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Mesto ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Okres ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Zeme ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Psc ?? string.Empty).ToLower().Contains(search)).ToList();
 				}
 				return View(nameof(ListCustomers), customers);
 			}
@@ -198,11 +201,11 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// Výpis evidovaných informací o zákazníkovi přihlášenému zákazníkovi
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListCustomer()
+		public async Task<IActionResult> ListCustomer()
 		{
 			if (Role.Equals("Zakaznik"))
 			{
-				Zakaznici_Adresy customerAddress = CustomerSQL.GetCustomerWithAddressByEmail(Email);
+				Zakaznici_Adresy customerAddress = await CustomerSQL.GetCustomerWithAddressByEmail(Email);
 				return View(customerAddress);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -215,11 +218,12 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <param name="idAdresy">ID odstraňované adresy</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeleteCustomer(int idZakaznika, int idAdresy)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteCustomer(int idZakaznika, int idAdresy)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZAKAZNIKA", idZakaznika, idAdresy);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZAKAZNIKA", idZakaznika, idAdresy);
 			}
 			return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 		}

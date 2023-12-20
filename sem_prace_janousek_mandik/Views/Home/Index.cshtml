@@ -7,7 +7,19 @@
 }
 
 <div class="text-center">
-	<p>Role přihlášeného: @ViewBag.Role</p>
-	<p>Uživatel: @ViewBag.Email</p>
+	<h3>Vítejte ve skladu!</h3>
+	<br />
+	<h4>Pro další kroky využijte menu výše</h4>
+	<br />
+
+	@if (ViewBag.Role.Equals(""))
+	{
+		<p>Uživatel nepřihlášen</p>
+	}
+	else
+	{
+		<p>Email uživatele: @ViewBag.Email</p>
+		<p>Úroveň oprávnění: @ViewBag.Role</p>
+	}
 
 </div>

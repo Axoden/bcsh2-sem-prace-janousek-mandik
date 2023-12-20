@@ -1,4 +1,6 @@
-﻿namespace sem_prace_janousek_mandik.Models.Customer
+﻿using sem_prace_janousek_mandik.Models.Shared;
+
+namespace sem_prace_janousek_mandik.Models.Customer
 {
     public class Zakaznici_Adresy
     {

@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Controllers.Management;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Employee;
+using sem_prace_janousek_mandik.Models.Management;
 
 namespace sem_prace_janousek_mandik.Controllers.Employee
 {
-	public class EmployeeController : BaseController
+    public class EmployeeController : BaseController
 	{
 		/// <summary>
 		/// Výpis všech zaměstnanců
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListEmployees()
+		public async Task<IActionResult> ListEmployees()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				List<Zamestnanci_Adresy_Pozice> zamestnanci = EmployeeSQL.GetAllEmployeesWithAddressPosition();
+				List<Zamestnanci_Adresy_Pozice> zamestnanci = await EmployeeSQL.GetAllEmployeesWithAddressPosition();
 				return View(zamestnanci);
 			}
             return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -27,18 +27,19 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// </summary>
 		/// <param name="search"></param>
 		/// <returns></returns>
-        [HttpPost]
-        public IActionResult SearchEmployees(string search)
+        [HttpGet]
+        public async Task<IActionResult> SearchEmployees(string search)
         {
             if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
             {
                 ViewBag.Search = search;
-                List<Zamestnanci_Adresy_Pozice> zamestnanci = EmployeeSQL.GetAllEmployeesWithAddressPosition();
+                List<Zamestnanci_Adresy_Pozice> zamestnanci = await EmployeeSQL.GetAllEmployeesWithAddressPosition();
                 if (search != null)
                 {
-                    zamestnanci = zamestnanci.Where(lmb => lmb.Zamestnanci.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.DatumNarozeni.ToString().ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Telefon.ToLower().Contains(search.ToLower()) || lmb.Zamestnanci.Email.ToLower().Contains(search.ToLower()) || lmb.Adresy.Ulice.ToLower().Contains(search.ToLower()) || lmb.Adresy.Mesto.ToLower().Contains(search.ToLower()) || lmb.Adresy.Okres.ToLower().Contains(search.ToLower()) || lmb.Adresy.Zeme.ToLower().Contains(search.ToLower()) || lmb.Adresy.Psc.ToLower().Contains(search.ToLower())).ToList();
-                }
-                return View(nameof(ListEmployees), zamestnanci);
+					search = search.ToLower();
+					zamestnanci = zamestnanci.Where(lmb => (lmb.Zamestnanci?.Jmeno ?? string.Empty).ToLower().Contains(search) || (lmb.Zamestnanci?.Prijmeni ?? string.Empty).ToLower().Contains(search) || (lmb.Zamestnanci?.DatumNarozeni != null && lmb.Zamestnanci.DatumNarozeni.ToString().ToLower().Contains(search)) || (lmb.Zamestnanci?.Telefon ?? string.Empty).ToLower().Contains(search) || (lmb.Zamestnanci?.Email ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Ulice ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Mesto ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Okres ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Zeme ?? string.Empty).ToLower().Contains(search) || (lmb.Adresy?.Psc ?? string.Empty).ToLower().Contains(search)).ToList();
+				}
+				return View(nameof(ListEmployees), zamestnanci);
             }
             return RedirectToAction(nameof(HomeController.Index), nameof(Home));
         }
@@ -48,12 +49,12 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-		public IActionResult AddEmployee()
+		public async Task<IActionResult> AddEmployee()
 		{
 			if (Role.Equals("Admin"))
 			{
 				Zamestnanci_Adresy_PoziceList employees = new();
-				employees.Pozice = ManagementSQL.GetAllPositions();
+				employees.Pozice = await ManagementSQL.GetAllPositions();
 				return View(employees);
 			}
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
@@ -65,7 +66,8 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <param name="newEmployee">Model s daty nového zaměstnance</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
 		{
 			if (Role.Equals("Admin"))
 			{
@@ -73,7 +75,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 				{
                     newEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(newEmployee.Zamestnanci.Heslo);
 
-					string? err = EmployeeSQL.RegisterEmployee(newEmployee);
+					string? err = await EmployeeSQL.RegisterEmployee(newEmployee);
 
 					if (err == null)
 					{
@@ -82,15 +84,15 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 					else
 					{
 						ViewBag.ErrorInfo = err;
-						return ReturnBad();
+						return await ReturnBad();
 					}
 				}
-				return ReturnBad();
+				return await ReturnBad();
             }
 
-            IActionResult ReturnBad()
+			async Task<IActionResult> ReturnBad()
 			{
-                newEmployee.Pozice = ManagementSQL.GetAllPositions();
+                newEmployee.Pozice = await ManagementSQL.GetAllPositions();
                 return View(newEmployee);
             }
 
@@ -103,16 +105,16 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <param name="index">ID upravovaného zaměstnance</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditEmployeeGet(int index)
+		public async Task<IActionResult> EditEmployeeGet(int index)
 		{
-            Zamestnanci_Adresy_Pozice employee = EmployeeSQL.GetEmployeeWithAddressPosition(index);
+            Zamestnanci_Adresy_Pozice employee = await EmployeeSQL.GetEmployeeWithAddressPosition(index);
             if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") && employee.Zamestnanci.Email.Equals(Email) ||
 				Role.Equals("Logistik") && employee.Zamestnanci.Email.Equals(Email))
 			{
 				Zamestnanci_Adresy_PoziceList emp = new();
 				emp.Zamestnanci = employee.Zamestnanci;
 				emp.Adresy = employee.Adresy;
-				emp.Pozice = ManagementSQL.GetAllPositions();
+				emp.Pozice = await ManagementSQL.GetAllPositions();
                 return View("EditEmployee", emp);
 			}
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
@@ -124,7 +126,8 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <param name="editedEmployee">Model s upravenými daty zaměstnance</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditEmployeePost(Zamestnanci_Adresy_PoziceList editedEmployee)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditEmployeePost(Zamestnanci_Adresy_PoziceList editedEmployee)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
@@ -133,7 +136,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 					editedEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(editedEmployee.Zamestnanci.Heslo);
 				}
 
-				string? err = EmployeeSQL.EditEmployee(editedEmployee);
+				string? err = await EmployeeSQL.EditEmployee(editedEmployee);
 
 				if (err == null)
 				{
@@ -155,11 +158,12 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <param name="idAdresy">ID odstraňované adresy</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeleteEmployee(int idZamestnance, int idAdresy)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteEmployee(int idZamestnance, int idAdresy)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZAMESTNANCE", idZamestnance, idAdresy);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZAMESTNANCE", idZamestnance, idAdresy);
 			}
 			return RedirectToAction(nameof(ListEmployees), nameof(Employee));
 		}
@@ -180,18 +184,19 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <param name="inputEmployee">Model s emailem a heslem zaměstnance</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult LoginEmployee(ZamestnanciLoginForm inputEmployee)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> LoginEmployee(ZamestnanciLoginForm inputEmployee)
 		{
 			ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
 			if (ModelState.IsValid)
 			{
-				Zamestnanci? dbZamestnanec = EmployeeSQL.AuthEmployee(inputEmployee.Email);
-				if (dbZamestnanec != null)
+				Zamestnanci? dbZamestnanec = await EmployeeSQL.AuthEmployee(inputEmployee.Email);
+				if (dbZamestnanec.Heslo != null)
 				{
 					// Kontrola hashe hesel
 					if (dbZamestnanec.Heslo.Equals(SharedSQL.HashPassword(inputEmployee.Heslo)))
 					{
-						Pozice? pozice = EmployeeSQL.GetPosition(dbZamestnanec.IdPozice);
+						Pozice? pozice = await EmployeeSQL.GetPosition(dbZamestnanec.IdPozice);
 						if (pozice != null)
 						{
 							// Nastavení session

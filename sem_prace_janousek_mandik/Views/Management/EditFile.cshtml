@@ -1,5 +1,7 @@
 ﻿@using sem_prace_janousek_mandik.Models.Employee;
-@model sem_prace_janousek_mandik.Models.Soubory_Edit
+@using sem_prace_janousek_mandik.Models.Management;
+@model Soubory_Edit
+
 @section Title{
 	Úprava souboru
 }
@@ -8,19 +10,21 @@
 	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-<h1>Úprava souboru</h1>
+<div class="text-center">
+	<h1>Úprava souboru</h1>
+</div>
 
 <hr />
-<div class="row">
+<div class="form">
 	<div class="col-md-4">
 		<p>@ViewBag.ErrorInfo</p>
 		<form asp-action="EditFilePost" enctype="multipart/form-data">
-			@Html.AntiForgeryToken()
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 			<div class="form-group">
 				<label>Obrázek zboží: </label>
 				<input type="file" name="soubor" />
 			</div>
+			<br />
 			<div class="form-group">
 				<label asp-for="Soubory.Nazev" class="control-label"></label>
 				<input asp-for="Soubory.Nazev" class="form-control" />
@@ -49,7 +53,7 @@
 
 			<div class="form-group">
 				<label asp-for="Zamestnanci">Poslední úpravu provedl</label>
-				<select asp-for="Soubory.idZamestnance" class="form-control">
+				<select asp-for="Soubory.IdZamestnance" class="form-control">
 					@foreach (Zamestnanci item in Model.Zamestnanci)
 					{
 						<option value="@item.IdZamestnance">@item.Jmeno @item.Prijmeni</option>
@@ -60,7 +64,7 @@
 			<div class="form-group">
 				<input type="hidden" asp-for="Soubory.IdSouboru" value="@Model.Soubory.IdSouboru" />
 			</div>
-
+			<br />
 			<div class="form-group">
 				<input type="submit" value="Upravit" class="btn btn-primary" />
 			</div>

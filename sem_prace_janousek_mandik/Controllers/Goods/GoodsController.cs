@@ -2,8 +2,9 @@
 using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Controllers.Supplier;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Goods;
+using sem_prace_janousek_mandik.Models.Management;
+using System.Linq;
 
 namespace sem_prace_janousek_mandik.Controllers.Goods
 {
@@ -13,11 +14,11 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// Výpis všech kategorií
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListCategories()
+		public async Task<IActionResult> ListCategories()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				List<Kategorie_NadrazenaKategorie> categories = GoodsSQL.GetAllCategories();
+				List<Kategorie_NadrazenaKategorie> categories = await GoodsSQL.GetAllCategories();
 				return View(categories);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -28,18 +29,18 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <param name="search">Vstup pro vyhledávání</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchCategories(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchCategories(string search)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				// Předání vyhledávaného výrazu
 				ViewBag.Search = search;
-				List<Kategorie_NadrazenaKategorie> categories = GoodsSQL.GetAllCategories();
+				List<Kategorie_NadrazenaKategorie> categories = await GoodsSQL.GetAllCategories();
 				if (search != null)
 				{
-					categories = categories.Where(lmb => lmb.Kategorie.Nazev.ToLower().Contains(search.ToLower()) || lmb.Kategorie.Zkratka.ToLower().Contains(search.ToLower()) ||
-					lmb.Kategorie.Popis.ToLower().Contains(search.ToLower()) || (lmb.NadrazenaKategorie?.Nazev?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					search = search.ToLower();
+					categories = categories.Where(lmb => (lmb.Kategorie?.Nazev ?? string.Empty).ToLower().Contains(search) || (lmb.Kategorie?.Zkratka ?? string.Empty).ToLower().Contains(search) || (lmb.Kategorie?.Popis ?? string.Empty).ToLower().Contains(search) || (lmb.NadrazenaKategorie?.Nazev ?? string.Empty).ToLower().Contains(search)).ToList();
 				}
 				return View(nameof(ListCategories), categories);
 			}
@@ -51,12 +52,12 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet]
-		public IActionResult AddCategory()
+		public async Task<IActionResult> AddCategory()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Kategorie_NadrazenaKategorie_List category = new();
-				category.NadrazenaKategorie = GoodsSQL.GetAllCategoriesIdNameAcronym();
+				category.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
 				return View(category);
 			}
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
@@ -69,24 +70,23 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult AddCategory(Kategorie_NadrazenaKategorie_List newCategory)
+		public async Task<IActionResult> AddCategory(Kategorie_NadrazenaKategorie_List newCategory)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				newCategory.NadrazenaKategorie = GoodsSQL.GetAllCategoriesIdNameAcronym();
+				newCategory.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
 				if (ModelState.IsValid == true)
 				{
 					newCategory.Kategorie.Zkratka = newCategory.Kategorie.Zkratka.ToUpper();
 					// Kontrola zda již neexistuje kategorie s touto zkratkou
-					if (GoodsSQL.CheckExistsAcronym(newCategory.Kategorie.Zkratka) == true)
+					if (await GoodsSQL.CheckExistsAcronym(newCategory.Kategorie.Zkratka) == true)
 					{
 						ViewBag.ErrorInfo = "Tato zkratka je již používána!";
 						return View(newCategory);
 					}
 
-					if (GoodsSQL.AddCategory(newCategory.Kategorie))
+					if (await GoodsSQL.AddCategory(newCategory.Kategorie))
 					{
-						// Úspěšné přidání, přesměrování na výpis kategorií
 						return RedirectToAction(nameof(ListCategories), nameof(Goods));
 					}
 				}
@@ -101,14 +101,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="index">ID upravované kategorie</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditCategoryGet(int index)
+		public async Task<IActionResult> EditCategoryGet(int index)
 		{
-			// Kontrola oprávnění na načtení parametrů kategorie
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Kategorie_NadrazenaKategorie_List category = new();
-				category.Kategorie = GoodsSQL.GetCategoryById(index);
-				category.NadrazenaKategorie = GoodsSQL.GetAllCategoriesIdNameAcronym();
+				category.Kategorie = await GoodsSQL.GetCategoryById(index);
+				category.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
 				return View("EditCategory", category);
 			}
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
@@ -121,37 +120,37 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult EditCategoryPost(Kategorie_NadrazenaKategorie_List category)
+		public async Task<IActionResult> EditCategoryPost(Kategorie_NadrazenaKategorie_List category)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				if (ModelState.IsValid)
 				{
-					category.Kategorie.Zkratka = category.Kategorie.Zkratka.ToUpper();
-					string acronym = GoodsSQL.GetAcronymByIdCategory(category.Kategorie.IdKategorie);
+					category.Kategorie.Zkratka = category.Kategorie.Zkratka?.ToUpper();
+					string? acronym = await GoodsSQL.GetAcronymByIdCategory(category.Kategorie.IdKategorie);
 					// Kontrola zda již neexistuje kategorie s touto zkratkou
 					if (!acronym.Equals(category.Kategorie.Zkratka))
 					{
-						if (GoodsSQL.CheckExistsAcronym(category.Kategorie.Zkratka) == true)
+						if (await GoodsSQL.CheckExistsAcronym(category.Kategorie.Zkratka) == true)
 						{
 							ViewBag.ErrorInfo = "Tato zkratka je již používána!";
-							return ReturnBad();
+							return await ReturnBad();
 						}
 					}
 
-					if (!GoodsSQL.EditCategory(category.Kategorie))
+					if (!await GoodsSQL.EditCategory(category.Kategorie))
 					{
-						return ReturnBad();
+						return await ReturnBad();
 					}
 				}
 				else
 				{
-					return ReturnBad();
+					return await ReturnBad();
 				}
 
-				IActionResult ReturnBad()
+				async Task<IActionResult> ReturnBad()
 				{
-					category.NadrazenaKategorie = GoodsSQL.GetAllCategoriesIdNameAcronym();
+					category.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
 					return View("EditCategory", category);
 				}
 			}
@@ -164,11 +163,18 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="index">ID odstraňované kategorie</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeleteCategory(int index)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteCategory(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_KATEGORII", index);
+				string? output = await GoodsSQL.DeleteCategory(index);
+				if(output != null)
+				{
+					ViewBag.ErrorInfo = output;
+					List<Kategorie_NadrazenaKategorie> categories = await GoodsSQL.GetAllCategories();
+					return View("ListCategories", categories);
+				}
 			}
 			return RedirectToAction(nameof(ListCategories), nameof(Goods));
 		}
@@ -178,15 +184,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// Výpis veškerého zboží
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListGoods()
+		public async Task<IActionResult> ListGoods()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
 			{
-				List<Zbozi_Um_Kat_Dod_Soubory> zboziUmisteniKategorieDodavatel = GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
+				List<Zbozi_Um_Kat_Dod_Soubory> zboziUmisteniKategorieDodavatel = await GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
 				return View(zboziUmisteniKategorieDodavatel);
 			}
-
-			// Přesměrování, pokud uživatel nemá povolen přístup
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
 
@@ -195,17 +199,17 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchGoods(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchGoods(string search)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				ViewBag.Search = search;
-				List<Zbozi_Um_Kat_Dod_Soubory> zbozi = GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
+				List<Zbozi_Um_Kat_Dod_Soubory> zbozi = await GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
 				if (search != null)
 				{
-					zbozi = zbozi.Where(lmb => lmb.Zbozi.Nazev.ToLower().Contains(search.ToLower()) || lmb.Zbozi.JednotkovaCena.ToString().ToLower().Contains(search.ToLower()) || lmb.Zbozi.PocetNaSklade.ToString().ToLower().Contains(search.ToLower()) || lmb.Zbozi.CarovyKod.ToLower().Contains(search.ToLower()) || lmb.Zbozi.Poznamka.ToLower().Contains(search.ToLower()) || lmb.Kategorie.Nazev.ToLower().Contains(search.ToLower()) || lmb.Kategorie.Zkratka.ToLower().Contains(search.ToLower()) ||
-					lmb.Kategorie.Popis.ToLower().Contains(search.ToLower()) || lmb.Umisteni.Mistnost.ToLower().Contains(search.ToLower()) || lmb.Umisteni.Rada.ToLower().Contains(search.ToLower()) || lmb.Umisteni.Regal.ToLower().Contains(search.ToLower()) || lmb.Umisteni.Pozice.ToLower().Contains(search.ToLower()) || lmb.Umisteni.Datum.ToString().ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Nazev.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Jmeno.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Prijmeni.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Telefon.ToLower().Contains(search.ToLower()) || lmb.Dodavatele.Email.ToLower().Contains(search.ToLower())).ToList();
+					search = search.ToLower();
+					zbozi = zbozi.Where(lmb => (lmb.Zbozi?.Nazev ?? string.Empty).ToLower().Contains(search) || (lmb.Zbozi?.JednotkovaCena != null && lmb.Zbozi.JednotkovaCena.ToString().ToLower().Contains(search)) || (lmb.Zbozi?.PocetNaSklade != null && lmb.Zbozi.PocetNaSklade.ToString().ToLower().Contains(search)) || (lmb.Zbozi?.CarovyKod ?? string.Empty).ToLower().Contains(search) || (lmb.Zbozi?.Poznamka ?? string.Empty).ToLower().Contains(search) || (lmb.Kategorie?.Nazev ?? string.Empty).ToLower().Contains(search) || (lmb.Kategorie?.Zkratka ?? string.Empty).ToLower().Contains(search) || (lmb.Kategorie?.Popis ?? string.Empty).ToLower().Contains(search) || (lmb.Umisteni?.Mistnost ?? string.Empty).ToLower().Contains(search) || (lmb.Umisteni?.Rada ?? string.Empty).ToLower().Contains(search) || (lmb.Umisteni?.Regal ?? string.Empty).ToLower().Contains(search) || (lmb.Umisteni?.Pozice ?? string.Empty).ToLower().Contains(search) || (lmb.Umisteni?.Datum != null && lmb.Umisteni.Datum.ToString().ToLower().Contains(search)) || (lmb.Dodavatele?.Nazev ?? string.Empty).ToLower().Contains(search) || (lmb.Dodavatele?.Jmeno ?? string.Empty).ToLower().Contains(search) || (lmb.Dodavatele?.Prijmeni ?? string.Empty).ToLower().Contains(search) || (lmb.Dodavatele?.Telefon ?? string.Empty).ToLower().Contains(search) || (lmb.Dodavatele?.Email ?? string.Empty).ToLower().Contains(search)).ToList();
 				}
 				return View(nameof(ListGoods), zbozi);
 			}
@@ -217,14 +221,14 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet]
-		public IActionResult AddGoods()
+		public async Task<IActionResult> AddGoods()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Zbozi_Um_Kat_DodList goods = new();
-				goods.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
-				goods.Umisteni = GoodsSQL.GetAllLocationsPositions();
-				goods.Dodavatele = SupplierSQL.GetAllSuppliersName();
+				goods.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
+				goods.Umisteni = await GoodsSQL.GetAllLocationsPositions();
+				goods.Dodavatele = await SupplierSQL.GetAllSuppliersName();
 				return View(goods);
 			}
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
@@ -235,12 +239,12 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <param name="file">Vstupní obrázek</param>
 		/// <returns>Model Souboru s upravenými daty</returns>
-		private Soubory CreateImage(IFormFile file)
+		private async Task<Soubory> CreateImage(IFormFile file)
 		{
 			Soubory newFile = new();
 			if (file != null && file.Length > 0)
 			{
-				newFile.idZamestnance = EmployeeSQL.GetEmployeeIdByEmail(Email);
+				newFile.IdZamestnance = await EmployeeSQL.GetEmployeeIdByEmail(Email);
 				newFile.Nazev = file.FileName;
 				string[] arr = file.ContentType.Split("/");
 				newFile.TypSouboru = arr[0];
@@ -261,40 +265,40 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult AddGoods(Zbozi_Um_Kat_DodList newGoods, IFormFile soubor)
+		public async Task<IActionResult> AddGoods(Zbozi_Um_Kat_DodList newGoods, IFormFile soubor)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				ModelState.Remove("soubor");
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
 					// Kontrola zda již neexistuje zboží s tímto čárovým kódem
-					if (GoodsSQL.CheckExistsBarcode(newGoods.Zbozi.CarovyKod) == true)
+					if (await GoodsSQL.CheckExistsBarcode(newGoods.Zbozi.CarovyKod) == true)
 					{
 						ViewBag.ErrorInfo = "Tento čárový kód je již používán!";
-						return ReturnBad();
+						return await ReturnBad();
 					}
 
-					string? err = GoodsSQL.AddGoods(newGoods.Zbozi, CreateImage(soubor));
+					string? err = await GoodsSQL.AddGoods(newGoods.Zbozi, await CreateImage(soubor));
 
-                    if (err == null)
+					if (err == null)
 					{
 						return RedirectToAction(nameof(ListGoods), nameof(Goods));
 					}
 					else
 					{
 						ViewBag.ErrorInfo = err;
-                        return ReturnBad();
-                    }
+						return await ReturnBad();
+					}
 				}
-				return ReturnBad();
+				return await ReturnBad();
 			}
 
-			IActionResult ReturnBad()
+			async Task<IActionResult> ReturnBad()
 			{
-				newGoods.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
-				newGoods.Umisteni = GoodsSQL.GetAllLocationsPositions();
-				newGoods.Dodavatele = SupplierSQL.GetAllSuppliersName();
+				newGoods.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
+				newGoods.Umisteni = await GoodsSQL.GetAllLocationsPositions();
+				newGoods.Dodavatele = await SupplierSQL.GetAllSuppliersName();
 				return View(newGoods);
 			}
 
@@ -307,16 +311,15 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="index">ID upravovaného zboží</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditGoodsGet(int index)
+		public async Task<IActionResult> EditGoodsGet(int index)
 		{
-			// Kontrola oprávnění na načtení parametrů zboží
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
 				Zbozi_Um_Kat_DodList goods = new();
-				goods.Zbozi = GoodsSQL.GetGoodsById(index);
-				goods.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
-				goods.Umisteni = GoodsSQL.GetAllLocationsPositions();
-				goods.Dodavatele = SupplierSQL.GetAllSuppliersName();
+				goods.Zbozi = await GoodsSQL.GetGoodsById(index);
+				goods.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
+				goods.Umisteni = await GoodsSQL.GetAllLocationsPositions();
+				goods.Dodavatele = await SupplierSQL.GetAllSuppliersName();
 				return View("EditGoods", goods);
 			}
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
@@ -329,7 +332,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult EditGoodsPost(Zbozi_Um_Kat_DodList editZbozi, IFormFile soubor, bool checkBoxDelete)
+		public async Task<IActionResult> EditGoodsPost(Zbozi_Um_Kat_DodList editZbozi, IFormFile soubor, bool checkBoxDelete)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
@@ -337,23 +340,23 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 				ModelState.Remove("checkBoxDelete");
 				if (ModelState.IsValid)
 				{
-					string barcode = GoodsSQL.GetBarcodeByIdGoods(editZbozi.Zbozi.IdZbozi);
+					string? barcode = await GoodsSQL.GetBarcodeByIdGoods(editZbozi.Zbozi.IdZbozi);
 					// Kontrola zda již neexistuje zboží s tímto čárovým kódem
 					if (!barcode.Equals(editZbozi.Zbozi.CarovyKod))
 					{
-						if (GoodsSQL.CheckExistsBarcode(editZbozi.Zbozi.CarovyKod) == true)
+						if (await GoodsSQL.CheckExistsBarcode(editZbozi.Zbozi.CarovyKod))
 						{
 							ViewBag.ErrorInfo = "Tento čárový kód je již používán!";
-							return ReturnBad();
+							return await ReturnBad();
 						}
 					}
 
-					if(checkBoxDelete == true)
+					if (checkBoxDelete == true)
 					{
 						editZbozi.Zbozi.IdSouboru = -1;
 					}
 
-					string? err = GoodsSQL.EditGoods(editZbozi.Zbozi, CreateImage(soubor));
+					string? err = await GoodsSQL.EditGoods(editZbozi.Zbozi, await CreateImage(soubor));
 
 					if (err == null)
 					{
@@ -362,16 +365,17 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 					else
 					{
 						ViewBag.ErrorInfo = err;
-						return ReturnBad();
+						return await ReturnBad();
 					}
 				}
+				return await ReturnBad();
 
-				IActionResult ReturnBad()
+				async Task<IActionResult> ReturnBad()
 				{
-					editZbozi.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
-					editZbozi.Umisteni = GoodsSQL.GetAllLocationsPositions();
-					editZbozi.Dodavatele = SupplierSQL.GetAllSuppliersName();
-					return View(editZbozi);
+					editZbozi.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
+					editZbozi.Umisteni = await GoodsSQL.GetAllLocationsPositions();
+					editZbozi.Dodavatele = await SupplierSQL.GetAllSuppliersName();
+					return View("EditGoods", editZbozi);
 				}
 			}
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
@@ -382,12 +386,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <param name="index">ID odstraňovaného zboží</param>
 		/// <returns></returns>
-		[HttpGet]
-		public IActionResult DeleteGoods(int index)
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteGoods(int index)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_ZBOZI", index);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZBOZI", index);
 			}
 			return RedirectToAction(nameof(ListGoods), nameof(Goods));
 		}
@@ -396,12 +401,15 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// Výpis všech umístění
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListLocations()
+		public async Task<IActionResult> ListLocations()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				List<Umisteni> umisteni = GoodsSQL.GetAllLocations();
-				return View(umisteni);
+				Zbozi_Pohyby_Umisteni goods = new();
+				goods.Zbozi = await GoodsSQL.GetAllGoodsIdName();
+				goods.Movements = await GoodsSQL.GetAllLocationsMovements();
+				goods.Umisteni = await GoodsSQL.GetAllLocations();
+				return View(goods);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
@@ -411,19 +419,30 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchLocations(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchLocations(string search)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
 				ViewBag.Search = search;
-				List<Umisteni> umisteni = GoodsSQL.GetAllLocations();
+				Zbozi_Pohyby_Umisteni goods = new();
+				goods.Zbozi = await GoodsSQL.GetAllGoodsIdName();
+				goods.Movements = await GoodsSQL.GetAllLocationsMovements();
+				goods.Umisteni = await GoodsSQL.GetAllLocations();
 				if (search != null)
 				{
-					umisteni = umisteni.Where(lmb => lmb.Mistnost.ToLower().Contains(search.ToLower()) || lmb.Rada.ToLower().Contains(search.ToLower()) ||
-					lmb.Regal.ToLower().Contains(search.ToLower()) || lmb.Pozice.ToLower().Contains(search.ToLower()) || lmb.Datum.ToString().ToLower().Contains(search.ToLower()) || lmb.Poznamka.ToLower().Contains(search.ToLower())).ToList();
+					search = search.ToLower();
+					goods.Umisteni = goods.Umisteni.Where(lmb => (lmb.Mistnost ?? string.Empty).ToLower().Contains(search) || (lmb.Rada ?? string.Empty).ToLower().Contains(search) || (lmb.Regal ?? string.Empty).ToLower().Contains(search) || (lmb.Pozice ?? string.Empty).ToLower().Contains(search) || (lmb.Datum != null && lmb.Datum.ToString().ToLower().Contains(search)) || (lmb.Poznamka ?? string.Empty).ToLower().Contains(search)).ToList();
+					if (goods.Umisteni.Count == 0)
+					{
+						goods.Umisteni = await GoodsSQL.GetAllLocations();
+						goods.Zbozi = goods.Zbozi.Where(lmb => (lmb.Nazev ?? string.Empty).ToLower().Contains(search)).ToList();
+						var idUmisteniPohybyList = goods.Zbozi.Select(lmb => lmb.IdUmisteni).ToList();
+						goods.Umisteni = goods.Umisteni.Where(lmb => idUmisteniPohybyList.Contains(lmb.IdUmisteni)).ToList();
+						goods.Movements = goods.Movements.Where(lmb => goods.Zbozi.Any(x => x.IdZbozi == lmb.IdZbozi)).ToList();
+					}
 				}
-				return View(nameof(ListLocations), umisteni);
+				return View(nameof(ListLocations), goods);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
 		}
@@ -449,13 +468,13 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult AddLocation(Umisteni newLocation)
+		public async Task<IActionResult> AddLocation(Umisteni newLocation)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
-					if (GoodsSQL.AddLocation(newLocation))
+					if (await GoodsSQL.AddLocation(newLocation))
 					{
 						return RedirectToAction(nameof(ListLocations), nameof(Goods));
 					}
@@ -471,11 +490,11 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="index">ID upravovaného umístění</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditLocationGet(int index)
+		public async Task<IActionResult> EditLocationGet(int index)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				Umisteni umisteni = GoodsSQL.GetLocationById(index);
+				Umisteni umisteni = await GoodsSQL.GetLocationById(index);
 				return View("EditLocation", umisteni);
 			}
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
@@ -487,15 +506,19 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="umisteni"></param>
 		/// <returns></returns>
 		[HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult EditLocationPost(Umisteni umisteni)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditLocationPost(Umisteni umisteni)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
 			{
-				if (!GoodsSQL.EditLocation(umisteni))
+				if (ModelState.IsValid)
 				{
-					return View("EditLocation", umisteni);
+					if (await GoodsSQL.EditLocation(umisteni))
+					{
+						return RedirectToAction(nameof(ListLocations), nameof(Goods));
+					}
 				}
+				return View("EditLocation", umisteni);
 			}
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
 		}
@@ -506,11 +529,12 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <param name="index">ID odstraňovaného umístění</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeleteLocation(int index)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteLocation(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_UMISTENI", index);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_UMISTENI", index);
 			}
 			return RedirectToAction(nameof(ListLocations), nameof(Goods));
 		}

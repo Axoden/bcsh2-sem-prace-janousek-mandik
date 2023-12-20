@@ -10,14 +10,15 @@
 	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-<h1>Nové zboží</h1>
+<div class="text-center">
+	<h1>Nové zboží</h1>
+</div>
 
 <hr />
-<div class="row">
+<div class="form">
 	<div class="col-md-4">
 		<p>@ViewBag.ErrorInfo</p>
 		<form asp-action="@nameof(GoodsController.AddGoods)" enctype="multipart/form-data">
-			@Html.AntiForgeryToken()
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 			<div class="form-group">
 				<label asp-for="Zbozi.Nazev" class="control-label"></label>
@@ -26,7 +27,7 @@
 			</div>
 			<div class="form-group">
 				<label asp-for="Zbozi.JednotkovaCena" class="control-label"></label>
-				<input asp-for="Zbozi.JednotkovaCena" class="form-control" />
+				<input asp-for="Zbozi.JednotkovaCena" pattern="^\d+(\.\d+)?$" title="Desetinné číslo oddělujte tečkou (.)" class="form-control" />
 				<span asp-validation-for="Zbozi.JednotkovaCena" class="text-danger"></span>
 			</div>
 			<div class="form-group">
@@ -72,12 +73,12 @@
 					}
 				</select>
 			</div>
-
+			<br />
 			<div class="form-group">
 				<label>Obrázek zboží: </label>
 				<input type="file" name="soubor" />
 			</div>
-
+			<br />
 			<div class="form-group">
 				<input type="submit" value="Přidat" class="btn btn-primary" />
 			</div>

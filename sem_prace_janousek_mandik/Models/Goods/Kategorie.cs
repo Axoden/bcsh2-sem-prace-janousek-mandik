@@ -9,6 +9,7 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public int IdKategorie { get; set; }
 
 		[Required]
+		[RegularExpression("^[A-Z][a-zA-Z]{2,}", ErrorMessage = "Musí začínat velkým písmenem a musí obsahovat minimálně 3 znaky.")]
 		[DisplayName("Název: ")]
 		public string? Nazev { get; set; }
 

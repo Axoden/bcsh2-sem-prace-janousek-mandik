@@ -1,43 +1,50 @@
 ﻿@using sem_prace_janousek_mandik.Controllers.Management;
-@model List<sem_prace_janousek_mandik.Models.LogTableInsUpdDel>
+@using sem_prace_janousek_mandik.Models.Management;
+@model List<LogTableInsUpdDel>
 
 @section Title{
     Výpis logů
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
 <div class="text-center">
-    <h2>Výpis všech logů:</h2>
+	<h2>Výpis všech logů:</h2>
 
-    <form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchLogs)">
-        <input name="search" value="@ViewBag.Search" />
-        <input type="submit" value="Vyhledat" class="btn btn-primary" />
-    </form>
-    <br />
+	<br />
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchLogs)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
 
-    <table border="1">
-        <tr>
-            <td>Tabulka</td>
-            <td>Operace</td>
-            <td>Čas změny</td>
-            <td>Uživatel</td>
-            <td>Stará data</td>
-            <td>Nová data</td>
-        </tr>
+	<br />
+	<div class="list">
+		<table border="1" class="list table">
+			<tr>
+				<th>Tabulka:</th>
+				<th>Operace:</th>
+				<th>Čas změny:</th>
+				<th>Uživatel:</th>
+				<th>Stará data:</th>
+				<th>Nová data:</th>
+			</tr>
 
-        @foreach (LogTableInsUpdDel item in Model)
-        {
-            <tr>
-                <td>@item.TableName</td>
-                <td>@item.Operation</td>
-                <td>@item.ChangeTime</td>
-                <td>@item.Username</td>
-                <td>@item.OldData</td>
-                <td>@item.NewData</td>
-            </tr>
-        }
-    </table>
+			@foreach (LogTableInsUpdDel item in Model)
+			{
+				<tr>
+					<td>@item.TableName</td>
+					<td>@item.Operation</td>
+					<td>@item.ChangeTime.ToString("dd. MM. yyyy HH:mm")</td>
+					<td>@item.Username</td>
+					<td>@item.OldData</td>
+					<td>@item.NewData</td>
+				</tr>
+			}
+		</table>
+	</div>
 </div>

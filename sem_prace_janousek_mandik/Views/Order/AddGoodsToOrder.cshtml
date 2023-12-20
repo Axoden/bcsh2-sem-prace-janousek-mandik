@@ -1,49 +1,46 @@
 ﻿@using sem_prace_janousek_mandik.Models.Goods;
 @using sem_prace_janousek_mandik.Models.Order;
-@model sem_prace_janousek_mandik.Models.Order.ZboziObjednavek_Zbozi
+@model sem_prace_janousek_mandik.Models.Order.ZboziObjednavek_ZboziList
 
 @section Title{
 	Přidání zboží do objednávky
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-@{
-    List<Zbozi> goods = ViewBag.ListOfGoods;
-    int idObjednavky = ViewBag.IdObjednavky;
-}
-
-<h1>Přidání zboží do objednávky</h1>
+<div class="text-center">
+	<h1>Přidání zboží do objednávky</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="AddGoodsToOrderPost">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Zbozi">Zboží</label>
-                <select asp-for="ZboziObjednavek.IdZbozi" class="form-control">
-                    @foreach (Zbozi item in goods)
-                    {
-                        <option value="@item.IdZbozi">@item.Nazev, @Math.Round((decimal)item.JednotkovaCena, 2) Kč, EAN: @item.CarovyKod</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group">
-                <label asp-for="ZboziObjednavek.Mnozstvi" class="control-label"></label>
-                <input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
-                <span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="hidden" asp-for="ZboziObjednavek.IdObjednavky" value="@idObjednavky" />
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Přidat zboží do objednávky" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="AddGoodsToOrderPost">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Zbozi">Zboží</label>
+				<select asp-for="ZboziObjednavek.IdZbozi" class="form-control">
+					@foreach (Zbozi item in Model.Zbozi)
+					{
+						<option value="@item.IdZbozi">@item.Nazev, @Math.Round((decimal)item.JednotkovaCena, 2) Kč, EAN: @item.CarovyKod</option>
+					}
+				</select>
+			</div>
+			<div class="form-group">
+				<label asp-for="ZboziObjednavek.Mnozstvi" class="control-label"></label>
+				<input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
+				<span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<input type="hidden" asp-for="ZboziObjednavek.IdObjednavky" value="@Model.IdObjednavky" />
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Přidat zboží do objednávky" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

@@ -9,12 +9,12 @@ namespace sem_prace_janousek_mandik.Models.Order
         public int IdObjednavky { get; set; }
 
         [Required]
+		[DisplayName("Číslo objednávky: ")]
 		public int CisloObjednavky { get; set; }
 
 		[Required(ErrorMessage = "Datum přijetí je povinné")]
 		[DisplayName("Datum přijetí: ")]
-		
-		public DateTime? DatumPrijeti { get; set; }
+		public DateTime DatumPrijeti { get; set; }
 
 		[DisplayName("Poznámka: ")]
 		public string? Poznamka { get; set; }

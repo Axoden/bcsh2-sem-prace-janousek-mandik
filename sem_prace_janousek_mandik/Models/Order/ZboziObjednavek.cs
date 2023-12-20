@@ -10,10 +10,11 @@ namespace sem_prace_janousek_mandik.Models.Order
 
         [Required]
 		[DisplayName("Množství: ")]
-		[Range(1, 20)]
+		[Range(1, 9999)]
 		public int Mnozstvi { get; set; }
 
 		[Required]
+		[DisplayName("Jednotková cena [Kč]: ")]
 		public float JednotkovaCena { get; set; }
 
 		[Browsable(false)]

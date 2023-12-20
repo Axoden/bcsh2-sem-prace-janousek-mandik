@@ -15,22 +15,27 @@
 <div class="text-center">
 	<h2>Výpis všech databázových objektů:</h2>
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchDatabaseObjects)">
-		<input name="search" value="@ViewBag.Search" />
+	<br />
+	<div class="list">
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchDatabaseObjects)" method="get">
+		<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+		<br />
 		<input type="submit" value="Vyhledat" class="btn btn-primary" />
 	</form>
-	<br />
+	</div>
 
-	<table border="1">
+	<br />
+	<div class="list">
+		<table border="1" class="list table">
 		<tr>
-			<td style="font-weight: bold">Tabulky</td>
-			<td style="font-weight: bold">Pohledy</td>
-			<td style="font-weight: bold">Indexy</td>
-			<td style="font-weight: bold">Balíčky</td>
-			<td style="font-weight: bold">Procedury</td>
-			<td style="font-weight: bold">Funkce</td>
-			<td style="font-weight: bold">Triggery</td>
-			<td style="font-weight: bold">Sekvence</td>
+			<th>Tabulky:</th>
+			<th>Pohledy:</th>
+			<th>Indexy:</th>
+			<th>Balíčky:</th>
+			<th>Procedury:</th>
+			<th>Funkce:</th>
+			<th>Triggery:</th>
+			<th>Sekvence:</th>
 		</tr>
 
 		@for (int i = 0; i < maxRows; i++)
@@ -47,4 +52,5 @@
 			</tr>
 		}
 	</table>
+	</div>
 </div>

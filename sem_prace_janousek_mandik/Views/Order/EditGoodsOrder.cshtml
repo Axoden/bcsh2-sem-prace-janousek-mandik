@@ -5,39 +5,41 @@
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-
-<h1>Úprava zboží objednávky</h1>
+<div class="text-center">
+	<h1>Úprava zboží objednávky</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="EditGoodsOrderPost">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Zbozi.Nazev" class="control-label"></label>
-                <input asp-for="Zbozi.Nazev" class="form-control" disabled />
-                <span asp-validation-for="Zbozi.Nazev" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ZboziObjednavek.Mnozstvi" class="control-label"></label>
-                <input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
-                <span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ZboziObjednavek.JednotkovaCena" class="control-label"></label>
-                <input asp-for="ZboziObjednavek.JednotkovaCena" class="form-control" />
-                <span asp-validation-for="ZboziObjednavek.JednotkovaCena" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="hidden" asp-for="ZboziObjednavek.IdZboziObjednavky" value="@Model.ZboziObjednavek.IdZboziObjednavky" />
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Upravit" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="EditGoodsOrderPost">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Zbozi.Nazev" class="control-label"></label>
+				<input asp-for="Zbozi.Nazev" class="form-control" disabled />
+				<span asp-validation-for="Zbozi.Nazev" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="ZboziObjednavek.Mnozstvi" class="control-label"></label>
+				<input asp-for="ZboziObjednavek.Mnozstvi" class="form-control" />
+				<span asp-validation-for="ZboziObjednavek.Mnozstvi" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="ZboziObjednavek.JednotkovaCena" class="control-label"></label>
+				<input asp-for="ZboziObjednavek.JednotkovaCena" pattern="^\d+(\.\d+)?$" title="Desetinné číslo oddělujte tečkou (.)" class="form-control" />
+				<span asp-validation-for="ZboziObjednavek.JednotkovaCena" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<input type="hidden" asp-for="ZboziObjednavek.IdZboziObjednavky" value="@Model.ZboziObjednavek.IdZboziObjednavky" />
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Upravit" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

@@ -1,5 +1,7 @@
 ﻿@using sem_prace_janousek_mandik.Controllers.Management;
-@model List<sem_prace_janousek_mandik.Models.Soubory_Vypis>
+@using sem_prace_janousek_mandik.Models.Management;
+@model List<Soubory_Vypis>
+
 @section Title{
 	Výpis souborů
 }
@@ -11,61 +13,67 @@
 <div class="text-center">
 	<h2>Výpis všech souborů:</h2>
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchFiles)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
 	<br />
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchFiles)">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
 
-	<table border="1">
-		<tr>
-			<td>Obrázek</td>
-			<td>Název</td>
-			<td>Typ souboru</td>
-			<td>Přípona</td>
-			<td>Čas nahrání</td>
-			<td>Čas poslední úpravy</td>
-			<td>Poslední úpravu provedl</td>
-			<td>Je používán u zboží s názvem</td>
-			<td>Upravit</td>
-			<td>Odstranit</td>
-		</tr>
-
-		@foreach (Soubory_Vypis item in Model)
-		{
-			string imageDataURL = "";
-			if (item.Soubory.Data != null)
-			{
-				string base64String = Convert.ToBase64String(item.Soubory.Data);
-				imageDataURL = $"data:image/png;base64,{base64String}";
-			}
+	<br />
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>
-					@if (item.Soubory.Data != null)
-					{
-						<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
-					}
-				</td>
-				<td>@item.Soubory.Nazev</td>
-				<td>@item.Soubory.TypSouboru</td>
-				<td>@item.Soubory.PriponaSouboru</td>
-				<td>@item.Soubory.DatumNahrani</td>
-				<td>@item.Soubory.DatumModifikace</td>
-				<td>@(item.JmenoZamestnance + " " + item.PrijmeniZamestnance)</td>
-				<td>@item.KdePouzito</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditFileGet)">
-						<input type="hidden" name="idSouboru" value="@item.Soubory.IdSouboru" />
-						<input type="submit" value="Upravit" class="btn btn-primary" />
-					</form>
-				</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeleteFile)">
-						<input type="hidden" name="index" value="@item.Soubory.IdSouboru" />
-						<input type="submit" value="Smazat" class="btn btn-primary" />
-					</form>
-				</td>
+				<th>Obrázek:</th>
+				<th>@Html.DisplayNameFor(item => item[0].Soubory.Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Soubory.TypSouboru)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Soubory.PriponaSouboru)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Soubory.DatumNahrani)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Soubory.DatumModifikace)</th>
+				<th>@Html.DisplayNameFor(item => item[0].JmenoZamestnance) @Html.DisplayNameFor(item => item[0].PrijmeniZamestnance)</th>
+				<th>@Html.DisplayNameFor(item => item[0].KdePouzito)</th>
+				<th>Upravit:</th>
+				<th>Odstranit:</th>
 			</tr>
-		}
-	</table>
+
+			@foreach (Soubory_Vypis item in Model)
+			{
+				string imageDataURL = "";
+				if (item.Soubory?.Data != null)
+				{
+					string base64String = Convert.ToBase64String(item.Soubory.Data);
+					imageDataURL = $"data:image/png;base64,{base64String}";
+				}
+				<tr>
+					<td>
+						@if (item.Soubory?.Data != null)
+						{
+							<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
+						}
+					</td>
+					<td>@item.Soubory?.Nazev</td>
+					<td>@item.Soubory?.TypSouboru</td>
+					<td>@item.Soubory?.PriponaSouboru</td>
+					<td>@item.Soubory?.DatumNahrani.ToString("dd. MM. yyyy HH:mm")</td>
+					<td>@item.Soubory?.DatumModifikace.ToString("dd. MM. yyyy HH:mm")</td>
+					<td>@(item.JmenoZamestnance + " " + item.PrijmeniZamestnance)</td>
+					<td>@item.KdePouzito</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditFileGet)">
+							<input type="hidden" name="idSouboru" value="@item.Soubory?.IdSouboru" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeleteFile)">
+							<input type="hidden" name="index" value="@item.Soubory?.IdSouboru" />
+							<input type="submit" value="Smazat" class="btn btn-primary" />
+						</form>
+					</td>
+				</tr>
+			}
+		</table>
+	</div>
 </div>

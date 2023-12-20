@@ -14,74 +14,81 @@
 
 	@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.AddSupplier)"><button type="submit">Přidat dodavatele</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.AddSupplier)" method="get">
+			<input type="submit" value="Přidat dodavatele" class="btn btn-primary" />
+		</form>
 		<br />
 	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.SearchSuppliers)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.SearchSuppliers)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Název</td>
-			<td>Jméno</td>
-			<td>Příjmení</td>
-			<td>Telefon</td>
-			<td>Email</td>
-			<td>Ulice</td>
-			<td>Město</td>
-			<td>Okres</td>
-			<td>Země</td>
-			<td>PSČ</td>
-			@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
-			{
-				<td>Upravit</td>
-			}
-			@if (ViewBag.Role.Equals("Admin"))
-			{
-				<td>Odstranit</td>
-			}
-		</tr>
-
-		@foreach (Dodavatele_Adresy item in Model)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Dodavatele.Nazev</td>
-				<td>@item.Dodavatele.Jmeno</td>
-				<td>@item.Dodavatele.Prijmeni</td>
-				<td>@item.Dodavatele.Telefon</td>
-				<td>@item.Dodavatele.Email</td>
-				<td>@item.Adresy.Ulice</td>
-				<td>@item.Adresy.Mesto</td>
-				<td>@item.Adresy.Okres</td>
-				<td>@item.Adresy.Zeme</td>
-				<td>@item.Adresy.Psc</td>
-
+				<th>@Html.DisplayNameFor(item => item[0].Dodavatele.Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Dodavatele.Jmeno)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Dodavatele.Prijmeni)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Dodavatele.Telefon)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Dodavatele.Email)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Ulice)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Mesto)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Okres)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Zeme)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
 				@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
 				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplierGet)">
-							<input type="hidden" name="index" value="@item.Dodavatele.IdDodavatele" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
+					<th>Upravit:</th>
 				}
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)">
-							<input type="hidden" name="idDodavatele" value="@item.Dodavatele.IdDodavatele" />
-
-							<input type="hidden" name="idAdresy" value="@item.Adresy.IdAdresy" />
-							<input type="submit" value="Smazat" class="btn btn-primary" />
-						</form>
-					</td>
+					<th>Odstranit:</th>
 				}
 			</tr>
-		}
-	</table>
+
+			@foreach (Dodavatele_Adresy item in Model)
+			{
+				<tr>
+					<td>@item.Dodavatele?.Nazev</td>
+					<td>@item.Dodavatele?.Jmeno</td>
+					<td>@item.Dodavatele?.Prijmeni</td>
+					<td><a href="tel:@item.Dodavatele?.Telefon">@item.Dodavatele?.Telefon</a></td>
+					<td><a href="mailto:@item.Dodavatele?.Email">@item.Dodavatele?.Email</a></td>
+					<td>@item.Adresy?.Ulice</td>
+					<td>@item.Adresy?.Mesto</td>
+					<td>@item.Adresy?.Okres</td>
+					<td>@item.Adresy?.Zeme</td>
+					<td>@item.Adresy?.Psc</td>
+
+					@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplierGet)">
+								<input type="hidden" name="index" value="@item.Dodavatele?.IdDodavatele" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)">
+								<input type="hidden" name="idDodavatele" value="@item.Dodavatele?.IdDodavatele" />
+
+								<input type="hidden" name="idAdresy" value="@item.Adresy?.IdAdresy" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>

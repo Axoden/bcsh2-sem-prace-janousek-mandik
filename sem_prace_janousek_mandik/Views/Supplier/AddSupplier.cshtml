@@ -5,73 +5,74 @@
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-
-<h1>Přidání nového dodavatele</h1>
+<div class="text-center">
+	<h1>Přidání nového dodavatele</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="AddSupplier">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Dodavatele.Nazev" class="control-label"></label>
-                <input asp-for="Dodavatele.Nazev" class="form-control" />
-                <span asp-validation-for="Dodavatele.Nazev" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Dodavatele.Jmeno" class="control-label"></label>
-                <input asp-for="Dodavatele.Jmeno" class="form-control" />
-                <span asp-validation-for="Dodavatele.Jmeno" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Dodavatele.Prijmeni" class="control-label"></label>
-                <input asp-for="Dodavatele.Prijmeni" class="form-control" />
-                <span asp-validation-for="Dodavatele.Prijmeni" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Dodavatele.Telefon" class="control-label"></label>
-                <input asp-for="Dodavatele.Telefon" class="form-control" />
-                <span asp-validation-for="Dodavatele.Telefon" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Dodavatele.Email" class="control-label"></label>
-                <input asp-for="Dodavatele.Email" class="form-control" />
-                <span asp-validation-for="Dodavatele.Email" class="text-danger"></span>
-            </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="AddSupplier">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Dodavatele.Nazev" class="control-label"></label>
+				<input asp-for="Dodavatele.Nazev" class="form-control" />
+				<span asp-validation-for="Dodavatele.Nazev" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Dodavatele.Jmeno" class="control-label"></label>
+				<input asp-for="Dodavatele.Jmeno" class="form-control" />
+				<span asp-validation-for="Dodavatele.Jmeno" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Dodavatele.Prijmeni" class="control-label"></label>
+				<input asp-for="Dodavatele.Prijmeni" class="form-control" />
+				<span asp-validation-for="Dodavatele.Prijmeni" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Dodavatele.Telefon" class="control-label"></label>
+				<input asp-for="Dodavatele.Telefon" class="form-control" />
+				<span asp-validation-for="Dodavatele.Telefon" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Dodavatele.Email" class="control-label"></label>
+				<input asp-for="Dodavatele.Email" class="form-control" />
+				<span asp-validation-for="Dodavatele.Email" class="text-danger"></span>
+			</div>
 
-            <div class="form-group">
-                <label asp-for="Adresy.Ulice" class="control-label"></label>
-                <input asp-for="Adresy.Ulice" class="form-control" />
-                <span asp-validation-for="Adresy.Ulice" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Mesto" class="control-label"></label>
-                <input asp-for="Adresy.Mesto" class="form-control" />
-                <span asp-validation-for="Adresy.Mesto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Okres" class="control-label"></label>
-                <input asp-for="Adresy.Okres" class="form-control"/>
-                <span asp-validation-for="Adresy.Okres" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Zeme" class="control-label"></label>
-                <input asp-for="Adresy.Zeme" class="form-control" />
-                <span asp-validation-for="Adresy.Zeme" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Adresy.Psc" class="control-label"></label>
-                <input asp-for="Adresy.Psc" class="form-control" />
-                <span asp-validation-for="Adresy.Psc" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Přidat dodavatele" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+			<div class="form-group">
+				<label asp-for="Adresy.Ulice" class="control-label"></label>
+				<input asp-for="Adresy.Ulice" class="form-control" />
+				<span asp-validation-for="Adresy.Ulice" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Adresy.Mesto" class="control-label"></label>
+				<input asp-for="Adresy.Mesto" class="form-control" />
+				<span asp-validation-for="Adresy.Mesto" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Adresy.Okres" class="control-label"></label>
+				<input asp-for="Adresy.Okres" class="form-control" />
+				<span asp-validation-for="Adresy.Okres" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Adresy.Zeme" class="control-label"></label>
+				<input asp-for="Adresy.Zeme" class="form-control" />
+				<span asp-validation-for="Adresy.Zeme" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Adresy.Psc" class="control-label"></label>
+				<input asp-for="Adresy.Psc" class="form-control" />
+				<span asp-validation-for="Adresy.Psc" class="text-danger"></span>
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Přidat dodavatele" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

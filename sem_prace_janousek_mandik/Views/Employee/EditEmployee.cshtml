@@ -1,4 +1,5 @@
-﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
+﻿@using sem_prace_janousek_mandik.Models.Management;
+@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
 @section Title{
 	Úprava zaměstnance
 }
@@ -7,10 +8,12 @@
     Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
+<div class="text-center">
 <h1>Úprava zaměstnance</h1>
+</div>
 
 <hr />
-<div class="row">
+<div class="form">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
         <form asp-action="EditEmployeePost">
@@ -104,7 +107,7 @@
 
             <input type="hidden" asp-for="Zamestnanci.IdZamestnance" value="@Model.Zamestnanci.IdZamestnance" />
             <input type="hidden" asp-for="Zamestnanci.IdAdresy" value="@Model.Zamestnanci.IdAdresy" />
-
+            <br />
             <div class="form-group">
                 <input type="submit" value="Upravit" class="btn btn-primary" />
             </div>

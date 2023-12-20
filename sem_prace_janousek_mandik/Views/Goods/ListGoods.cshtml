@@ -14,95 +14,95 @@
 
 	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddGoods)"><button type="submit">Přidat zboží</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddGoods)" method="get">
+			<input type="submit" value="Přidat zboží" class="btn btn-primary" />
+		</form>
 		<br />
 	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchGoods)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchGoods)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" id="search" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Foto</td>
-			<td>Název</td>
-			<td>Jednotková cena</td>
-			<td>Počet kusů na skladě</td>
-			<td>Čárový kód</td>
-			<td>Poznámka</td>
-			<td>Kategorie</td>
-			<td>Zkratka</td>
-			<td>Popis kategorie</td>
-			<td>Místnost</td>
-			<td>Rada</td>
-			<td>Regál</td>
-			<td>Pozice</td>
-			<td>Poslední změna na umístění</td>
-			<td>Název</td>
-			<td>Jméno</td>
-			<td>Příjmení</td>
-			<td>Telefon</td>
-			<td>Email</td>
-			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
-			{
-				<td>Upravit</td>
-				<td>Odstranit</td>
-			}
-		</tr>
-
-		@foreach (Zbozi_Um_Kat_Dod_Soubory item in Model)
-		{
-			string imageDataURL = "";
-			if (item.Soubory.Data != null)
-			{
-				string base64String = Convert.ToBase64String(item.Soubory.Data);
-				imageDataURL = $"data:image/png;base64,{base64String}";
-			}
-
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>
-					@if (item.Soubory.Data != null)
-					{
-						<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
-					}
-				</td>
-				<td>@item.Zbozi.Nazev</td>
-				<td>@item.Zbozi.JednotkovaCena</td>
-				<td>@item.Zbozi.PocetNaSklade</td>
-				<td>@item.Zbozi.CarovyKod</td>
-				<td>@item.Zbozi.Poznamka</td>
-				<td>@item.Kategorie.Nazev</td>
-				<td>@item.Kategorie.Zkratka</td>
-				<td>@item.Kategorie.Popis</td>
-				<td>@item.Umisteni.Mistnost</td>
-				<td>@item.Umisteni.Rada</td>
-				<td>@item.Umisteni.Regal</td>
-				<td>@item.Umisteni.Pozice</td>
-				<td>@item.Umisteni.Datum</td>
-				<td>@item.Dodavatele.Nazev</td>
-				<td>@item.Dodavatele.Jmeno</td>
-				<td>@item.Dodavatele.Prijmeni</td>
-				<td>@item.Dodavatele.Telefon</td>
-				<td>@item.Dodavatele.Email</td>
+				<th>Foto:</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zbozi.Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zbozi.JednotkovaCena)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zbozi.PocetNaSklade)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zbozi.CarovyKod)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zbozi.Poznamka)</th>
+				<th>Kategorie @Html.DisplayNameFor(item => item[0].Kategorie.Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Zkratka)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Umisteni.Mistnost)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Umisteni.Rada)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Umisteni.Regal)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Umisteni.Pozice)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Umisteni.Datum)</th>
+				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Nazev)</th>
+				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Jmeno)</th>
+				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Prijmeni)</th>
+				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Telefon)</th>
+				<th>Dodavatel  @Html.DisplayNameFor(item => item[0].Dodavatele.Email)</th>
 				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">
-							<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)">
-							<input type="hidden" name="index" value="@item.Zbozi.IdZbozi" />
-							<input type="submit" value="Smazat" class="btn btn-primary" />
-						</form>
-					</td>
+					<th>Upravit:</th>
+					<th>Odstranit:</th>
 				}
 			</tr>
-		}
-	</table>
+
+			@foreach (Zbozi_Um_Kat_Dod_Soubory item in Model)
+			{
+				string imageDataURL = item.Soubory?.Data != null ? $"data:image/png;base64,{Convert.ToBase64String(item.Soubory.Data)}" : string.Empty;
+
+				<tr>
+					<td>
+						@if (item.Soubory?.Data != null)
+						{
+							<img src="@imageDataURL" alt="@item.Soubory.Nazev" width="100%" height="100%" />
+						}
+					</td>
+					<td>@item.Zbozi?.Nazev</td>
+					<td>@item.Zbozi?.JednotkovaCena</td>
+					<td>@item.Zbozi?.PocetNaSklade</td>
+					<td>@item.Zbozi?.CarovyKod</td>
+					<td>@item.Zbozi?.Poznamka</td>
+					<td>@item.Kategorie?.Nazev</td>
+					<td>@item.Kategorie?.Zkratka</td>
+					<td>@item.Umisteni?.Mistnost</td>
+					<td>@item.Umisteni?.Rada</td>
+					<td>@item.Umisteni?.Regal</td>
+					<td>@item.Umisteni?.Pozice</td>
+					<td>@item.Umisteni?.Datum.ToString("dd. MM. yyyy HH:mm")</td>
+					<td>@item.Dodavatele?.Nazev</td>
+					<td>@item.Dodavatele?.Jmeno</td>
+					<td>@item.Dodavatele?.Prijmeni</td>
+					<td><a href="tel:@item.Dodavatele?.Telefon">@item.Dodavatele?.Telefon</a></td>
+					<td><a href="mailto:@item.Dodavatele?.Email">@item.Dodavatele?.Email</a></td>
+					@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">
+								<input type="hidden" name="index" value="@item.Zbozi?.IdZbozi" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteGoods)">
+								<input type="hidden" name="index" value="@item.Zbozi?.IdZbozi" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>

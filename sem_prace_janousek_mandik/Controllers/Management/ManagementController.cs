@@ -3,23 +3,23 @@ using sem_prace_janousek_mandik.Controllers.Customer;
 using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Controllers.Goods;
 using sem_prace_janousek_mandik.Controllers.Home;
-using sem_prace_janousek_mandik.Models;
 using sem_prace_janousek_mandik.Models.Employee;
 using sem_prace_janousek_mandik.Models.Goods;
+using sem_prace_janousek_mandik.Models.Management;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
 {
-	public class ManagementController : BaseController
+    public class ManagementController : BaseController
 	{
 		/// <summary>
 		/// Výpis všech pozic
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListPositions()
+		public async Task<IActionResult> ListPositions()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin"))
 			{
-				List<Pozice> pozice = ManagementSQL.GetAllPositions();
+				List<Pozice> pozice = await ManagementSQL.GetAllPositions();
 				return View(pozice);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -30,13 +30,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchPositions(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchPositions(string search)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin"))
 			{
 				ViewBag.Search = search;
-				List<Pozice> pozice = ManagementSQL.GetAllPositions();
+				List<Pozice> pozice = await ManagementSQL.GetAllPositions();
 				if (search != null)
 				{
 					pozice = pozice.Where(lmb => (lmb.Nazev?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
@@ -67,13 +67,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="newPosition">Model s daty nové pozice</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddPosition(Pozice newPosition)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddPosition(Pozice newPosition)
 		{
 			if (Role.Equals("Admin"))
 			{
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
-					if (ManagementSQL.RegisterPosition(newPosition))
+					if (await ManagementSQL.RegisterPosition(newPosition))
 					{
 						return RedirectToAction(nameof(ListPositions), nameof(Management));
 					}
@@ -89,11 +90,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="index">ID upravované pozice</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditPositionGet(int index)
+		public async Task<IActionResult> EditPositionGet(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				Pozice position = ManagementSQL.GetPositionById(index);
+				Pozice position = await ManagementSQL.GetPositionById(index);
 				return View("EditPosition", position);
 			}
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
@@ -105,13 +106,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="position">Model s upravenými daty pozice</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditPositionPost(Pozice position)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditPositionPost(Pozice position)
 		{
 			if (Role.Equals("Admin"))
 			{
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
-					ManagementSQL.EditPosition(position);
+					await ManagementSQL.EditPosition(position);
 				}
 				else
 				{
@@ -127,11 +129,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="index">ID pozice</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeletePosition(int index)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeletePosition(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_POZICI", index);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_POZICI", index);
 			}
 			return RedirectToAction(nameof(ListPositions), nameof(Management));
 		}
@@ -157,11 +160,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="idEmployee">ID zaměstnance</param>
 		/// <returns></returns>
-		public IActionResult StartEmulationEmployee(int idEmployee)
+		public async Task<IActionResult> StartEmulationEmployee(int idEmployee)
 		{
 			if (Role.Equals("Admin"))
 			{
-				Zamestnanci_Pozice employee = EmployeeSQL.GetEmployeeRoleEmailById(idEmployee);
+				Zamestnanci_Pozice employee = await EmployeeSQL.GetEmployeeRoleEmailById(idEmployee);
 				HttpContext.Session.SetString("emulatedEmail", Email);
 				HttpContext.Session.SetString("email", employee.Zamestnanci.Email);
 				HttpContext.Session.SetString("role", employee.Pozice.Nazev);
@@ -189,18 +192,18 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vypíše všechny databázové objekty
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListDatabaseObjects()
+		public async Task<IActionResult> ListDatabaseObjects()
 		{
 			if (Role.Equals("Admin"))
 			{
-				ViewBag.Tables = ManagementSQL.GetAllObjects("table_name", "user_tables");
-				ViewBag.Views = ManagementSQL.GetAllObjects("view_name", "user_views");
-				ViewBag.Indexes = ManagementSQL.GetAllObjects("index_name", "user_indexes");
-				ViewBag.Packages = ManagementSQL.GetAllPackages();
-				ViewBag.Procedures = ManagementSQL.GetAllProceduresFunctions(true);
-				ViewBag.Functions = ManagementSQL.GetAllProceduresFunctions(false);
-				ViewBag.Triggers = ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
-				ViewBag.Sequences = ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
+				ViewBag.Tables = await ManagementSQL.GetAllObjects("table_name", "user_tables");
+				ViewBag.Views = await ManagementSQL.GetAllObjects("view_name", "user_views");
+				ViewBag.Indexes = await ManagementSQL.GetAllObjects("index_name", "user_indexes");
+				ViewBag.Packages = await ManagementSQL.GetAllPackages();
+				ViewBag.Procedures = await ManagementSQL.GetAllProceduresFunctions(true);
+				ViewBag.Functions = await ManagementSQL.GetAllProceduresFunctions(false);
+				ViewBag.Triggers = await ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
+				ViewBag.Sequences = await ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
 
 				return View();
 			}
@@ -212,20 +215,20 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchDatabaseObjects(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchDatabaseObjects(string search)
 		{
 			if (Role.Equals("Admin"))
 			{
 				ViewBag.Search = search;
-				List<string> tables = ManagementSQL.GetAllObjects("table_name", "user_tables");
-				List<string> views = ManagementSQL.GetAllObjects("view_name", "user_views");
-				List<string> indexes = ManagementSQL.GetAllObjects("index_name", "user_indexes");
-				List<string> packages = ManagementSQL.GetAllPackages();
-				List<string> procedures = ManagementSQL.GetAllProceduresFunctions(true);
-				List<string> functions = ManagementSQL.GetAllProceduresFunctions(false);
-				List<string> triggers = ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
-				List<string> sequences = ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
+				List<string> tables = await ManagementSQL.GetAllObjects("table_name", "user_tables");
+				List<string> views = await ManagementSQL.GetAllObjects("view_name", "user_views");
+				List<string> indexes = await ManagementSQL.GetAllObjects("index_name", "user_indexes");
+				List<string> packages = await ManagementSQL.GetAllPackages();
+				List<string> procedures = await ManagementSQL.GetAllProceduresFunctions(true);
+				List<string> functions = await ManagementSQL.GetAllProceduresFunctions(false);
+				List<string> triggers = await ManagementSQL.GetAllObjects("trigger_name", "user_triggers");
+				List<string> sequences = await ManagementSQL.GetAllObjects("sequence_name", "user_sequences");
 				if (search != null)
 				{
 					tables = tables.Where(lmb => (lmb?.ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
@@ -255,11 +258,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vypíše změny dat v tabulkách
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListLogs()
+		public async Task<IActionResult> ListLogs()
 		{
 			if (Role.Equals("Admin"))
 			{
-				List<LogTableInsUpdDel> logs = ManagementSQL.GetAllLogs();
+				List<LogTableInsUpdDel> logs = await ManagementSQL.GetAllLogs();
 				return View(logs);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -270,16 +273,16 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchLogs(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchLogs(string search)
 		{
 			if (Role.Equals("Admin"))
 			{
 				ViewBag.Search = search;
-				List<LogTableInsUpdDel> logs = ManagementSQL.GetAllLogs();
+				List<LogTableInsUpdDel> logs = await ManagementSQL.GetAllLogs();
 				if (search != null)
 				{
-					logs = logs.Where(lmb => (lmb?.TableName?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Operation?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.ChangeTime?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Username?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.OldData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.NewData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
+					logs = logs.Where(lmb => (lmb?.TableName?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Operation?.ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.ChangeTime.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.Username?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.OldData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower()) || (lmb?.NewData?.ToString().ToLower() ?? string.Empty).Contains(search.ToLower())).ToList();
 				}
 				return View(nameof(ListLogs), logs);
 			}
@@ -291,17 +294,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet]
-		public IActionResult ListReports()
+		public async Task<IActionResult> ListReports()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
 			{
-				Sestavy reports = ManagementSQL.GetAllReports(true);
-				return View(reports);
-			}
-
-			if (Role.Equals("Logistik") || Role.Equals("Skladnik"))
-			{
-				Sestavy reports = ManagementSQL.GetAllReports(false);
+				Sestavy reports = await ManagementSQL.GetAllReports();
 				return View(reports);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -312,13 +309,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <returns></returns>
 		[HttpGet]
-		public IActionResult ListOverView()
+		public async Task<IActionResult> ListOverView()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
 			{
 				OverView overView = new();
-				overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
-				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
+				overView.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
+				overView.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
 				return View(overView);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -330,7 +327,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="idZakaznika">ID zákazníka</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult ListOverViewCus(int idZakaznika)
+		public async Task<IActionResult> ListOverViewCus(int idZakaznika)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
 			{
@@ -338,8 +335,8 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				ViewBag.CustomerValue = customerValue;
 
 				OverView overView = new();
-				overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
-				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
+				overView.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
+				overView.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -350,16 +347,16 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult ListOverViewSuppliers()
+		public async Task<IActionResult> ListOverViewSuppliers()
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
 			{
-				string supplierValue = ManagementSQL.ListOverViewSuppliers();
+				string? supplierValue = await ManagementSQL.ListOverViewSuppliers();
 				ViewBag.SupplierValue = supplierValue;
 
 				OverView overView = new();
-				overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
-				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
+				overView.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
+				overView.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -371,14 +368,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="idKategorie">ID kategorie</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult ListOverViewCategories(int idKategorie)
+		public async Task<IActionResult> ListOverViewCategories(int idKategorie)
 		{
 			if (Role.Equals("Admin") || Role.Equals("Manazer"))
 			{
-				int idGoods = ManagementSQL.ListOverViewCategories(idKategorie);
+				int idGoods = await ManagementSQL.ListOverViewCategories(idKategorie);
 				if (idGoods != 0)
 				{
-					Zbozi zbozi = GoodsSQL.GetGoodsById(idGoods);
+					Zbozi zbozi = await GoodsSQL.GetGoodsById(idGoods);
 					ViewBag.MaxGoods = zbozi.Nazev;
 				}
 				else
@@ -387,8 +384,8 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				}
 
 				OverView overView = new();
-				overView.Zakaznici = CustomerSQL.GetAllCustomersNameSurname();
-				overView.Kategorie = GoodsSQL.GetAllCategoriesNameAcronym();
+				overView.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
+				overView.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
 				return View("ListOverView", overView);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -398,11 +395,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vypíše seznam všech souborů
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListFiles()
+		public async Task<IActionResult> ListFiles()
 		{
 			if (Role.Equals("Admin"))
 			{
-				List<Soubory_Vypis> soubory = ManagementSQL.GetAllFiles();
+				List<Soubory_Vypis> soubory = await ManagementSQL.GetAllFiles();
 				return View(soubory);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -414,63 +411,83 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult SearchFiles(string search)
+		public async Task<IActionResult> SearchFiles(string search)
 		{
 			if (Role.Equals("Admin"))
 			{
 				ViewBag.Search = search;
-				List<Soubory_Vypis> soubory = ManagementSQL.GetAllFiles();
+				List<Soubory_Vypis> soubory = await ManagementSQL.GetAllFiles();
 				if (search != null)
 				{
-					soubory = soubory.Where(lmb => lmb.Soubory.Nazev.ToLower().Contains(search.ToLower()) || lmb.Soubory.TypSouboru.ToLower().Contains(search.ToLower()) || lmb.Soubory.PriponaSouboru.ToString().ToLower().Contains(search.ToLower()) || lmb.Soubory.DatumNahrani.ToString().ToLower().Contains(search.ToLower()) || lmb.Soubory.DatumModifikace.ToString().ToLower().Contains(search.ToLower()) || lmb.JmenoZamestnance.ToLower().Contains(search.ToLower()) || lmb.PrijmeniZamestnance.ToLower().Contains(search.ToLower()) || lmb.KdePouzito.ToLower().Contains(search.ToLower())).ToList();
+					search = search.ToLower();
+					soubory = soubory.Where(lmb => (lmb.Soubory?.Nazev ?? string.Empty).ToLower().Contains(search) || (lmb.Soubory?.TypSouboru ?? string.Empty).ToLower().Contains(search) || (lmb.Soubory?.PriponaSouboru != null && lmb.Soubory.PriponaSouboru.ToString().ToLower().Contains(search)) || (lmb.Soubory?.DatumNahrani != null && lmb.Soubory.DatumNahrani.ToString().ToLower().Contains(search)) || (lmb.Soubory?.DatumModifikace != null && lmb.Soubory.DatumModifikace.ToString().ToLower().Contains(search)) || (lmb.JmenoZamestnance ?? string.Empty).ToLower().Contains(search) || (lmb.PrijmeniZamestnance ?? string.Empty).ToLower().Contains(search) || (lmb.KdePouzito ?? string.Empty).ToLower().Contains(search)).ToList();
 				}
 				return View(nameof(ListFiles), soubory);
 			}
 			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult EditFileGet(int idSouboru)
+		/// <summary>
+		/// Metoda na načtení formuláře na úpravu Souboru
+		/// </summary>
+		/// <param name="idSouboru"></param>
+		/// <returns></returns>
+		public async Task<IActionResult> EditFileGet(int idSouboru)
 		{
 			if (Role.Equals("Admin"))
 			{
 				Soubory_Edit fileEdit = new();
-				fileEdit.Soubory = ManagementSQL.GetFileById(idSouboru);
-				fileEdit.Zamestnanci = EmployeeSQL.GetAllEmployeesNameSurname();
+				fileEdit.Soubory = await ManagementSQL.GetFileById(idSouboru);
+				fileEdit.Zamestnanci = await EmployeeSQL.GetAllEmployeesNameSurname();
 				return View("EditFile", fileEdit);
 			}
 			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult EditFilePost(Soubory_Edit fileEdit, IFormFile file)
+		/// <summary>
+		/// Metoda přijme a upraví upravená data
+		/// </summary>
+		/// <param name="fileEdit">Model s upravenými daty souboru</param>
+		/// <param name="soubor">Soubor</param>
+		/// <returns></returns>
+		public async Task<IActionResult> EditFilePost(Soubory_Edit fileEdit, IFormFile soubor)
 		{
 			if (Role.Equals("Admin"))
 			{
-				if (fileEdit.Soubory != null)
+				fileEdit.Zamestnanci = await EmployeeSQL.GetAllEmployeesNameSurname();
+				ModelState.Remove("soubor");
+				if (ModelState.IsValid)
 				{
-					if (file != null && file.Length > 0)
+					if (fileEdit.Soubory != null)
 					{
-						using (var memoryStream = new MemoryStream())
+						if (soubor != null && soubor.Length > 0)
 						{
-							file.CopyTo(memoryStream);
-							fileEdit.Soubory.Data = memoryStream.ToArray();
+							using (var memoryStream = new MemoryStream())
+							{
+								soubor.CopyTo(memoryStream);
+								fileEdit.Soubory.Data = memoryStream.ToArray();
+							}
+							await ManagementSQL.EditFile(fileEdit);
 						}
-						ManagementSQL.EditFile(fileEdit);
+						await ManagementSQL.EditFile(fileEdit);
 					}
-					ManagementSQL.EditFile(fileEdit);
+					return RedirectToAction(nameof(ListFiles), nameof(Management));
 				}
-				else
-				{
-					return View("EditFile", fileEdit);
-				}
+				return View("EditFile", fileEdit);
 			}
 			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}
 
-		public IActionResult DeleteFile(int index)
+		/// <summary>
+		/// Metoda zavolá proceduru na odstranění souboru
+		/// </summary>
+		/// <param name="index">ID souboru</param>
+		/// <returns></returns>
+		public async Task<IActionResult> DeleteFile(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_SOUBOR", index);
+				await SharedSQL.CallDeleteProcedure("P_SMAZAT_SOUBOR", index);
 			}
 			return RedirectToAction(nameof(ListFiles), nameof(Management));
 		}

@@ -1,6 +1,7 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Goods.Umisteni>
+﻿@model sem_prace_janousek_mandik.Models.Goods.Zbozi_Pohyby_Umisteni
 @using sem_prace_janousek_mandik.Controllers.Goods;
 @using sem_prace_janousek_mandik.Models.Goods;
+
 @section Title{
 	Výpis umístění
 }
@@ -12,51 +13,99 @@
 <div class="text-center">
 	<h2>Výpis všech umístění:</h2>
 
-	<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddLocation)"><button type="submit">Přidat umístění</button></a>
 	<br />
-	<br />
-
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchLocations)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
+	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddLocation)" method="get">
+		<input type="submit" value="Přidat umístění" class="btn btn-primary" />
 	</form>
 	<br />
 
-	<table border="1">
-		<tr>
-			<td>Místnost</td>
-			<td>Řada</td>
-			<td>Regál</td>
-			<td>Pozice</td>
-			<td>Poslední změna na umístění</td>
-			<td>Poznámka</td>
-			<td>Upravit</td>
-			<td>Odstranit</td>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchLocations)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
 
-		</tr>
+	<br />
+	<div class="list">
+		<table border="1" class="list table">
+			@foreach (Umisteni item in Model.Umisteni)
+			{
+				<tr>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Mistnost)</th>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Rada)</th>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Regal)</th>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Pozice)</th>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Datum)</th>
+					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Poznamka)</th>
+					<th>Upravit:</th>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<th>Odstranit:</th>
+					}
+				</tr>
 
-		@foreach (Umisteni item in Model)
-		{
-			<tr>
-				<td>@item.Mistnost</td>
-				<td>@item.Rada</td>
-				<td>@item.Regal</td>
-				<td>@item.Pozice</td>
-				<td>@item.Datum</td>
-				<td>@item.Poznamka</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditLocationGet)">
-						<input type="hidden" name="index" value="@item.IdUmisteni" />
-						<input type="submit" value="Upravit" class="btn btn-primary" />
-					</form>
-				</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)">
-						<input type="hidden" name="index" value="@item.IdUmisteni" />
-						<input type="submit" value="Smazat" class="btn btn-primary" />
-					</form>
-				</td>
-			</tr>
-		}
-	</table>
+				<tr>
+					<td>@item.Mistnost</td>
+					<td>@item.Rada</td>
+					<td>@item.Regal</td>
+					<td>@item.Pozice</td>
+					<td>@item.Datum.ToString("dd. MM. yyyy HH:mm")</td>
+					<td>@item.Poznamka</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditLocationGet)">
+							<input type="hidden" name="index" value="@item.IdUmisteni" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)">
+								<input type="hidden" name="index" value="@item.IdUmisteni" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+
+
+				bool printedHeaderTr = false;
+
+				foreach (Movements itemMovement in Model.Movements.Where(lmb => lmb.IdUmisteni == item.IdUmisteni).Take(5).ToList())
+				{
+					@if (!printedHeaderTr)
+					{
+						<tr></tr>
+						<tr></tr>
+						<tr></tr>
+						<tr>
+							<th></th>
+							<th>Poslední pohyby na umístění</th>
+							<th>Pohyb:</th>
+							<th>Název zboží:</th>
+						</tr>
+						printedHeaderTr = true;
+					}
+
+					<tr>
+						<td></td>
+						<td>>>></td>
+						<td>
+							@if (itemMovement.Operation.Equals("ADD") || itemMovement.Operation.Equals("UPDATENEW"))
+							{
+								<p>Přišlo</p>
+							}
+							else if (itemMovement.Operation.Equals("DELETE") || itemMovement.Operation.Equals("UPDATEOLD"))
+							{
+								<p>Odešlo</p>
+							}
+						</td>
+						<td>@(Model.Zbozi.FirstOrDefault(lmb => lmb.IdZbozi == itemMovement.IdZbozi)?.Nazev ?? "Neexistující zboží")</td>
+					</tr>
+				}
+			}
+		</table>
+	</div>
 </div>

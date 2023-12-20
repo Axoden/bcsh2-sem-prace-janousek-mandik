@@ -5,78 +5,80 @@
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-<h1>Úprava platby</h1>
+<div class="text-center">
+	<h1>Úprava platby</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="EditPaymentPost">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Platby.DatumPlatby" class="control-label"></label>
-                <input asp-for="Platby.DatumPlatby" class="form-control" />
-                <span asp-validation-for="Platby.DatumPlatby" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Platby.Castka" class="control-label"></label>
-                <input asp-for="Platby.Castka" class="form-control" />
-                <span asp-validation-for="Platby.Castka" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Platby.TypPlatby"></label>
-                @if (Model.Platby.TypPlatby.Equals("K"))
-                {
-                    <select asp-for="Platby.TypPlatby" class="form-control">
-                        <option value="Kartou" selected>Kartou</option>
-                        <option value="Hotove">Hotove</option>
-                        <option value="Prevodem">Prevodem</option>
-                    </select>
-                }
-                else if (Model.Platby.TypPlatby.Equals("P"))
-                {    
-                <select asp-for="Platby.TypPlatby" class="form-control">
-                    <option value="Kartou">Kartou</option>
-                    <option value="Hotove">Hotove</option>
-                    <option value="Prevodem" selected>Prevodem</option>
-                    </select>
-                }
-                else
-                {
-                    <select asp-for="Platby.TypPlatby" class="form-control">
-                        <option value="Kartou">Kartou</option>
-                        <option value="Hotove" selected>Hotove</option>
-                        <option value="Prevodem">Prevodem</option>
-                    </select>
-                }
-            </div>
-            <div class="form-group">
-                <label asp-for="Platby.VariabilniSymbol" class="control-label"></label>
-                <input asp-for="Platby.VariabilniSymbol" class="form-control" />
-                <span asp-validation-for="Platby.VariabilniSymbol" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Platby.IdFaktury">Faktura</label>
-                <select asp-for="Platby.IdFaktury" class="form-control">
-                    @foreach (Faktury item in Model.Faktury)
-                    {
-                        <option value="@item.IdFaktury">@item.CisloFaktury, @item.DatumVystaveni</option>
-                    }
-                </select>
-            </div>
-            <div class="form-group">
-                <input type="hidden" asp-for="Platby.IdPlatby" value=" @Model.Platby.IdPlatby" />
-            </div>
-            <div class="form-group">
-                <input type="hidden" asp-for="Platby.IdFaktury" value=" @Model.Platby.IdFaktury" />
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Upravit" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="EditPaymentPost">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Platby.DatumPlatby" class="control-label"></label>
+				<input asp-for="Platby.DatumPlatby" class="form-control" />
+				<span asp-validation-for="Platby.DatumPlatby" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Platby.Castka" class="control-label"></label>
+				<input asp-for="Platby.Castka" pattern="^\d+(\.\d+)?$" title="Desetinné číslo oddělujte tečkou (.)" class="form-control" />
+				<span asp-validation-for="Platby.Castka" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Platby.TypPlatby"></label>
+				@if (Model.Platby.TypPlatby.Equals("K"))
+				{
+					<select asp-for="Platby.TypPlatby" class="form-control">
+						<option value="Kartou" selected>Kartou</option>
+						<option value="Hotove">Hotove</option>
+						<option value="Prevodem">Prevodem</option>
+					</select>
+				}
+				else if (Model.Platby.TypPlatby.Equals("P"))
+				{
+					<select asp-for="Platby.TypPlatby" class="form-control">
+						<option value="Kartou">Kartou</option>
+						<option value="Hotove">Hotove</option>
+						<option value="Prevodem" selected>Prevodem</option>
+					</select>
+				}
+				else
+				{
+					<select asp-for="Platby.TypPlatby" class="form-control">
+						<option value="Kartou">Kartou</option>
+						<option value="Hotove" selected>Hotove</option>
+						<option value="Prevodem">Prevodem</option>
+					</select>
+				}
+			</div>
+			<div class="form-group">
+				<label asp-for="Platby.VariabilniSymbol" class="control-label"></label>
+				<input asp-for="Platby.VariabilniSymbol" class="form-control" />
+				<span asp-validation-for="Platby.VariabilniSymbol" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Platby.IdFaktury">Faktura</label>
+				<select asp-for="Platby.IdFaktury" class="form-control">
+					@foreach (Faktury item in Model.Faktury)
+					{
+						<option value="@item.IdFaktury">@item.CisloFaktury, @item.DatumVystaveni</option>
+					}
+				</select>
+			</div>
+			<div class="form-group">
+				<input type="hidden" asp-for="Platby.IdPlatby" value="@Model.Platby.IdPlatby" />
+			</div>
+			<div class="form-group">
+				<input type="hidden" asp-for="Platby.IdFaktury" value="@Model.Platby.IdFaktury" />
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Upravit" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

@@ -11,18 +11,18 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="invoice">Nová faktura</param>
 		/// <returns>true, pokud procedura proběhla v pořádku, jinak false</returns>
-		internal static bool AddInvoice(Faktury invoice)
+		internal static async Task<bool> AddInvoice(Faktury invoice)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_VLOZIT_FAKTURU", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_insert.P_VLOZIT_FAKTURU", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_cisloFaktury", OracleDbType.Int32).Value = invoice.CisloFaktury;
+                        command.Parameters.Add("p_cisloFaktury", OracleDbType.Int32).Value = invoice.CisloFaktury;
 						command.Parameters.Add("p_datumVystaveni", OracleDbType.Date).Value = invoice.DatumVystaveni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
 						command.Parameters.Add("p_datumSplatnosti", OracleDbType.Date).Value = invoice.DatumSplatnosti.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
 						command.Parameters.Add("p_castkaObjednavka", OracleDbType.BinaryFloat).Value = invoice.CastkaObjednavka;
@@ -31,7 +31,6 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}
@@ -46,26 +45,25 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="payment">Nová platba</param>
 		/// <returns>true, pokud procedura proběhla v pořádku, jinak false</returns>
-		internal static bool AddPayment(PlatbyCustomerForm payment)
+		internal static async Task<bool> AddPayment(PlatbyCustomerForm payment)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_VLOZIT_PLATBU", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_insert.P_VLOZIT_PLATBU", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
 						command.Parameters.Add("p_datumPlatby", OracleDbType.Date).Value = DateTime.Now;
-						command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Castka;
+						command.Parameters.Add("p_castka", OracleDbType.Decimal).Value = payment.Castka;
 						command.Parameters.Add("p_typPlatby", OracleDbType.Varchar2).Value = payment.TypPlatby;
 						command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
 						command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}
@@ -80,14 +78,14 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="invoice">Model s upravenými daty faktury</param>
 		/// <returns>true, pokud procedura proběhla v pořádku, jinak false</returns>
-		internal static bool EditInvoice(Faktury invoice)
+		internal static async Task<bool> EditInvoice(Faktury invoice)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_UPRAVIT_FAKTURU", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_edit.P_UPRAVIT_FAKTURU", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
@@ -101,7 +99,6 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}
@@ -116,14 +113,14 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="payment">Model s upravenými daty platby</param>
 		/// <returns>true, pokud procedura proběhla v pořádku, jinak false</returns>
-		internal static bool EditPayment(Platba_Faktury payment)
+		internal static async Task<bool> EditPayment(Platba_Faktury payment)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_UPRAVIT_PLATBU", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_edit.P_UPRAVIT_PLATBU", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
@@ -136,7 +133,6 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}
@@ -150,41 +146,36 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// Metoda vytáhne všechny faktury
 		/// </summary>
 		/// <returns>List se všemi fakturami</returns>
-		internal static List<Faktury> GetAllInvoices()
+		internal static async Task<List<Faktury>> GetAllInvoices()
 		{
 			List<Faktury> invoices = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
-					command.CommandText = "SELECT * FROM faktury";
-					using (OracleDataReader reader = command.ExecuteReader())
+					command.CommandText = "SELECT * FROM faktury ORDER BY cisloFaktury DESC";
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Faktury? specificInvoice = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificInvoice = new();
-								specificInvoice.IdFaktury = int.Parse(reader["idFaktury"].ToString());
-								specificInvoice.CisloFaktury = int.Parse(reader["cisloFaktury"].ToString());
-								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(DateTime.Parse(reader["datumVystaveni"].ToString()));
-								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
-								specificInvoice.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
-								specificInvoice.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
-								specificInvoice.Dph = float.Parse(reader["dph"].ToString());
+								Faktury? specificInvoice = new();
+
+								specificInvoice.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
+								specificInvoice.CisloFaktury = reader.GetInt32(reader.GetOrdinal("cisloFaktury"));
+								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumVystaveni")));
+								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumSplatnosti")));
+								specificInvoice.CastkaObjednavka = reader.GetFloat(reader.GetOrdinal("castkaObjednavka"));
+								specificInvoice.CastkaDoprava = reader.GetFloat(reader.GetOrdinal("castkaDoprava"));
+								specificInvoice.Dph = reader.GetFloat(reader.GetOrdinal("dph"));
 
 								invoices.Add(specificInvoice);
 							}
 						}
-						else
-						{
-							specificInvoice = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return invoices;
 		}
@@ -193,40 +184,35 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// Metoda vytáhne všechny platby
 		/// </summary>
 		/// <returns>List se všemi platbami</returns>
-		internal static List<Platby> GetAllPayments()
+		internal static async Task<List<Platby>> GetAllPayments()
 		{
 			List<Platby> payments = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM platby";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Platby? specificPayment = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificPayment = new();
-								specificPayment.IdPlatby = int.Parse(reader["idPlatby"].ToString());
-								specificPayment.DatumPlatby = DateTime.Parse(reader["datumPlatby"].ToString());
-								specificPayment.Castka = float.Parse(reader["castka"].ToString());
-								specificPayment.TypPlatby = char.Parse(reader["typPlatby"].ToString());
+								Platby? specificPayment = new();
+
+								specificPayment.IdPlatby = reader.GetInt32(reader.GetOrdinal("idPlatby"));
+								specificPayment.DatumPlatby = reader.GetDateTime(reader.GetOrdinal("datumPlatby"));
+								specificPayment.Castka = reader.GetFloat(reader.GetOrdinal("castka"));
+								specificPayment.TypPlatby = reader["typPlatby"].ToString()[0];
 								specificPayment.VariabilniSymbol = reader["variabilniSymbol"].ToString();
-								specificPayment.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								specificPayment.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
 
 								payments.Add(specificPayment);
 							}
 						}
-						else
-						{
-							specificPayment = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return payments;
 		}
@@ -236,34 +222,33 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="idInvoice">ID faktury</param>
 		/// <returns>Model konkrétní faktury</returns>
-		internal static Faktury GetInvoiceById(int idInvoice)
+		internal static async Task<Faktury> GetInvoiceById(int idInvoice)
 		{
 			Faktury specificInvoice = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM faktury WHERE idFaktury = :idFaktury";
 					command.Parameters.Add(":idFaktury", OracleDbType.Int32).Value = idInvoice;
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificInvoice.IdFaktury = int.Parse(reader["idFaktury"].ToString());
-								specificInvoice.CisloFaktury = int.Parse(reader["cisloFaktury"].ToString());
-								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(DateTime.Parse(reader["datumVystaveni"].ToString()));
-								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
-								specificInvoice.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
-								specificInvoice.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
-								specificInvoice.Dph = float.Parse(reader["dph"].ToString());
+								specificInvoice.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
+								specificInvoice.CisloFaktury = reader.GetInt32(reader.GetOrdinal("cisloFaktury"));
+								specificInvoice.DatumVystaveni = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumVystaveni")));
+								specificInvoice.DatumSplatnosti = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumSplatnosti")));
+								specificInvoice.CastkaObjednavka = reader.GetFloat(reader.GetOrdinal("castkaObjednavka"));
+								specificInvoice.CastkaDoprava = reader.GetFloat(reader.GetOrdinal("castkaDoprava"));
+								specificInvoice.Dph = reader.GetFloat(reader.GetOrdinal("dph"));
 							}
 						}
 					}
 				}
-				connection.Close();
 			}
 			return specificInvoice;
 		}
@@ -273,33 +258,32 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="idPayment">ID platby</param>
 		/// <returns>Model konkrétní platby</returns>
-		internal static PlatbyForm GetPaymentById(int idPayment)
+		internal static async Task<PlatbyForm> GetPaymentById(int idPayment)
 		{
 			PlatbyForm specificPayment = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM platby WHERE idPlatby = :idPlatby";
 					command.Parameters.Add(":idPlatby", OracleDbType.Int32).Value = idPayment;
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificPayment.IdPlatby = int.Parse(reader["idPlatby"].ToString());
-								specificPayment.DatumPlatby = DateTime.Parse(reader["datumPlatby"].ToString());
-								specificPayment.Castka = float.Parse(reader["castka"].ToString());
+								specificPayment.IdPlatby = reader.GetInt32(reader.GetOrdinal("idPlatby"));
+								specificPayment.DatumPlatby = reader.GetDateTime(reader.GetOrdinal("datumPlatby"));
+								specificPayment.Castka = reader.GetFloat(reader.GetOrdinal("castka"));
 								specificPayment.TypPlatby = reader["typPlatby"].ToString();
 								specificPayment.VariabilniSymbol = reader["variabilniSymbol"].ToString();
-								specificPayment.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								specificPayment.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
 							}
 						}
 					}
 				}
-				connection.Close();
 			}
 			return specificPayment;
 		}
@@ -309,41 +293,36 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="idInvoice">ID faktury</param>
 		/// <returns>List všech plateb konkrétní faktury</returns>
-		internal static List<Platby> GetAllPaymentsByInvoiceId(int idInvoice)
+		internal static async Task<List<Platby>> GetAllPaymentsByInvoiceId(int idInvoice)
 		{
 			List<Platby> payments = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM platby WHERE idFaktury = :idInvoice";
 					command.Parameters.Add(":idInvoice", OracleDbType.Int32).Value = idInvoice;
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Platby? specificPayment = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificPayment = new();
-								specificPayment.IdPlatby = int.Parse(reader["idPlatby"].ToString());
-								specificPayment.DatumPlatby = DateTime.Parse(reader["datumPlatby"].ToString());
-								specificPayment.Castka = float.Parse(reader["castka"].ToString());
+								Platby? specificPayment = new();
+
+								specificPayment.IdPlatby = reader.GetInt32(reader.GetOrdinal("idPlatby"));
+								specificPayment.DatumPlatby = reader.GetDateTime(reader.GetOrdinal("datumPlatby"));
+								specificPayment.Castka = reader.GetFloat(reader.GetOrdinal("castka"));
 								specificPayment.TypPlatby = char.Parse(reader["typPlatby"].ToString());
 								specificPayment.VariabilniSymbol = reader["variabilniSymbol"].ToString();
-								specificPayment.IdFaktury = int.Parse(reader["idFaktury"].ToString());
+								specificPayment.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
 
 								payments.Add(specificPayment);
 							}
 						}
-						else
-						{
-							specificPayment = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return payments;
 		}
@@ -352,24 +331,31 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// Metoda zavolá proceduru na přidání platby zaplacenou zákazníkem
 		/// </summary>
 		/// <param name="payment">Model s daty platby</param>
-        internal static void AddCustomerPayment(PlatbyCustomerForm payment)
-        {
-            using (OracleConnection connection = OracleDbContext.GetConnection())
-            {
-                connection.Open();
-                using (OracleCommand command = new("P_ZAPLAT_OBJEDNAVKU", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
+		internal static async Task<bool> AddCustomerPayment(PlatbyCustomerForm payment)
+		{
+			try
+			{
+				using (OracleConnection connection = OracleDbContext.GetConnection())
+				{
+					await connection.OpenAsync();
+					using (OracleCommand command = new("P_ZAPLAT_OBJEDNAVKU", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-                    command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
-                    command.Parameters.Add("p_typPlatby", OracleDbType.Char).Value = payment.TypPlatby;
-                    command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Castka;
-                    command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
+						command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.IdFaktury;
+						command.Parameters.Add("p_typPlatby", OracleDbType.Char).Value = payment.TypPlatby;
+						command.Parameters.Add("p_castka", OracleDbType.Decimal).Value = payment.Castka;
+						command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.VariabilniSymbol;
 
-                    command.ExecuteNonQuery();
-                }
-                connection.Close();
-            }
-        }
+						command.ExecuteNonQuery();
+					}
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
 	}
 }

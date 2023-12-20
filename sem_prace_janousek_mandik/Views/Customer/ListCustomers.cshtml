@@ -14,73 +14,83 @@
 <div class="text-center">
 	<h2>Výpis všech zákazníků:</h2>
 
-	@if (ViewBag.Role.Equals("Admin"))
-	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)"><button type="submit">Přidat zákazníka</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)" method="get">
+			<input type="submit" value="Přidat zákazníka" class="btn btn-primary" />
+		</form>
 		<br />
-	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.SearchCustomers)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.SearchCustomers)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Jméno</td>
-			<td>Příjmení</td>
-			<td>Heslo</td>
-			<td>Telefon</td>
-			<td>Email</td>
-			<td>Ulice</td>
-			<td>Město</td>
-			<td>Okres</td>
-			<td>Země</td>
-			<td>PSČ</td>
-			<td>Upravit</td>
-			<td>Odstranit</td>
-			<td>Emulovat</td>
-		</tr>
-
-		@{
-			string hidden = "<skryté>";
-		}
-
-		@foreach (Zakaznici_Adresy item in Model)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Zakaznici.Jmeno</td>
-				<td>@item.Zakaznici.Prijmeni</td>
-				<td>@hidden</td>
-				<td>@item.Zakaznici.Telefon</td>
-				<td>@item.Zakaznici.Email</td>
-				<td>@item.Adresy.Ulice</td>
-				<td>@item.Adresy.Mesto</td>
-				<td>@item.Adresy.Okres</td>
-				<td>@item.Adresy.Zeme</td>
-				<td>@item.Adresy.Psc</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomerGet)">
-						<input type="hidden" name="index" value="@item.Zakaznici.IdZakaznika" />
-						<input type="submit" value="Upravit" class="btn btn-primary" />
-					</form>
-				</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)">
-						<input type="hidden" name="idZakaznika" value="@item.Zakaznici.IdZakaznika" />
-						<input type="hidden" name="idAdresy" value="@item.Zakaznici.IdAdresy" />
-						<input type="submit" value="Smazat" class="btn btn-primary" />
-					</form>
-				</td>
-				<td>
-					<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationCustomer)">
-						<input type="hidden" name="emailCustomer" value="@item.Zakaznici.Email" />
-						<input type="submit" value="Emulovat" class="btn btn-primary" />
-					</form>
-				</td>
+				<th>@Html.DisplayNameFor(item => item[0].Zakaznici.Jmeno)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zakaznici.Prijmeni)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zakaznici.Heslo)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zakaznici.Telefon)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zakaznici.Email)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Ulice)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Mesto)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Okres)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Zeme)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
+				<th>Upravit: </th>
+				@if (ViewBag.Role.Equals("Admin"))
+				{
+					<th>Odstranit: </th>
+					<th>Emulovat: </th>
+				}
 			</tr>
-		}
-	</table>
+
+			@{
+				string hidden = "<skryté>";
+			}
+
+			@foreach (Zakaznici_Adresy item in Model)
+			{
+				<tr>
+					<td>@item.Zakaznici?.Jmeno</td>
+					<td>@item.Zakaznici?.Prijmeni</td>
+					<td>@hidden</td>
+					<td><a href="tel:@item.Zakaznici?.Telefon">@item.Zakaznici?.Telefon</a></td>
+					<td><a href="mailto:@item.Zakaznici?.Email">@item.Zakaznici?.Email</a></td>
+					<td>@item.Adresy?.Ulice</td>
+					<td>@item.Adresy?.Mesto</td>
+					<td>@item.Adresy?.Okres</td>
+					<td>@item.Adresy?.Zeme</td>
+					<td>@item.Adresy?.Psc</td>
+					<td>
+						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.EditCustomerGet)">
+							<input type="hidden" name="index" value="@item.Zakaznici?.IdZakaznika" />
+							<input type="submit" value="Upravit" class="btn btn-primary" />
+						</form>
+					</td>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)">
+								<input type="hidden" name="idZakaznika" value="@item.Zakaznici?.IdZakaznika" />
+								<input type="hidden" name="idAdresy" value="@item.Zakaznici?.IdAdresy" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationCustomer)">
+								<input type="hidden" name="emailCustomer" value="@item.Zakaznici?.Email" />
+								<input type="submit" value="Emulovat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>

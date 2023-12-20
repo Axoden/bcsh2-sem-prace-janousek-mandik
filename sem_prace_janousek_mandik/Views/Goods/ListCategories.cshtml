@@ -11,56 +11,63 @@
 
 <div class="text-center">
 	<h2>Výpis všech kategorií:</h2>
-
+	<p>@ViewBag.ErrorInfo</p>
 	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddCategory)"><button type="submit">Přidat kategorii</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddCategory)" method="get">
+			<input type="submit" value="Přidat kategorii" class="btn btn-primary" />
+		</form>
 		<br />
 	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchCategories)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.SearchCategories)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" id="search" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Název</td>
-			<td>Zkratka</td>
-			<td>Popis</td>
-			<td>Nadřazená kategorie</td>
-			@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
-			{
-				<td>Upravit</td>
-				<td>Odstranit</td>
-			}
-		</tr>
-
-		@foreach (Kategorie_NadrazenaKategorie item in Model)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Kategorie.Nazev</td>
-				<td>@item.Kategorie.Zkratka</td>
-				<td>@item.Kategorie.Popis</td>
-				<td>@(item.NadrazenaKategorie.Nazev ?? "")</td>
+				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Zkratka)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Popis)</th>
+				<th>Nadřazená Kategorie @Html.DisplayNameFor(item => item[0].NadrazenaKategorie.Nazev)</th>
 				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditCategoryGet)">
-							<input type="hidden" name="index" value="@item.Kategorie.IdKategorie" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteCategory)">
-							<input type="hidden" name="index" value="@item.Kategorie.IdKategorie" />
-							<input type="submit" value="Smazat" class="btn btn-primary" />
-						</form>
-					</td>
+					<th>Upravit:</th>
+					<th>Odstranit:</th>
 				}
 			</tr>
-		}
-	</table>
+
+			@foreach (Kategorie_NadrazenaKategorie item in Model)
+			{
+				<tr>
+					<td>@item.Kategorie?.Nazev</td>
+					<td>@item.Kategorie?.Zkratka</td>
+					<td>@item.Kategorie?.Popis</td>
+					<td>@(item.NadrazenaKategorie?.Nazev ?? "")</td>
+					@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditCategoryGet)">
+								<input type="hidden" name="index" value="@item.Kategorie?.IdKategorie" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteCategory)">
+								<input type="hidden" name="index" value="@item.Kategorie?.IdKategorie" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>

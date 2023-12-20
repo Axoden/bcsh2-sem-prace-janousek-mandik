@@ -1,5 +1,9 @@
-﻿@model sem_prace_janousek_mandik.Models.Sestavy
-@using sem_prace_janousek_mandik.Controllers.Management;
+﻿@using sem_prace_janousek_mandik.Models.Payment;
+@using sem_prace_janousek_mandik.Models.Management;
+@using sem_prace_janousek_mandik.Models.Employee;
+@using sem_prace_janousek_mandik.Models.Goods;
+@model Sestavy
+
 @section Title{
 	Výpis sestav
 }
@@ -10,36 +14,38 @@
 
 <div class="text-center">
 	<h2>Sestavy:</h2>
-	<br/>
-	<h3>Vypíše faktury, zakázníky a kým byla faktura vytvořena </h3>
-	<table border="1">
-		<tr>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].CisloFaktury)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].DatumVystaveni)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].DatumSplatnosti)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].CastkaObjednavka)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].CastkaDoprava)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].Dph)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].ZakaznikJmeno)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].AdresaZakaznika)</td>
-			<td>@Html.DisplayNameFor(item => item.Faktury[0].ZamestnanecJmeno)</td>
-		</tr>
-
-		@foreach (Faktury_Zak_Zam item in Model.Faktury)
-		{
+	<br />
+	<h3>Vypíše faktury, zákazníky a kým byla faktura vytvořena </h3>
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.CisloFaktury</td>
-				<td>@item.DatumVystaveni</td>
-				<td>@item.DatumSplatnosti</td>
-				<td>@item.CastkaObjednavka</td>
-				<td>@item.CastkaDoprava</td>
-				<td>@item.Dph</td>
-				<td>@item.ZakaznikJmeno</td>
-				<td>@item.AdresaZakaznika</td>
-				<td>@item.ZamestnanecJmeno</td>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].CisloFaktury)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].DatumVystaveni)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].DatumSplatnosti)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].CastkaObjednavka)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].CastkaDoprava)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].Dph)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].ZakaznikJmeno)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].AdresaZakaznika)</th>
+				<th>@Html.DisplayNameFor(item => item.Faktury[0].ZamestnanecJmeno)</th>
 			</tr>
-		}
-	</table>
+
+			@foreach (Faktury_Zak_Zam item in Model.Faktury)
+			{
+				<tr>
+					<td>@item.CisloFaktury</td>
+					<td>@item.DatumVystaveni</td>
+					<td>@item.DatumSplatnosti</td>
+					<td>@item.CastkaObjednavka</td>
+					<td>@item.CastkaDoprava</td>
+					<td>@item.Dph</td>
+					<td>@item.ZakaznikJmeno</td>
+					<td>@item.AdresaZakaznika</td>
+					<td>@item.ZamestnanecJmeno</td>
+				</tr>
+			}
+		</table>
+	</div>
 
 	<br />
 	<br />
@@ -47,45 +53,45 @@
 	<br />
 	<h3>
 		Vypíše informace o zaměstnancích, jejich pozici a adresu ve specifikovaném formátu,
-		a také počet objednávek, které každý zaměstnanec vytvořil.
+		a také počet objednávek, které každý zaměstnanec vytvořil
 	</h3>
-	<table border="1">
-		<tr>
-			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Jmeno)</td>
-			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Prijmeni)</td>
-			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].NazevPozice)</td>
-			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Adresa)</td>
-			<td>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].PocetObjednavek)</td>
-
-		</tr>
-
-		@foreach (Zamestnanci_Objednavky item in Model.ZamestnanciObjednavky)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Jmeno</td>
-				<td>@item.Prijmeni</td>
-				<td>@item.NazevPozice</td>
-				<td>@item.Adresa</td>
-				<td>@item.PocetObjednavek</td>
+				<th>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Jmeno)</th>
+				<th>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Prijmeni)</th>
+				<th>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].NazevPozice)</th>
+				<th>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].Adresa)</th>
+				<th>@Html.DisplayNameFor(item => item.ZamestnanciObjednavky[0].PocetObjednavek)</th>
 			</tr>
-		}
-	</table>
+
+			@foreach (Zamestnanci_Objednavky item in Model.ZamestnanciObjednavky)
+			{
+				<tr>
+					<td>@item.Jmeno</td>
+					<td>@item.Prijmeni</td>
+					<td>@item.NazevPozice</td>
+					<td>@item.Adresa</td>
+					<td>@item.PocetObjednavek</td>
+				</tr>
+			}
+		</table>
+	</div>
 
 	<br />
 	<br />
-	@if (ViewBag.Role.Equals("Admin"))
-	{
-		<br />
-		<h3>Vypíše zboží jeho umístění a kategorie, které je momentálně na skladě </h3>
-		<table border="1">
+	<br />
+	<h3>Vypíše zboží, jeho umístění a kategorie, které je momentálně na skladě </h3>
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].Nazev)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].JednotkovaCena)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].PocetNaSklade)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].NazevKategorie)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].NadrazenaKategorie)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].NazevDodavatele)</td>
-				<td>@Html.DisplayNameFor(item => item.ZboziSklad[0].Umisteni)</td>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].Nazev)</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].JednotkovaCena) [Kč]</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].PocetNaSklade)</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].NazevKategorie)</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].NadrazenaKategorie)</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].NazevDodavatele)</th>
+				<th>@Html.DisplayNameFor(item => item.ZboziSklad[0].Umisteni)</th>
 			</tr>
 
 			@foreach (Zbozi_Sklad item in Model.ZboziSklad)
@@ -101,5 +107,5 @@
 				</tr>
 			}
 		</table>
-	}
+	</div>
 </div>

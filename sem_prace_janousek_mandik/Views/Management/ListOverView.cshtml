@@ -1,84 +1,92 @@
-﻿@model sem_prace_janousek_mandik.Models.OverView
-@using sem_prace_janousek_mandik.Controllers.Management;
-@using sem_prace_janousek_mandik.Models.Customer;
+﻿@using sem_prace_janousek_mandik.Models.Customer;
 @using sem_prace_janousek_mandik.Models.Goods;
+@using sem_prace_janousek_mandik.Models.Management;
+@model OverView
+
 @section Title{
     Přehledy
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
 <div class="text-center">
-    <h2>Přehledy:</h2>
+	<h2>Přehledy:</h2>
 
-    <h3>Výpis hodnot všech objendávek vybraného zákaníka:</h3>
-    <form asp-action="ListOverViewCus">
+	<h3>Výpis hodnot všech objednávek vybraného zákaníka:</h3>
 
-        <div class="form-group">
-            <label>Zákazník: </label>
-            <select name="idZakaznika" class="form-control">
-                @foreach (Zakaznici item in Model.Zakaznici)
-                {
-                    <option value="@item.IdZakaznika">@item.Jmeno, @item.Prijmeni</option>
-                }
-            </select>
-        </div>
+	<div class="list">
+		<form asp-action="ListOverViewCus">
+			<label>Zákazník:</label>
+			<select name="idZakaznika" class="form-control">
+				<option></option>
+				@foreach (Zakaznici item in Model.Zakaznici)
+				{
+					<option value="@item.IdZakaznika">@item.Jmeno, @item.Prijmeni</option>
+				}
+			</select>
 
-        <div class="form-group">
-            <input type="submit" value="Spustit" class="btn btn-primary" />
-        </div>
+			<br />
+			<div>
+				<input type="submit" value="Spustit" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 
-    </form>
+	@if (ViewBag.CustomerValue != null)
+	{
+		<br />
+		<p>Hodnota všech objednávek zákazníka je: @ViewBag.CustomerValue Kč</p>
+	}
 
-    @if (ViewBag.CustomerValue != null)
-    {
-        <p>Hodnota objednávek je: @ViewBag.CustomerValue</p>
-    }
+	<hr />
+	<br />
+	<br />
 
-    <br />
-    <br />
+	<h3>Výpis největšího dodavatele (nejvíce dodávaného zboží)</h3>
+	<form asp-action="ListOverViewSuppliers">
+		<div>
+			<br />
+			<input type="submit" value="Spustit" class="btn btn-primary" />
+		</div>
+	</form>
 
-    <h3>Výpis největšího dodavatele (nejvíce dodávaného zboží)</h3>
-    <form asp-action="ListOverViewSuppliers">
+	@if (ViewBag.SupplierValue != null)
+	{
+		<br />
+		<p>@ViewBag.SupplierValue</p>
+	}
 
-        <div class="form-group">
-            <input type="submit" value="Spustit" class="btn btn-primary" />
-        </div>
+	<hr />
+	<br />
+	<br />
 
-    </form>
+	<h3>Nejvíce kusů zboží na skladě vybrané kategorie</h3>
 
-    @if (ViewBag.SupplierValue != null)
-    {
-        <p>@ViewBag.SupplierValue</p>
-    }
+	<div class="list">
+		<form asp-action="ListOverViewCategories">
+			<label>Kategorie: </label>
+			<select name="idKategorie" class="form-control">
+				<option></option>
+				@foreach (Kategorie item in Model.Kategorie)
+				{
+					<option value="@item.IdKategorie">@item.Nazev, @item.Zkratka</option>
+				}
+			</select>
 
-    <br />
-    <br />
+			<div>
+				<br />
+				<input type="submit" value="Spustit" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 
-    <h3>Nejvíce kusů zboží na skladě vybrané kategorie</h3>
-    <form asp-action="ListOverViewCategories">
+	@if (ViewBag.MaxGoods != null)
+	{
+		<br />
+		<p>Nejvíce kusů na skladě je u zboží: @ViewBag.MaxGoods</p>
+	}
 
-        <div class="form-group">
-            <label>Kategorie: </label>
-            <select name="idKategorie" class="form-control">
-                @foreach (Kategorie item in Model.Kategorie)
-                {
-                    <option value="@item.IdKategorie">@item.Nazev, @item.Zkratka</option>
-                }
-            </select>
-        </div>
-
-        <div class="form-group">
-            <input type="submit" value="Spustit" class="btn btn-primary" />
-        </div>
-
-    </form>
-
-    @if (ViewBag.MaxGoods != null)
-    {
-        <p>Nejvíce kusů na skladě je u zboží: @ViewBag.MaxGoods</p>
-    }
-
+	<hr />
 </div>

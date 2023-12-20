@@ -1,6 +1,6 @@
 ﻿using sem_prace_janousek_mandik.Models.Employee;
 
-namespace sem_prace_janousek_mandik.Models
+namespace sem_prace_janousek_mandik.Models.Management
 {
     public class Soubory_Edit
     {

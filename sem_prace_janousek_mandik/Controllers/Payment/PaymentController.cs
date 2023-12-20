@@ -13,13 +13,13 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// Výpis všech faktur včetně plateb
 		/// </summary>
 		/// <returns></returns>
-		public IActionResult ListInvoices()
+		public async Task<IActionResult> ListInvoices()
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
 			{
 				Faktury_Platby invoices = new();
-				invoices.Faktury = PaymentSQL.GetAllInvoices();
-				invoices.Platby = PaymentSQL.GetAllPayments();
+				invoices.Faktury = await PaymentSQL.GetAllInvoices();
+				invoices.Platby = await PaymentSQL.GetAllPayments();
 				return View(invoices);
 			}
 			return RedirectToAction(nameof(HomeController.Index), nameof(Home));
@@ -30,22 +30,22 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="search">Vyhledávaná fráze</param>
 		/// <returns></returns>
-		[HttpPost]
-		public IActionResult SearchInvoices(string search)
+		[HttpGet]
+		public async Task<IActionResult> SearchInvoices(string search)
 		{
 			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
 			{
 				ViewBag.Search = search;
 				Faktury_Platby invoices = new();
-				invoices.Faktury = PaymentSQL.GetAllInvoices();
-				invoices.Platby = PaymentSQL.GetAllPayments();
+				invoices.Faktury = await PaymentSQL.GetAllInvoices();
+				invoices.Platby = await PaymentSQL.GetAllPayments();
 				if (search != null)
 				{
 					search = search.ToLower();
 					invoices.Faktury = invoices.Faktury.Where(lmb => (lmb.CisloFaktury.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.DatumVystaveni.ToString()?.ToLower() ?? string.Empty).Contains(search) || (lmb?.DatumSplatnosti?.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.CastkaObjednavka.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.CastkaDoprava.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.Dph.ToString().ToLower() ?? string.Empty).Contains(search)).ToList();
 					if(invoices.Faktury.Count == 0)
 					{
-						invoices.Faktury = PaymentSQL.GetAllInvoices();
+						invoices.Faktury = await PaymentSQL.GetAllInvoices();
 						invoices.Platby = invoices.Platby.Where(lmb => (lmb.DatumPlatby.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.Castka.ToString()?.ToLower() ?? string.Empty).Contains(search) || (lmb?.TypPlatby?.ToString().ToLower() ?? string.Empty).Contains(search) || (lmb?.VariabilniSymbol?.ToString().ToLower() ?? string.Empty).Contains(search)).ToList();
 						var idFakturyList = invoices.Platby.Select(lmb => lmb.IdFaktury).ToList();
 						invoices.Faktury = invoices.Faktury.Where(lmb => idFakturyList.Contains(lmb.IdFaktury)).ToList();
@@ -76,7 +76,8 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="invoice">Model s novými daty faktury</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddInvoice(Faktury invoice)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddInvoice(Faktury invoice)
 		{
 			if (Role.Equals("Admin"))
 			{
@@ -91,7 +92,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 					return View(invoice);
 				}
 
-				PaymentSQL.AddInvoice(invoice);
+				await PaymentSQL.AddInvoice(invoice);
 				return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
@@ -103,11 +104,11 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="index">ID upravované faktury</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditInvoiceGet(int index)
+		public async Task<IActionResult> EditInvoiceGet(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				Faktury invoice = PaymentSQL.GetInvoiceById(index);
+				Faktury invoice = await PaymentSQL.GetInvoiceById(index);
 				return View("EditInvoice", invoice);
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
@@ -119,22 +120,24 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="invoice"></param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditInvoicePost(Faktury invoice)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditInvoicePost(Faktury invoice)
 		{
 			if (Role.Equals("Admin"))
 			{
+				ModelState.Remove("CisloFaktury");
 				if (!ModelState.IsValid)
 				{
-					return View(invoice);
+					return View("EditInvoice", invoice);
 				}
 
 				if (invoice.DatumSplatnosti < invoice.DatumVystaveni)
 				{
 					ViewBag.ErrorInfo = "Datum vystavení musí být před datem splatnosti!";
-					return View(invoice);
+					return View("EditInvoice", invoice);
 				}
 
-				PaymentSQL.AddInvoice(invoice);
+				await PaymentSQL.EditInvoice(invoice);
 				return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
@@ -146,11 +149,12 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="index">ID odstraňované faktury</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeleteInvoice(int index)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteInvoice(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_FAKTURU", index);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_FAKTURU", index);
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 		}
@@ -162,13 +166,13 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="index">ID upravované platby</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditPaymentGet(int index)
+		public async Task<IActionResult> EditPaymentGet(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
 				Platba_Faktury payment = new();
-				payment.Platby = PaymentSQL.GetPaymentById(index);
-				payment.Faktury = PaymentSQL.GetAllInvoices();
+				payment.Platby = await PaymentSQL.GetPaymentById(index);
+				payment.Faktury = await PaymentSQL.GetAllInvoices();
 				return View("EditPayment", payment);
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
@@ -180,7 +184,8 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="payment">ID platby</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult EditPaymentPost(Platba_Faktury payment)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditPaymentPost(Platba_Faktury payment)
 		{
 			if (Role.Equals("Admin"))
 			{
@@ -189,14 +194,14 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
                     if (payment.Platby.TypPlatby.Equals("Prevodem") && payment.Platby.VariabilniSymbol == null)
                     {
                         ViewBag.ErrorInfo = "Při platbě převodem je potřeba variabilní symbol!";
-                        payment.Faktury = PaymentSQL.GetAllInvoices();
+                        payment.Faktury = await PaymentSQL.GetAllInvoices();
                         return View("EditPayment", payment);
                     }
-                    PaymentSQL.EditPayment(payment);
+                    await PaymentSQL.EditPayment(payment);
                 }
 				else
 				{
-                    payment.Faktury = PaymentSQL.GetAllInvoices();
+                    payment.Faktury = await PaymentSQL.GetAllInvoices();
                     return View("EditPayment", payment);
 				}
 			}
@@ -209,11 +214,12 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="index">ID platby</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult DeletePayment(int index)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeletePayment(int index)
 		{
 			if (Role.Equals("Admin"))
 			{
-				SharedSQL.CallDeleteProcedure("P_SMAZAT_PLATBU", index);
+				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_PLATBU", index);
 			}
 			return RedirectToAction(nameof(ListInvoices), nameof(Payment));
 		}
@@ -240,7 +246,8 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="payment">Model s daty nové platby</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddPaymentPost(PlatbyCustomerForm payment)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddPaymentPost(PlatbyCustomerForm payment)
 		{
 			if (Role.Equals("Admin"))
 			{
@@ -251,7 +258,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 						ViewBag.ErrorInfo = "Při platbě převodem je potřeba variabilní symbol!";
 						return View("AddPayment", payment);
 					}
-					PaymentSQL.AddPayment(payment);
+					await PaymentSQL.AddPayment(payment);
 				}
 				else
 				{
@@ -267,16 +274,16 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="idObjednavky">ID objednávky</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddPaymentCustomerGet(int idObjednavky)
+		public async Task<IActionResult> AddPaymentCustomerGet(int idObjednavky)
 		{
-			Objednavky_Zakaznici_Faktury customer = OrderSQL.GetCustomerOrderInvoice(idObjednavky);
+			Objednavky_Zakaznici_Faktury customer = await OrderSQL.GetCustomerOrderInvoice(idObjednavky);
 
 			if (customer.Zakaznici.Email.Equals(Email))
 			{
 				PlatbyCustomerForm payment = new();
 				payment.IdFaktury = customer.Faktury.IdFaktury;
 
-				float zbyvaZaplatit = RemainsToPay(idObjednavky, customer, payment.IdFaktury);
+				float zbyvaZaplatit = await RemainsToPay(idObjednavky, customer, payment.IdFaktury);
 
 				payment.Castka = zbyvaZaplatit;
 				ViewBag.idObjednavky = idObjednavky;
@@ -293,10 +300,10 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="customer">Model zákazníka</param>
 		/// <param name="idInvoice">ID faktury</param>
 		/// <returns>Částka, která zbýva zaplatit</returns>
-		private static float RemainsToPay(int idObjednavky, Objednavky_Zakaznici_Faktury customer, int idInvoice)
+		private static async Task<float> RemainsToPay(int idObjednavky, Objednavky_Zakaznici_Faktury customer, int idInvoice)
 		{
-			List<ZboziObjednavek> zboziObjednavek = OrderSQL.GetAllGoodsOrdersById(idObjednavky);
-			List<Platby> payments = PaymentSQL.GetAllPaymentsByInvoiceId(idInvoice);
+			List<ZboziObjednavek> zboziObjednavek = await OrderSQL.GetAllGoodsOrdersById(idObjednavky);
+			List<Platby> payments = await PaymentSQL.GetAllPaymentsByInvoiceId(idInvoice);
 
 			var sumJednotkovaCenaBezDph = zboziObjednavek.Where(lmb => lmb.IdObjednavky == idObjednavky).Sum(lmb => (lmb.JednotkovaCena * lmb.Mnozstvi));
 			sumJednotkovaCenaBezDph = sumJednotkovaCenaBezDph + customer.Faktury.CastkaDoprava;
@@ -315,9 +322,10 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <param name="idObjednavky">ID objednávky</param>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult AddPaymentCustomerPost(PlatbyCustomerForm customerPay, int idObjednavky)
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddPaymentCustomerPost(PlatbyCustomerForm customerPay, int idObjednavky)
 		{
-			Objednavky_Zakaznici_Faktury customer = OrderSQL.GetCustomerOrderInvoice(idObjednavky);
+			Objednavky_Zakaznici_Faktury customer = await OrderSQL.GetCustomerOrderInvoice(idObjednavky);
 
 			if (customer.Zakaznici.Email.Equals(Email) && customer.Objednavky.IdObjednavky == idObjednavky && customer.Faktury.IdFaktury == customerPay.IdFaktury)
 			{
@@ -325,7 +333,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 				PlatbyCustomerForm payment = new();
 				payment.IdFaktury = customer.Faktury.IdFaktury;
 
-				float zbyvaZaplatit = RemainsToPay(idObjednavky, customer, payment.IdFaktury);
+				float zbyvaZaplatit = await RemainsToPay(idObjednavky, customer, payment.IdFaktury);
 
 				payment.Castka = zbyvaZaplatit;
 				ViewBag.idObjednavky = idObjednavky;
@@ -343,7 +351,11 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 						ViewBag.ErrorInfo = "Při platbě převodem je potřeba variabilní symbol!";
 						return View("AddPaymentCustomer", payment);
 					}
-					PaymentSQL.AddCustomerPayment(customerPay);
+
+					if(!await PaymentSQL.AddCustomerPayment(customerPay))
+					{
+						return View("AddPaymentCustomer", payment);
+					}
 				}
 				else
 				{
@@ -360,10 +372,10 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// </summary>
 		/// <param name="idFaktury">ID faktury</param>
 		/// <returns></returns>
-		public IActionResult DownloadInvoice(int idFaktury)
+		public async Task<IActionResult> DownloadInvoice(int idFaktury)
 		{
-			Faktury faktura = PaymentSQL.GetInvoiceById(idFaktury);
-			List<ZboziObjednavek_Zbozi> zbozi = OrderSQL.GetGoodsOrderByIdInvoice(idFaktury);
+			Faktury faktura = await PaymentSQL.GetInvoiceById(idFaktury);
+			List<ZboziObjednavek_Zbozi> zbozi = await OrderSQL.GetGoodsOrderByIdInvoice(idFaktury);
 
 			MemoryStream memoryStream = new();
 			CreateInvoicePDF(memoryStream, faktura, zbozi);

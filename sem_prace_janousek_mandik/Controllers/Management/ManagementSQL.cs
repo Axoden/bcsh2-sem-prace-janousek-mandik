@@ -1,6 +1,9 @@
 ﻿using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
-using sem_prace_janousek_mandik.Models;
+using sem_prace_janousek_mandik.Models.Employee;
+using sem_prace_janousek_mandik.Models.Goods;
+using sem_prace_janousek_mandik.Models.Management;
+using sem_prace_janousek_mandik.Models.Payment;
 using System.Data;
 
 namespace sem_prace_janousek_mandik.Controllers.Management
@@ -11,36 +14,27 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vytáhne všechny pozice
 		/// </summary>
 		/// <returns>List všech pozic</returns>
-		public static List<Pozice> GetAllPositions()
+		internal static async Task<List<Pozice>> GetAllPositions()
 		{
 			List<Pozice> pozice = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM pozice";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Pozice? jednaPozice = new();
-						if (reader.HasRows)
+						while (await reader.ReadAsync())
 						{
-							while (reader.Read())
-							{
-								jednaPozice = new();
-								jednaPozice.IdPozice = int.Parse(reader["idPozice"].ToString());
-								jednaPozice.Nazev = reader["nazev"].ToString();
+							Pozice? jednaPozice = new();
+							jednaPozice.IdPozice = reader.GetInt32(reader.GetOrdinal("idPozice"));
+							jednaPozice.Nazev = reader["nazev"].ToString();
 
-								pozice.Add(jednaPozice);
-							}
-						}
-						else
-						{
-							jednaPozice = null;
+							pozice.Add(jednaPozice);
 						}
 					}
 				}
-				connection.Close();
 			}
 			return pozice;
 		}
@@ -50,24 +44,28 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="newPosition">Model nové pozice</param>
 		/// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
-		internal static bool RegisterPosition(Pozice newPosition)
+		internal static async Task<bool> RegisterPosition(Pozice newPosition)
 		{
-			bool registerSuccessful = false;
-			using (OracleConnection connection = OracleDbContext.GetConnection())
+			try
 			{
-				connection.Open();
-				using (OracleCommand command = new("p_vlozit_pozici_v2", connection))
+				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					command.CommandType = CommandType.StoredProcedure;
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_insert.p_vlozit_pozici_v2", connection))
+					{
+						command.CommandType = CommandType.StoredProcedure;
 
-					command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newPosition.Nazev;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = newPosition.Nazev;
 
-					command.ExecuteNonQuery();
+						command.ExecuteNonQuery();
+					}
 				}
-				connection.Close();
-				registerSuccessful = true;
+				return true;
 			}
-			return registerSuccessful;
+			catch
+			{
+				return false;
+			}
 		}
 
 		/// <summary>
@@ -75,14 +73,14 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="pozice">Model s upravenými daty pozice</param>
 		/// <returns>true, pokud příkaz proběhl úspěšně, jinak false</returns>
-		public static bool EditPosition(Pozice pozice)
+		internal static async Task<bool> EditPosition(Pozice pozice)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_UPRAVIT_POZICI_V2", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_edit.P_UPRAVIT_POZICI_V2", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
@@ -91,7 +89,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}
@@ -106,29 +103,28 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="idPozice">ID pozice</param>
 		/// <returns>Model konkrétní pozice</returns>
-		public static Pozice GetPositionById(int idPozice)
+		internal static async Task<Pozice> GetPositionById(int idPozice)
 		{
 			Pozice getPozice = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM pozice WHERE idPozice = :idPozice";
 					command.Parameters.Add(":idPozice", OracleDbType.Int32).Value = idPozice;
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								getPozice.IdPozice = int.Parse(reader["idPozice"].ToString());
+								getPozice.IdPozice = reader.GetInt32(reader.GetOrdinal("idPozice"));
 								getPozice.Nazev = reader["nazev"].ToString();
 							}
 						}
 					}
 				}
-				connection.Close();
 			}
 			return getPozice;
 		}
@@ -139,34 +135,28 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <param name="name">Název sloupce</param>
 		/// <param name="dbObject">Název tabulky</param>
 		/// <returns>List vybraných objektů</returns>
-		public static List<string> GetAllObjects(string name, string dbObject)
+		internal static async Task<List<string>> GetAllObjects(string name, string dbObject)
 		{
 			List<string> objectNames = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = $"SELECT {name} AS nazev FROM {dbObject}";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						string? specificObject = null;
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificObject = reader["nazev"].ToString();
+								string? specificObject = reader["nazev"].ToString();
 
 								objectNames.Add(specificObject);
 							}
 						}
-						else
-						{
-							specificObject = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return objectNames;
 		}
@@ -175,34 +165,28 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vytáhne všechny balíčky použíté v DB
 		/// </summary>
 		/// <returns>List balíčků</returns>
-		public static List<string> GetAllPackages()
+		internal static async Task<List<string>> GetAllPackages()
 		{
 			List<string> objectNames = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT object_name AS nazev FROM user_objects WHERE object_type = 'PACKAGE'";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						string? specificObject = null;
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificObject = reader["nazev"].ToString();
+								string? specificObject = reader["nazev"].ToString();
 
 								objectNames.Add(specificObject);
 							}
 						}
-						else
-						{
-							specificObject = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return objectNames;
 		}
@@ -212,12 +196,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="procedure">true => procedury, false => funkce</param>
 		/// <returns>List procedur/funkcí</returns>
-		public static List<string> GetAllProceduresFunctions(bool procedure)
+		internal static async Task<List<string>> GetAllProceduresFunctions(bool procedure)
 		{
 			List<string> objectNames = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					if (procedure)
@@ -229,25 +213,19 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 						command.CommandText = "SELECT object_name AS nazev FROM user_procedures WHERE procedure_name IS NOT NULL";
 					}
 
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						string? specificObject = null;
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificObject = reader["nazev"].ToString();
+								string? specificObject = reader["nazev"].ToString();
 
 								objectNames.Add(specificObject);
 							}
 						}
-						else
-						{
-							specificObject = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return objectNames;
 		}
@@ -256,27 +234,26 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda vrátí všechny logy o změnách dat v tabulkách
 		/// </summary>
 		/// <returns>List všech logů</returns>
-		internal static List<LogTableInsUpdDel> GetAllLogs()
+		internal static async Task<List<LogTableInsUpdDel>> GetAllLogs()
 		{
 			List<LogTableInsUpdDel> logs = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM log_table_ins_upd_del ORDER BY change_time DESC";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						LogTableInsUpdDel? log = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								log = new();
-								log.LogId = int.Parse(reader["log_id"].ToString());
+								LogTableInsUpdDel? log = new();
+								log.LogId = reader.GetInt32(reader.GetOrdinal("log_id"));
 								log.TableName = reader["table_name"].ToString();
 								log.Operation = reader["operation"].ToString();
-								log.ChangeTime = DateTime.Parse(reader["change_time"].ToString());
+								log.ChangeTime = reader.GetDateTime(reader.GetOrdinal("change_time"));
 								log.Username = reader["username"].ToString();
 								log.OldData = reader["old_data"].ToString();
 								log.NewData = reader["new_data"].ToString();
@@ -286,12 +263,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 						}
 					}
 				}
-				connection.Close();
 			}
 			return logs;
 		}
 
-		internal static Sestavy GetAllReports(bool fullPriv)
+		internal static async Task<Sestavy> GetAllReports()
 		{
 			Sestavy report = new();
 			report.Faktury = new();
@@ -299,25 +275,24 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			report.ZboziSklad = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM V_FAKTURY_INFO ORDER BY datumVystaveni DESC";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Faktury_Zak_Zam? invoice = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								invoice = new();
-								invoice.IdFaktury = int.Parse(reader["idFaktury"].ToString());
-								invoice.CisloFaktury = int.Parse(reader["cisloFaktury"].ToString());
-								invoice.DatumVystaveni = DateOnly.FromDateTime(DateTime.Parse(reader["datumVystaveni"].ToString()));
-								invoice.DatumSplatnosti = DateOnly.FromDateTime(DateTime.Parse(reader["datumSplatnosti"].ToString()));
-								invoice.CastkaObjednavka = float.Parse(reader["castkaObjednavka"].ToString());
-								invoice.CastkaDoprava = float.Parse(reader["castkaDoprava"].ToString());
-								invoice.Dph = float.Parse(reader["dph"].ToString());
+								Faktury_Zak_Zam? invoice = new();
+								invoice.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
+								invoice.CisloFaktury = reader.GetInt32(reader.GetOrdinal("cisloFaktury"));
+								invoice.DatumVystaveni = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumVystaveni")));
+								invoice.DatumSplatnosti = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("datumSplatnosti")));
+								invoice.CastkaObjednavka = reader.GetFloat(reader.GetOrdinal("castkaObjednavka"));
+								invoice.CastkaDoprava = reader.GetFloat(reader.GetOrdinal("castkaDoprava"));
+								invoice.Dph = reader.GetFloat(reader.GetOrdinal("dph"));
 								invoice.ZakaznikJmeno = reader["zakaznik"].ToString();
 								invoice.AdresaZakaznika = reader["adresa_zakaznika"].ToString();
 								invoice.ZamestnanecJmeno = reader["vytvoreno_zamestnancem"].ToString();
@@ -328,20 +303,20 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 					}
 
 					command.CommandText = "SELECT * FROM V_ZAMESTNANCI_INFO ORDER BY pocet_objednavek DESC";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Zamestnanci_Objednavky? emp = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
+								Zamestnanci_Objednavky? emp = new();
 								emp = new();
-								emp.IdZamestnance = int.Parse(reader["idZamestnance"].ToString());
+								emp.IdZamestnance = reader.GetInt32(reader.GetOrdinal("idZamestnance"));
 								emp.Jmeno = reader["jmeno"].ToString();
 								emp.Prijmeni = reader["prijmeni"].ToString();
 								emp.NazevPozice = reader["pozice"].ToString();
 								emp.Adresa = reader["adresa_zamestnance"].ToString();
-								emp.PocetObjednavek = int.Parse(reader["pocet_objednavek"].ToString());
+								emp.PocetObjednavek = reader.GetInt32(reader.GetOrdinal("pocet_objednavek"));
 
 								report.ZamestnanciObjednavky.Add(emp);
 							}
@@ -349,18 +324,17 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 					}
 
 					command.CommandText = "SELECT * FROM V_ZBOZI_NA_SKLADE ORDER BY kategorie_nazev";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Zbozi_Sklad? goods = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								goods = new();
-								goods.IdZbozi = int.Parse(reader["idZbozi"].ToString());
+								Zbozi_Sklad? goods = new();
+								goods.IdZbozi = reader.GetInt32(reader.GetOrdinal("idZbozi"));
 								goods.Nazev = reader["nazev"].ToString();
-								goods.JednotkovaCena = float.Parse(reader["jednotkovaCena"].ToString());
-								goods.PocetNaSklade = int.Parse(reader["pocetNaSklade"].ToString());
+								goods.JednotkovaCena = reader.GetFloat(reader.GetOrdinal("jednotkovaCena"));
+								goods.PocetNaSklade = reader.GetInt32(reader.GetOrdinal("pocetNaSklade"));
 								goods.NazevKategorie = reader["kategorie_nazev"].ToString();
 								goods.NadrazenaKategorie = reader["nadrazena_kategorie"].ToString();
 								goods.NazevDodavatele = reader["dodavatel_nazev"].ToString();
@@ -371,7 +345,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 						}
 					}
 				}
-				connection.Close();
 			}
 			return report;
 		}
@@ -381,13 +354,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="idZakaznika">ID zákazníka</param>
 		/// <returns>Hodnota objednávek</returns>
-		public static float ListOverViewCus(int idZakaznika)
+		internal static float ListOverViewCus(int idZakaznika)
 		{
 			float celkovaHodnota;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
 				connection.Open();
-				using (OracleCommand command = new("Celkova_Hodnota_Objednavek_Zakaznika", connection))
+				using (OracleCommand command = new("pkg_funkce.Celkova_Hodnota_Objednavek_Zakaznika", connection))
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
@@ -404,7 +377,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 					celkovaHodnota = float.Parse(returnValue.Value.ToString());
 				}
-				connection.Close();
 			}
 			return celkovaHodnota;
 		}
@@ -413,13 +385,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda zavolá funkci na zjistění největšího dodavatele
 		/// </summary>
 		/// <returns>Název dodavatele</returns>
-		internal static string ListOverViewSuppliers()
+		internal static async Task<string?> ListOverViewSuppliers()
 		{
-			string supplierOutput;
+			string? supplierOutput;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
-				using (OracleCommand command = new("Nejvetsi_Dodavatel", connection))
+				await connection.OpenAsync();
+				using (OracleCommand command = new("pkg_funkce.Nejvetsi_Dodavatel", connection))
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
@@ -436,7 +408,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 
 					supplierOutput = returnValue.Value.ToString();
 				}
-				connection.Close();
 			}
 			return supplierOutput;
 		}
@@ -446,13 +417,13 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// </summary>
 		/// <param name="idKategorie">ID kategorie</param>
 		/// <returns>ID zboží</returns>
-		internal static int ListOverViewCategories(int idKategorie)
+		internal static async Task<int> ListOverViewCategories(int idKategorie)
 		{
 			int idGoods = 0;
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
-				using (OracleCommand command = new("Nejvice_Objednane_Zbozi_V_Kategorii", connection))
+				await connection.OpenAsync();
+				using (OracleCommand command = new("pkg_funkce.Nejvice_Objednane_Zbozi_V_Kategorii", connection))
 				{
 					command.CommandType = CommandType.StoredProcedure;
 
@@ -472,7 +443,6 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 						idGoods = int.Parse(returnValue.Value.ToString());
 					}
 				}
-				connection.Close();
 			}
 			return idGoods;
 		}
@@ -481,32 +451,31 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// Metoda získá všechny soubory vč. podrobností
 		/// </summary>
 		/// <returns>List všech souborů</returns>
-		internal static List<Soubory_Vypis> GetAllFiles()
+		internal static async Task<List<Soubory_Vypis>> GetAllFiles()
 		{
 			List<Soubory_Vypis> files = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT s.*, z.jmeno, z.prijmeni, zb.nazev AS nazevZbozi FROM soubory s INNER JOIN zamestnanci z ON z.idZamestnance = s.idZamestnance INNER JOIN zbozi zb ON zb.idSouboru = s.idSouboru";
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
-						Soubory_Vypis? specificFile = new();
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								specificFile = new();
+								Soubory_Vypis? specificFile = new();
 								specificFile.Soubory = new();
-								specificFile.Soubory.IdSouboru = int.Parse(reader["idSouboru"].ToString());
+								specificFile.Soubory.IdSouboru = reader.GetInt32(reader.GetOrdinal("idSouboru"));
 								specificFile.Soubory.Nazev = reader["nazev"].ToString();
 								specificFile.Soubory.TypSouboru = reader["typSouboru"].ToString();
 								specificFile.Soubory.PriponaSouboru = reader["priponaSouboru"].ToString();
-								specificFile.Soubory.DatumNahrani = DateTime.Parse(reader["datumNahrani"].ToString());
-								specificFile.Soubory.DatumModifikace = DateTime.Parse(reader["datumModifikace"].ToString());
+								specificFile.Soubory.DatumNahrani = reader.GetDateTime(reader.GetOrdinal("datumNahrani"));
+								specificFile.Soubory.DatumModifikace = reader.GetDateTime(reader.GetOrdinal("datumModifikace"));
 								specificFile.Soubory.Data = reader["data"] as byte[];
-								specificFile.Soubory.idZamestnance = int.Parse(reader["idZamestnance"].ToString());
+								specificFile.Soubory.IdZamestnance = reader.GetInt32(reader.GetOrdinal("idZamestnance"));
 
 								specificFile.JmenoZamestnance = reader["jmeno"].ToString();
 								specificFile.PrijmeniZamestnance = reader["prijmeni"].ToString();
@@ -514,72 +483,65 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 								files.Add(specificFile);
 							}
 						}
-						else
-						{
-							specificFile = null;
-						}
 					}
 				}
-				connection.Close();
 			}
 			return files;
 		}
 
-		internal static Soubory? GetFileById(int idSouboru)
+		internal static async Task<Soubory?> GetFileById(int idSouboru)
 		{
 			Soubory getFiles = new();
 			using (OracleConnection connection = OracleDbContext.GetConnection())
 			{
-				connection.Open();
+				await connection.OpenAsync();
 				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT * FROM soubory WHERE idSouboru = :idSouboru";
 					command.Parameters.Add(":idSouboru", OracleDbType.Int32).Value = idSouboru;
-					using (OracleDataReader reader = command.ExecuteReader())
+					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())
 					{
 						if (reader.HasRows)
 						{
-							while (reader.Read())
+							while (await reader.ReadAsync())
 							{
-								getFiles.IdSouboru = int.Parse(reader["idSouboru"].ToString());
+								getFiles.IdSouboru = reader.GetInt32(reader.GetOrdinal("idSouboru"));
 								getFiles.Nazev = reader["nazev"].ToString();
 								getFiles.TypSouboru = reader["typSouboru"].ToString();
 								getFiles.PriponaSouboru = reader["priponaSouboru"].ToString();
-								getFiles.DatumNahrani = DateTime.Parse(reader["datumNahrani"].ToString());
-								getFiles.DatumModifikace = DateTime.Parse(reader["datumModifikace"].ToString());
-								getFiles.idZamestnance = int.Parse(reader["idZamestnance"].ToString());
+								getFiles.DatumNahrani = reader.GetDateTime(reader.GetOrdinal("datumNahrani"));
+								getFiles.DatumModifikace = reader.GetDateTime(reader.GetOrdinal("datumModifikace"));
+								getFiles.IdZamestnance = reader.GetInt32(reader.GetOrdinal("idZamestnance"));
 							}
 						}
 					}
 				}
-				connection.Close();
 			}
 			return getFiles;
 		}
 
-		internal static bool EditFile(Soubory_Edit fileEdit)
+		internal static async Task<bool> EditFile(Soubory_Edit fileEdit)
 		{
 			try
 			{
 				using (OracleConnection connection = OracleDbContext.GetConnection())
 				{
-					connection.Open();
-					using (OracleCommand command = new("P_UPRAVIT_SOUBOR", connection))
+					await connection.OpenAsync();
+					using (OracleCommand command = new("pkg_edit.P_UPRAVIT_SOUBOR", connection))
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_idsouboru", OracleDbType.Int32).Value = fileEdit.Soubory.IdSouboru;
-						command.Parameters.Add("p_nazev_souboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.Nazev;
-						command.Parameters.Add("p_typsouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.TypSouboru;
-						command.Parameters.Add("p_priponasouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory.PriponaSouboru;
-						command.Parameters.Add("p_datumnahrani", OracleDbType.Date).Value = fileEdit.Soubory.DatumNahrani;
-						command.Parameters.Add("p_datummodifikace", OracleDbType.Date).Value = fileEdit.Soubory.DatumModifikace;
-						command.Parameters.Add("p_data", OracleDbType.Blob).Value = fileEdit.Soubory.Data;
-						command.Parameters.Add("p_idzamestnance", OracleDbType.Int32).Value = fileEdit.Soubory.idZamestnance;
+						command.Parameters.Add("p_idsouboru", OracleDbType.Int32).Value = fileEdit.Soubory?.IdSouboru;
+						command.Parameters.Add("p_nazev_souboru", OracleDbType.Varchar2).Value = fileEdit.Soubory?.Nazev;
+						command.Parameters.Add("p_typsouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory?.TypSouboru;
+						command.Parameters.Add("p_priponasouboru", OracleDbType.Varchar2).Value = fileEdit.Soubory?.PriponaSouboru;
+						command.Parameters.Add("p_datumnahrani", OracleDbType.Date).Value = fileEdit.Soubory?.DatumNahrani;
+						command.Parameters.Add("p_datummodifikace", OracleDbType.Date).Value = fileEdit.Soubory?.DatumModifikace;
+						command.Parameters.Add("p_data", OracleDbType.Blob).Value = fileEdit.Soubory?.Data;
+						command.Parameters.Add("p_idzamestnance", OracleDbType.Int32).Value = fileEdit.Soubory?.IdZamestnance;
 
 						command.ExecuteNonQuery();
 					}
-					connection.Close();
 				}
 				return true;
 			}

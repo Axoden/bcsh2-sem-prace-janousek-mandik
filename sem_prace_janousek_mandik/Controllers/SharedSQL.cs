@@ -12,7 +12,7 @@ namespace sem_prace_janousek_mandik.Controllers
         /// </summary>
         /// <param name="password">Nezahashované heslo</param>
         /// <returns>Zahashované heslo</returns>
-        public static string? HashPassword(string password)
+        internal static string? HashPassword(string password)
         {
             if (password != null)
             {
@@ -28,18 +28,26 @@ namespace sem_prace_janousek_mandik.Controllers
         /// </summary>
         /// <param name="procedureName">Název procedury</param>
         /// <param name="id">Vstupní parametr ID procedury</param>
-        internal static void CallDeleteProcedure(string procedureName, int id)
+        /// <returns>true, pokud procedura proběhla úspěšně, jinak false</returns>
+        internal static async Task<bool> CallDeleteProcedure(string procedureName, int id)
         {
-            using (OracleConnection connection = OracleDbContext.GetConnection())
+            try
             {
-                connection.Open();
-                using (OracleCommand command = new(procedureName, connection))
+                using (OracleConnection connection = OracleDbContext.GetConnection())
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
-                    command.ExecuteNonQuery();
+                    await connection.OpenAsync();
+                    using (OracleCommand command = new(procedureName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
+                        command.ExecuteNonQuery();
+                    }
                 }
-                connection.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -49,20 +57,27 @@ namespace sem_prace_janousek_mandik.Controllers
         /// <param name="procedureName">Název procedury</param>
         /// <param name="id">Vstupní parametr ID procedury</param>
         /// <param name="idAdresy">Vstupní parametr ID procedury</param>
-		internal static void CallDeleteProcedure(string procedureName, int id, int secondId)
+		internal static async Task<bool> CallDeleteProcedure(string procedureName, int id, int secondId)
 		{
-			using (OracleConnection connection = OracleDbContext.GetConnection())
-			{
-				connection.Open();
-				using (OracleCommand command = new(procedureName, connection))
-				{
-					command.CommandType = CommandType.StoredProcedure;
-					command.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
-					command.Parameters.Add("p_idě", OracleDbType.Int32).Value = secondId;
-					command.ExecuteNonQuery();
-				}
-				connection.Close();
-			}
+            try
+            {
+                using (OracleConnection connection = OracleDbContext.GetConnection())
+                {
+                    await connection.OpenAsync();
+                    using (OracleCommand command = new(procedureName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.Add("p_id", OracleDbType.Int32).Value = id;
+                        command.Parameters.Add("p_id2", OracleDbType.Int32).Value = secondId;
+                        command.ExecuteNonQuery();
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
 		}
 	}
 }

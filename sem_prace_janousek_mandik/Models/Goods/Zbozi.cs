@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace sem_prace_janousek_mandik.Models.Goods
 {
@@ -9,17 +10,18 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public int IdZbozi { get; set; }
 
 		[Required]
+		[RegularExpression("^.{3,}$", ErrorMessage = "Musí obsahovat minimálně 3 znaky.")]
 		[DisplayName("Název: ")]
 		public string? Nazev { get; set; }
 
 		[Required]
-		[Range(0, float.MaxValue)]
-		[DisplayName("Jednotková cena: ")]
+		[Range(0, 9999999)]
+		[DisplayName("Jednotková cena [Kč]: ")]
 		public float? JednotkovaCena { get; set; }
 
 		[Required]
 		[Range(0, int.MaxValue)]
-		[DisplayName("Počet na skladě: ")]
+		[DisplayName("Počet kusů na skladě: ")]
 		public int PocetNaSklade { get; set; }
 
 		[Required]

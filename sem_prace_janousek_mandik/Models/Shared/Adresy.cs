@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace sem_prace_janousek_mandik.Models
+namespace sem_prace_janousek_mandik.Models.Shared
 {
     public class Adresy
     {
@@ -10,7 +10,7 @@ namespace sem_prace_janousek_mandik.Models
 
         [Required]
         [DisplayName("Ulice: ")]
-        public string? Ulice {  get; set; }
+        public string? Ulice { get; set; }
 
         [Required]
         [DisplayName("Město: ")]
@@ -24,7 +24,7 @@ namespace sem_prace_janousek_mandik.Models
         public string? Zeme { get; set; }
 
         [Required]
-        [Range(0, 99999)]
+        [Range(10000, 99999)]
         [DisplayName("PSČ: ")]
         public string? Psc { get; set; }
     }

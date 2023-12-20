@@ -1,6 +1,7 @@
 ﻿@using sem_prace_janousek_mandik.Controllers.Customer;
 @using sem_prace_janousek_mandik.Controllers.Employee;
 @using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Controllers.Home;
 @using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Controllers.Order;
 @using sem_prace_janousek_mandik.Controllers.Payment;
@@ -14,64 +15,70 @@
 <html>
 <head>
 	<title>@RenderSection("Title", required: false) - Skladové hospodářství</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/center_content.css" asp-append-version="true" />
 </head>
 <body>
-	<div>
+	<div style="text-align:center;padding-top:1%">
 		@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik") || role.Equals("Zakaznik"))
 		{
-			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Home)" asp-action="@nameof(HomeController.Index)"><button type="button" class="btn btn-secondary">Domovská stránka</button></a>
 
 			if (role.Equals("Admin"))
 			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button>Zákazníci</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListDatabaseObjects)"><button>Databázové objekty</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListLogs)"><button>Logování</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListFiles)"><button>Soubory</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListDatabaseObjects)"><button type="button" class="btn btn-secondary">Databázové objekty</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListLogs)"><button type="button" class="btn btn-secondary">Logování</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListFiles)"><button type="button" class="btn btn-secondary">Soubory</button></a>
 			}
 
 			if (role.Equals("Zakaznik"))
 			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomer)"><button>Informace o zákazníkovi</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomer)"><button type="button" class="btn btn-secondary">Informace o zákazníkovi</button></a>
 			}
 
 			if (role.Equals("Manazer") || role.Equals("Admin"))
 			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListPositions)"><button>Pozice</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListPositions)"><button type="button" class="btn btn-secondary">Pozice</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListReports)"><button type="button" class="btn btn-secondary">Sestavy</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListOverView)"><button type="button" class="btn btn-secondary">Přehledy</button></a>
 			}
 
 			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik"))
 			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button>Faktury + Platby</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button type="button" class="btn btn-secondary">Zákazníci</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button type="button" class="btn btn-secondary">Faktury + Platby</button></a>
 			}
 
 			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
 			{
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button>Zboží</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button>Kategorie</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListLocations)"><button>Umístění</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.ListSuppliers)"><button>Dodavatelé</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.ListEmployees)"><button>Zaměstnanci</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListReports)"><button>Sestavy</button></a>
-				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListOverView)"><button>Přehledy</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button type="button" class="btn btn-secondary">Zboží</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button type="button" class="btn btn-secondary">Kategorie</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListLocations)"><button type="button" class="btn btn-secondary">Umístění</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.ListSuppliers)"><button type="button" class="btn btn-secondary">Dodavatelé</button></a>
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.ListEmployees)"><button type="button" class="btn btn-secondary">Zaměstnanci</button></a>
 			}
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.ListOrders)"><button>Objednávky</button></a>
+
+			@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Zakaznik"))
+			{
+				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.ListOrders)"><button type="button" class="btn btn-secondary">Objednávky</button></a>
+			}
 		}
 
 		@if (role.Equals(""))
 		{
-			<a asp-controller="Home" asp-action="Index"><button>Domovská stránka</button></a>
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.LoginCustomer)"><button>Přihlášení zákazníci</button></a>
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)"><button>Registrace zákazníci</button></a>
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.LoginEmployee)"><button>Přihlášení zaměstnanci</button></a>
+			<a asp-controller="Home" asp-action="Index"><button type="button" class="btn btn-secondary">Domovská stránka</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.LoginCustomer)"><button type="button" class="btn btn-secondary">Přihlášení zákazníci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.RegisterCustomer)"><button type="button" class="btn btn-secondary">Registrace zákazníci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.LoginEmployee)"><button type="button" class="btn btn-secondary">Přihlášení zaměstnanci</button></a>
 		}
 		else
 		{
-			<a asp-controller="Home" asp-action="Logout"><button>Odhlásit se</button></a>
+			<a asp-controller="Home" asp-action="Logout"><button type="button" class="btn btn-secondary">Odhlásit se</button></a>
 		}
 
 		@if (!ViewBag.EmulatedEmail.Equals(""))
 		{
-			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EndEmulation)"><button>Ukončit emulaci</button></a>
+			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EndEmulation)"><button type="button" class="btn btn-secondary">Ukončit emulaci</button></a>
 		}
 	</div>
 

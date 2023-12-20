@@ -4,47 +4,49 @@
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-<h1>Zaplacení faktury</h1>
+<div class="text-center">
+	<h1>Zaplacení faktury</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="AddPaymentCustomerPost">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="TypPlatby"></label>
-                <select asp-for="TypPlatby" class="form-control">
-                    <option value="Kartou">Kartou</option>
-                    <option value="Hotove">Hotove</option>
-                    <option value="Prevodem">Prevodem</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Castka" class="control-label"></label>
-                <input asp-for="Castka" class="form-control" />
-                <span asp-validation-for="Castka" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VariabilniSymbol" class="control-label"></label>
-                <input asp-for="VariabilniSymbol" class="form-control" />
-                <span asp-validation-for="VariabilniSymbol" class="text-danger"></span>
-            </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="AddPaymentCustomerPost">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="TypPlatby"></label>
+				<select asp-for="TypPlatby" class="form-control">
+					<option value="Kartou">Kartou</option>
+					<option value="Hotove">Hotove</option>
+					<option value="Prevodem">Prevodem</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label asp-for="Castka" class="control-label"></label>
+				<input asp-for="Castka" pattern="^\d+(\.\d+)?$" title="Desetinné číslo oddělujte tečkou (.)" class="form-control" />
+				<span asp-validation-for="Castka" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="VariabilniSymbol" class="control-label"></label>
+				<input asp-for="VariabilniSymbol" class="form-control" placeholder="Pouze u platby převodem" />
+				<span asp-validation-for="VariabilniSymbol" class="text-danger"></span>
+			</div>
 
-            <div class="form-group">
-                <input type="hidden" asp-for="IdFaktury"  value="@Model.IdFaktury" />
-            </div>
+			<div class="form-group">
+				<input type="hidden" asp-for="IdFaktury" value="@Model.IdFaktury" />
+			</div>
 
-            <div class="form-group">
-                <input type="hidden" name="idObjednavky" value="@ViewBag.idObjednavky" />
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Zaplatit" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+			<div class="form-group">
+				<input type="hidden" name="idObjednavky" value="@ViewBag.idObjednavky" />
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Zaplatit" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

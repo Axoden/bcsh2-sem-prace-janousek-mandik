@@ -1,4 +1,7 @@
-﻿namespace sem_prace_janousek_mandik.Models.Employee
+﻿using sem_prace_janousek_mandik.Models.Management;
+using sem_prace_janousek_mandik.Models.Shared;
+
+namespace sem_prace_janousek_mandik.Models.Employee
 {
     public class Zamestnanci_Adresy_Pozice
     {

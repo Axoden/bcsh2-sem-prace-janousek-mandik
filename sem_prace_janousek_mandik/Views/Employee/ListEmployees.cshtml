@@ -15,138 +15,140 @@
 
 	@if (ViewBag.Role.Equals("Admin"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.AddEmployee)"><button type="submit">Přidat zaměstnance</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.AddEmployee)" method="get">
+			<input type="submit" value="Přidat zaměstnance" class="btn btn-primary" />
+		</form>
 		<br />
 	}
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.SearchEmployees)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" id="search" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.SearchEmployees)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Jméno</td>
-			<td>Příjmení</td>
-			<td>Heslo</td>
-			<td>Datum narození</td>
-			<td>Telefon</td>
-			<td>Email</td>
-			<td>Ulice</td>
-			<td>Město</td>
-			<td>Okres</td>
-			<td>Země</td>
-			<td>PSČ</td>
-			<td>Pozice</td>
-			<td>Upravit</td>
-			@if (ViewBag.Role.Equals("Admin"))
-			{
-				<td>Odstranit</td>
-				<td>Emulace</td>
-			}
-		</tr>
-
-		@{
-			string hidden = "<skryté>";
-		}
-
-		@foreach (Zamestnanci_Adresy_Pozice item in Model)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Zamestnanci.Jmeno</td>
-				<td>@item.Zamestnanci.Prijmeni</td>
-				<td>@hidden</td>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.Jmeno)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.Prijmeni)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.Heslo)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.DatumNarozeni)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.Telefon)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Zamestnanci.Email)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Ulice)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Mesto)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Okres)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Zeme)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
+				<th>@Html.DisplayNameFor(item => item[0].Pozice.Nazev)</th>
+				<th>Upravit:</th>
+				@if (ViewBag.Role.Equals("Admin"))
+				{
+					<th>Odstranit:</th>
+					<th>Emulace:</th>
+				}
+			</tr>
 
-				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin"))
-				{
-					<td>@item.Zamestnanci.DatumNarozeni</td>
-				}
-				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
-				{
-					<!-- Zobrazení data narození pouze adminovi nebo manažerovi -->
-					<td>@item.Zamestnanci.DatumNarozeni</td>
-				}
-				else
-				{
+			@{
+				string hidden = "<skryté>";
+			}
+
+			@foreach (Zamestnanci_Adresy_Pozice item in Model)
+			{
+				<tr>
+					<td>@item.Zamestnanci?.Jmeno</td>
+					<td>@item.Zamestnanci?.Prijmeni</td>
 					<td>@hidden</td>
-				}
 
-				<td>@item.Zamestnanci.Telefon</td>
-				<td>@item.Zamestnanci.Email</td>
-
-				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
-				{
-					<td>@item.Adresy.Ulice</td>
-					<td>@item.Adresy.Mesto</td>
-					if (item.Adresy.Okres.Equals(""))
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
 					{
-						<td></td>
+						<!-- Zobrazení data narození adminovi, manažerovi a vlastnímu zaměstnanci -->
+						<td>@item.Zamestnanci?.DatumNarozeni.Value.ToString("dd. MM. yyyy")</td>
 					}
 					else
 					{
-						<td>@item.Adresy.Okres</td>
+						<td>@hidden</td>
 					}
-					<td>@item.Adresy.Zeme</td>
-					<td>@item.Adresy.Psc</td>
-				}
-				else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
-				{
-					<td>@item.Adresy.Ulice</td>
-					<td>@item.Adresy.Mesto</td>
-					<td>@item.Adresy.Okres</td>
-					<td>@item.Adresy.Zeme</td>
-					<td>@item.Adresy.Psc</td>
-				}
-				else
-				{
-					<td>@hidden</td>
-					<td>@hidden</td>
-					<td>@hidden</td>
-					<td>@hidden</td>
-					<td>@hidden</td>
-				}
+
+					<td><a href="tel:@item.Zamestnanci?.Telefon">@item.Zamestnanci?.Telefon</a></td>
+					<td><a href="mailto:@item.Zamestnanci?.Email">@item.Zamestnanci?.Email</a></td>
+
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
+					{
+						<td>@item.Adresy?.Ulice</td>
+						<td>@item.Adresy?.Mesto</td>
+						if (item.Adresy.Okres.Equals(""))
+						{
+							<td></td>
+						}
+						else
+						{
+							<td>@item.Adresy?.Okres</td>
+						}
+						<td>@item.Adresy?.Zeme</td>
+						<td>@item.Adresy?.Psc</td>
+					}
+					else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+					{
+						<td>@item.Adresy?.Ulice</td>
+						<td>@item.Adresy?.Mesto</td>
+						<td>@item.Adresy?.Okres</td>
+						<td>@item.Adresy?.Zeme</td>
+						<td>@item.Adresy?.Psc</td>
+					}
+					else
+					{
+						<td>@hidden</td>
+						<td>@hidden</td>
+						<td>@hidden</td>
+						<td>@hidden</td>
+						<td>@hidden</td>
+					}
 
 
-				<td>@item.Pozice.Nazev</td>
+					<td>@item.Pozice?.Nazev</td>
 
-				@if (ViewBag.Email.Equals(item.Zamestnanci.Email) && !ViewBag.Role.Equals("Admin"))
-				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
-							<input type="hidden" name="index" value="@item.Zamestnanci.IdZamestnance" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
-				}
-				else if (ViewBag.Role.Equals("Admin"))
-				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
-							<input type="hidden" name="index" value="@item.Zamestnanci.IdZamestnance" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.DeleteEmployee)">
-							<input type="hidden" name="idZamestnance" value="@item.Zamestnanci.IdZamestnance" />
-							<input type="hidden" name="idAdresy" value="@item.Zamestnanci.IdAdresy" />
-							<input type="submit" value="Smazat" class="btn btn-primary" />
-						</form>
-					</td>
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationEmployee)">
-							<input type="hidden" name="idEmployee" value="@item.Zamestnanci.IdZamestnance" />
-							<input type="submit" value="Emulovat" class="btn btn-primary" />
-						</form>
-					</td>
-				}
-				else
-				{
-					<td>@hidden</td>
-				}
-			</tr>
-		}
-	</table>
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
+								<input type="hidden" name="index" value="@item.Zamestnanci?.IdZamestnance" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+					else if (ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
+								<input type="hidden" name="index" value="@item.Zamestnanci?.IdZamestnance" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.DeleteEmployee)">
+								<input type="hidden" name="idZamestnance" value="@item.Zamestnanci.IdZamestnance" />
+								<input type="hidden" name="idAdresy" value="@item.Zamestnanci.IdAdresy" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.StartEmulationEmployee)">
+								<input type="hidden" name="idEmployee" value="@item.Zamestnanci.IdZamestnance" />
+								<input type="submit" value="Emulovat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+					else
+					{
+						<td>@hidden</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>

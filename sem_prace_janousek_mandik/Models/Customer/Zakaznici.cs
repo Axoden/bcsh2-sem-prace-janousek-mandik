@@ -9,10 +9,12 @@ namespace sem_prace_janousek_mandik.Models.Customer
         public int IdZakaznika { get; set; }
 
         [Required]
-        [DisplayName("Jméno:")]
+		[RegularExpression("^[A-Z][a-zA-Z]{2,}", ErrorMessage = "Musí začínat velkým písmenem a musí obsahovat minimálně 3 znaky.")]
+		[DisplayName("Jméno:")]
         public string? Jmeno { get; set; }
 
         [Required]
+		[RegularExpression("^[A-Z][a-zA-Z]{2,}", ErrorMessage = "Musí začínat velkým písmenem a musí obsahovat minimálně 3 znaky.")]
 		[DisplayName("Příjmení:")]
 		public string? Prijmeni { get; set; }
 

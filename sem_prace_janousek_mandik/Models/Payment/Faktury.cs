@@ -25,17 +25,17 @@ namespace sem_prace_janousek_mandik.Models.Payment
 
 		[Required]
 		[Range(0, float.MaxValue)]
-		[DisplayName("Celková částka za objednávku: ")]
+		[DisplayName("Celková částka za objednávku [Kč]: ")]
 		public float CastkaObjednavka { get; set; }
 
 		[Required]
-		[Range(0, float.MaxValue)]
-		[DisplayName("Částka za dopravu: ")]
+		[Range(0, 1000000)]
+		[DisplayName("Částka za dopravu [Kč]: ")]
 		public float CastkaDoprava { get; set; }
 
 		[Required]
-		[Range(0, float.MaxValue)]
-		[DisplayName("DPH: ")]
+		[Range(0, 100)]
+		[DisplayName("DPH [%]: ")]
 		public float Dph { get; set; }
     }
 }

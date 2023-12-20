@@ -14,44 +14,43 @@
 
 	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddInvoice)"><button type="submit">Vytvořit novou fakturu</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddInvoice)" method="get">
+			<input type="submit" value="Vytvořit novou fakturu" class="btn btn-primary" />
+		</form>
 		<br />
 	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.SearchInvoices)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.SearchInvoices)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td style="font-weight: bold;">Č. faktury</td>
-			<td style="font-weight: bold;">Datum vystavení</td>
-			<td style="font-weight: bold;">Datum splatnosti</td>
-			<td style="font-weight: bold;">Částka za zboží</td>
-			<td style="font-weight: bold;">Částka za dopravu</td>
-			<td style="font-weight: bold;">DPH</td>
-			<td style="font-weight: bold;">Celkem bez DPH</td>
-			<td style="font-weight: bold;">Částka s DPH</td>
-			@if (ViewBag.Role.Equals("Admin"))
-			{
-				<td style="font-weight: bold;">Upravit</td>
-				<td style="font-weight: bold;">Odstranit</td>
-				<td style="font-weight: bold;">Přidat platbu</td>
-			}
-		</tr>
-
-		@{
-			bool printedHeaderTr = false;
-		}
-
-		@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			@foreach (Faktury item in Model.Faktury)
 			{
-				printedHeaderTr = false;
+				<tr>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].CisloFaktury)</th>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].DatumVystaveni)</th>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].DatumSplatnosti)</th>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].CastkaObjednavka)</th>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].CastkaDoprava)</th>
+					<th>@Html.DisplayNameFor(item => item.Faktury[0].Dph)</th>
+					<th>Celkem bez DPH [Kč]:</th>
+					<th>Částka s DPH [Kč]:</th>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<th>Upravit fakturu:</th>
+						<th>Odstranit fakturu:</th>
+						<th>Přidat platbu:</th>
+					}
+				</tr>
+
 				float celkemBezDph = item.CastkaObjednavka + item.CastkaDoprava;
 				string dph = "1." + item.Dph.ToString();
 				float celkemDph = (float)Math.Round(((item.CastkaObjednavka + item.CastkaDoprava) * float.Parse(dph)), 2);
@@ -60,8 +59,8 @@
 				<tr></tr>
 				<tr>
 					<td>@item.CisloFaktury</td>
-					<td>@item.DatumVystaveni</td>
-					<td>@item.DatumSplatnosti</td>
+					<td>@item.DatumVystaveni.Value.ToString("dd. MM. yyyy")</td>
+					<td>@item.DatumSplatnosti.Value.ToString("dd. MM. yyyy")</td>
 					<td>@item.CastkaObjednavka</td>
 					<td>@item.CastkaDoprava</td>
 					<td>@item.Dph</td>
@@ -90,7 +89,9 @@
 					}
 				</tr>
 
-				@foreach (Platby itemZbozi in Model.Platby.Where((lmb) => lmb.IdFaktury == item.IdFaktury).ToList())
+				bool printedHeaderTr = false;
+
+				@foreach (Platby itemPayments in Model.Platby.Where((lmb) => lmb.IdFaktury == item.IdFaktury).ToList())
 				{
 					@if (!printedHeaderTr)
 					{
@@ -99,14 +100,14 @@
 						<tr></tr>
 						<tr>
 							<td></td>
-							<td style="font-weight: bold;">Typ platby</td>
-							<td style="font-weight: bold;">Částka</td>
-							<td style="font-weight: bold;">Datum platby</td>
-							<td style="font-weight: bold;">Variabilní symbol</td>
+							<th>@Html.DisplayNameFor(item => item.Platby[0].TypPlatby)</th>
+							<th>@Html.DisplayNameFor(item => item.Platby[0].Castka)</th>
+							<th>@Html.DisplayNameFor(item => item.Platby[0].DatumPlatby)</th>
+							<th>@Html.DisplayNameFor(item => item.Platby[0].VariabilniSymbol)</th>
 							@if (ViewBag.Role.Equals("Admin"))
 							{
-								<td style="font-weight: bold;">Upravit</td>
-								<td style="font-weight: bold;">Odstranit</td>
+								<th>Upravit platbu:</th>
+								<th>Odstranit platbu:</th>
 							}
 						</tr>
 						printedHeaderTr = true;
@@ -115,11 +116,11 @@
 					<tr>
 						<td>>>></td>
 						<td>
-							@if (itemZbozi.TypPlatby == 'K')
+							@if (itemPayments.TypPlatby == 'K')
 							{
 								<p>Kartou</p>
 							}
-							else if (itemZbozi.TypPlatby == 'P')
+							else if (itemPayments.TypPlatby == 'P')
 							{
 								<p>Prevodem</p>
 							}
@@ -128,20 +129,20 @@
 								<p>Hotove</p>
 							}
 						</td>
-						<td>@itemZbozi.Castka</td>
-						<td>@itemZbozi.DatumPlatby</td>
-						<td>@itemZbozi.VariabilniSymbol</td>
+						<td>@itemPayments.Castka</td>
+						<td>@itemPayments.DatumPlatby.ToString("dd. MM. yyyy HH:mm")</td>
+						<td>@itemPayments.VariabilniSymbol</td>
 						@if (ViewBag.Role.Equals("Admin"))
 						{
 							<td>
 								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPaymentGet)">
-									<input type="hidden" name="index" value="@itemZbozi.IdPlatby" />
+									<input type="hidden" name="index" value="@itemPayments.IdPlatby" />
 									<input type="submit" value="Upravit" class="btn btn-primary" />
 								</form>
 							</td>
 							<td>
 								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.DeletePayment)">
-									<input type="hidden" name="index" value="@itemZbozi.IdPlatby" />
+									<input type="hidden" name="index" value="@itemPayments.IdPlatby" />
 									<input type="submit" value="Smazat" class="btn btn-primary" />
 								</form>
 							</td>
@@ -149,6 +150,6 @@
 					</tr>
 				}
 			}
-		}
-	</table>
+		</table>
+	</div>
 </div>

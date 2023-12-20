@@ -1,4 +1,5 @@
-﻿@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
+﻿@using sem_prace_janousek_mandik.Models.Management;
+@model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
 
 @section Title{
 	Přidání zaměstnance
@@ -8,11 +9,12 @@
     Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-
+<div class="text-center">
 <h1>Přidání nového zaměstnance</h1>
+</div>
 
 <hr />
-<div class="row">
+<div class="form">
     <div class="col-md-4">
         <p>@ViewBag.ErrorInfo</p>
         <form asp-action="AddEmployee">
@@ -87,7 +89,7 @@
                     }
                 </select>
             </div>
-
+            <br />
             <div class="form-group">
                 <input type="submit" value="Přidat zaměstnance" class="btn btn-primary" />
             </div>

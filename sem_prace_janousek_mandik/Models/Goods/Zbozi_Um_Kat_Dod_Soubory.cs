@@ -1,8 +1,9 @@
-﻿using sem_prace_janousek_mandik.Models.Supplier;
+﻿using sem_prace_janousek_mandik.Models.Management;
+using sem_prace_janousek_mandik.Models.Supplier;
 
 namespace sem_prace_janousek_mandik.Models.Goods
 {
-	public class Zbozi_Um_Kat_Dod_Soubory
+    public class Zbozi_Um_Kat_Dod_Soubory
 	{
 		public Zbozi? Zbozi { get; set; }
 

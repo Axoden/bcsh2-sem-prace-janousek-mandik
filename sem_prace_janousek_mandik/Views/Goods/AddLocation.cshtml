@@ -5,52 +5,53 @@
 }
 
 @{
-    Layout = "~/Views/Shared/_LayoutAll.cshtml";
+	Layout = "~/Views/Shared/_LayoutAll.cshtml";
 }
 
-
-<h1>Přidání nového umístění</h1>
+<div class="text-center">
+	<h1>Přidání nového umístění</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <p>@ViewBag.ErrorInfo</p>
-        <form asp-action="AddLocation">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Mistnost" class="control-label"></label>
-                <input asp-for="Mistnost" class="form-control" />
-                <span asp-validation-for="Mistnost" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Rada" class="control-label"></label>
-                <input asp-for="Rada" class="form-control" />
-                <span asp-validation-for="Rada" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Regal" class="control-label"></label>
-                <input asp-for="Regal" class="form-control" />
-                <span asp-validation-for="Regal" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Pozice" class="control-label"></label>
-                <input asp-for="Pozice" class="form-control" />
-                <span asp-validation-for="Pozice" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Datum" class="control-label"></label>
-                <input asp-for="Datum" class="form-control" />
-                <span asp-validation-for="Datum" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Poznamka" class="control-label"></label>
-                <input asp-for="Poznamka" class="form-control" />
-                <span asp-validation-for="Poznamka" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Přidat umístění" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="form">
+	<div class="col-md-4">
+		<p>@ViewBag.ErrorInfo</p>
+		<form asp-action="AddLocation">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group">
+				<label asp-for="Mistnost" class="control-label"></label>
+				<input asp-for="Mistnost" class="form-control" />
+				<span asp-validation-for="Mistnost" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Rada" class="control-label"></label>
+				<input asp-for="Rada" class="form-control" />
+				<span asp-validation-for="Rada" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Regal" class="control-label"></label>
+				<input asp-for="Regal" class="form-control" />
+				<span asp-validation-for="Regal" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Pozice" class="control-label"></label>
+				<input asp-for="Pozice" class="form-control" />
+				<span asp-validation-for="Pozice" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Datum" class="control-label"></label>
+				<input asp-for="Datum" class="form-control" />
+				<span asp-validation-for="Datum" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<label asp-for="Poznamka" class="control-label"></label>
+				<input asp-for="Poznamka" class="form-control" />
+				<span asp-validation-for="Poznamka" class="text-danger"></span>
+			</div>
+			<br />
+			<div class="form-group">
+				<input type="submit" value="Přidat umístění" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
 </div>

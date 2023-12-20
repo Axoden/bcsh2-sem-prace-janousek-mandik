@@ -13,7 +13,7 @@ namespace sem_prace_janousek_mandik.Models.Payment
 		public DateTime DatumPlatby { get; set; }
 
         [Required]
-		[DisplayName("Částka: ")]
+		[DisplayName("Částka [Kč]: ")]
 		[Range(0, float.MaxValue)]
 		public float Castka { get; set; }
 

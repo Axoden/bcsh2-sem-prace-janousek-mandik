@@ -1,5 +1,7 @@
-﻿@model List<sem_prace_janousek_mandik.Models.Pozice>
-@using sem_prace_janousek_mandik.Controllers.Management;
+﻿@using sem_prace_janousek_mandik.Controllers.Management;
+@using sem_prace_janousek_mandik.Models.Management;
+@model List<Pozice>
+
 @section Title{
 	Výpis pozicí
 }
@@ -13,47 +15,54 @@
 
 	@if (ViewBag.Role.Equals("Admin"))
 	{
-		<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.AddPosition)"><button type="submit">Přidat pozici</button></a>
 		<br />
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.AddPosition)" method="get">
+			<input type="submit" value="Přidat pozici" class="btn btn-primary" />
+		</form>
 		<br />
 	}
 
-	<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchPositions)">
-		<input name="search" value="@ViewBag.Search" />
-		<input type="submit" value="Vyhledat" class="btn btn-primary" />
-	</form>
+	<div class="list">
+		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.SearchPositions)" method="get">
+			<input for="search" type="text" class="form-control" name="search" value="@ViewBag.Search" />
+			<br />
+			<input type="submit" value="Vyhledat" class="btn btn-primary" />
+		</form>
+	</div>
+
 	<br />
-
-	<table border="1">
-		<tr>
-			<td>Název</td>
-			@if (ViewBag.Role.Equals("Admin"))
-			{
-				<td>Upravit</td>
-				<td>Odstranit</td>
-			}
-		</tr>
-
-		@foreach (Pozice item in Model)
-		{
+	<div class="list">
+		<table border="1" class="list table">
 			<tr>
-				<td>@item.Nazev</td>
+				<th>@Html.DisplayNameFor(item => item[0].Nazev)</th>
 				@if (ViewBag.Role.Equals("Admin"))
 				{
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPositionGet)">
-							<input type="hidden" name="index" value="@item.IdPozice" />
-							<input type="submit" value="Upravit" class="btn btn-primary" />
-						</form>
-					</td>
-					<td>
-						<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeletePosition)">
-							<input type="hidden" name="index" value="@item.IdPozice" />
-							<input type="submit" value="Smazat" class="btn btn-primary" />
-						</form>
-					</td>
+					<th>Upravit:</th>
+					<th>Odstranit:</th>
 				}
 			</tr>
-		}
-	</table>
+
+			@foreach (Pozice item in Model)
+			{
+				<tr>
+					<td>@item.Nazev</td>
+					@if (ViewBag.Role.Equals("Admin"))
+					{
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPositionGet)">
+								<input type="hidden" name="index" value="@item.IdPozice" />
+								<input type="submit" value="Upravit" class="btn btn-primary" />
+							</form>
+						</td>
+						<td>
+							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.DeletePosition)">
+								<input type="hidden" name="index" value="@item.IdPozice" />
+								<input type="submit" value="Smazat" class="btn btn-primary" />
+							</form>
+						</td>
+					}
+				</tr>
+			}
+		</table>
+	</div>
 </div>
