@@ -1,5 +1,6 @@
 ﻿@model List<sem_prace_janousek_mandik.Models.Goods.Kategorie_NadrazenaKategorie>
 @using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Models.Goods;
 @section Title{
 	Výpis kategorií
@@ -12,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všech kategorií:</h2>
 	<p>@ViewBag.ErrorInfo</p>
-	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddCategory)" method="get">
@@ -37,7 +38,7 @@
 				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Zkratka)</th>
 				<th>@Html.DisplayNameFor(item => item[0].Kategorie.Popis)</th>
 				<th>Nadřazená Kategorie @Html.DisplayNameFor(item => item[0].NadrazenaKategorie.Nazev)</th>
-				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+				@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 				{
 					<th>Upravit:</th>
 					<th>Odstranit:</th>
@@ -51,7 +52,7 @@
 					<td>@item.Kategorie?.Zkratka</td>
 					<td>@item.Kategorie?.Popis</td>
 					<td>@(item.NadrazenaKategorie?.Nazev ?? "")</td>
-					@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+					@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditCategoryGet)">

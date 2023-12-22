@@ -8,7 +8,7 @@
 @using sem_prace_janousek_mandik.Controllers.Supplier;
 
 @{
-	string role = ViewBag.Role;
+	Roles? role = ViewBag.Role;
 }
 
 <!DOCTYPE html>
@@ -20,36 +20,36 @@
 </head>
 <body>
 	<div style="text-align:center;padding-top:1%">
-		@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik") || role.Equals("Zakaznik"))
+		@if (role == Roles.Admin || role == Roles.Manazer || role == Roles.Logistik || role == Roles.Skladnik || role == Roles.Zakaznik)
 		{
 			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Home)" asp-action="@nameof(HomeController.Index)"><button type="button" class="btn btn-secondary">Domovská stránka</button></a>
 
-			if (role.Equals("Admin"))
+			if (role == Roles.Admin)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListDatabaseObjects)"><button type="button" class="btn btn-secondary">Databázové objekty</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListLogs)"><button type="button" class="btn btn-secondary">Logování</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListFiles)"><button type="button" class="btn btn-secondary">Soubory</button></a>
 			}
 
-			if (role.Equals("Zakaznik"))
+			if (role == Roles.Zakaznik)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomer)"><button type="button" class="btn btn-secondary">Informace o zákazníkovi</button></a>
 			}
 
-			if (role.Equals("Manazer") || role.Equals("Admin"))
+			if (role == Roles.Manazer || role == Roles.Admin)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListPositions)"><button type="button" class="btn btn-secondary">Pozice</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListReports)"><button type="button" class="btn btn-secondary">Sestavy</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.ListOverView)"><button type="button" class="btn btn-secondary">Přehledy</button></a>
 			}
 
-			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik"))
+			if (role == Roles.Admin || role == Roles.Manazer || role == Roles.Logistik)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.ListCustomers)"><button type="button" class="btn btn-secondary">Zákazníci</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.ListInvoices)"><button type="button" class="btn btn-secondary">Faktury + Platby</button></a>
 			}
 
-			if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Skladnik"))
+			if (role == Roles.Admin || role == Roles.Manazer || role == Roles.Logistik || role == Roles.Skladnik)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListGoods)"><button type="button" class="btn btn-secondary">Zboží</button></a>
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.ListCategories)"><button type="button" class="btn btn-secondary">Kategorie</button></a>
@@ -58,13 +58,13 @@
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.ListEmployees)"><button type="button" class="btn btn-secondary">Zaměstnanci</button></a>
 			}
 
-			@if (role.Equals("Admin") || role.Equals("Manazer") || role.Equals("Logistik") || role.Equals("Zakaznik"))
+			@if (role == Roles.Admin || role == Roles.Manazer || role == Roles.Logistik || role == Roles.Zakaznik)
 			{
 				<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.ListOrders)"><button type="button" class="btn btn-secondary">Objednávky</button></a>
 			}
 		}
 
-		@if (role.Equals(""))
+		@if (role == null)
 		{
 			<a asp-controller="Home" asp-action="Index"><button type="button" class="btn btn-secondary">Domovská stránka</button></a>
 			<a asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.LoginCustomer)"><button type="button" class="btn btn-secondary">Přihlášení zákazníci</button></a>

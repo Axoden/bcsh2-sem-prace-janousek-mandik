@@ -13,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všech pozic:</h2>
 
-	@if (ViewBag.Role.Equals("Admin"))
+	@if (ViewBag.Role == Roles.Admin)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.AddPosition)" method="get">
@@ -35,7 +35,7 @@
 		<table border="1" class="list table">
 			<tr>
 				<th>@Html.DisplayNameFor(item => item[0].Nazev)</th>
-				@if (ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Role == Roles.Admin)
 				{
 					<th>Upravit:</th>
 					<th>Odstranit:</th>
@@ -46,7 +46,7 @@
 			{
 				<tr>
 					<td>@item.Nazev</td>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Management)" asp-action="@nameof(ManagementController.EditPositionGet)">

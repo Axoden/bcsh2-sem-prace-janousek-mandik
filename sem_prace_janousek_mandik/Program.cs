@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -28,6 +31,14 @@ internal class Program
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
+
+        app.UseRequestLocalization(new RequestLocalizationOptions
+        {
+            DefaultRequestCulture = new RequestCulture("en-US"),
+            SupportedCultures = new List<CultureInfo> { new CultureInfo("en-US") },
+            SupportedUICultures = new List<CultureInfo> { new CultureInfo("en-US") }
+        });
 
         app.UseRouting();
 

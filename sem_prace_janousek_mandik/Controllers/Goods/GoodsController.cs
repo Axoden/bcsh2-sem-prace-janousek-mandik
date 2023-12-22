@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Controllers.Supplier;
 using sem_prace_janousek_mandik.Models.Goods;
 using sem_prace_janousek_mandik.Models.Management;
@@ -16,7 +17,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		public async Task<IActionResult> ListCategories()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				List<Kategorie_NadrazenaKategorie> categories = await GoodsSQL.GetAllCategories();
 				return View(categories);
@@ -32,7 +33,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public async Task<IActionResult> SearchCategories(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				// Předání vyhledávaného výrazu
 				ViewBag.Search = search;
@@ -54,7 +55,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public async Task<IActionResult> AddCategory()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Kategorie_NadrazenaKategorie_List category = new();
 				category.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
@@ -72,7 +73,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddCategory(Kategorie_NadrazenaKategorie_List newCategory)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				newCategory.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
 				if (ModelState.IsValid == true)
@@ -103,7 +104,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpPost]
 		public async Task<IActionResult> EditCategoryGet(int index)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Kategorie_NadrazenaKategorie_List category = new();
 				category.Kategorie = await GoodsSQL.GetCategoryById(index);
@@ -122,7 +123,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditCategoryPost(Kategorie_NadrazenaKategorie_List category)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				if (ModelState.IsValid)
 				{
@@ -166,7 +167,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteCategory(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				string? output = await GoodsSQL.DeleteCategory(index);
 				if(output != null)
@@ -186,7 +187,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		public async Task<IActionResult> ListGoods()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik || Role == Roles.Logistik)
 			{
 				List<Zbozi_Um_Kat_Dod_Soubory> zboziUmisteniKategorieDodavatel = await GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
 				return View(zboziUmisteniKategorieDodavatel);
@@ -202,7 +203,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public async Task<IActionResult> SearchGoods(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				ViewBag.Search = search;
 				List<Zbozi_Um_Kat_Dod_Soubory> zbozi = await GoodsSQL.GetAllGoodsWithLocationCategorySupplier();
@@ -223,7 +224,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public async Task<IActionResult> AddGoods()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Zbozi_Um_Kat_DodList goods = new();
 				goods.Kategorie = await GoodsSQL.GetAllCategoriesNameAcronym();
@@ -267,7 +268,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddGoods(Zbozi_Um_Kat_DodList newGoods, IFormFile soubor)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				ModelState.Remove("soubor");
 				if (ModelState.IsValid)
@@ -313,7 +314,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpPost]
 		public async Task<IActionResult> EditGoodsGet(int index)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Zbozi_Um_Kat_DodList goods = new();
 				goods.Zbozi = await GoodsSQL.GetGoodsById(index);
@@ -334,7 +335,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditGoodsPost(Zbozi_Um_Kat_DodList editZbozi, IFormFile soubor, bool checkBoxDelete)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				ModelState.Remove("soubor");
 				ModelState.Remove("checkBoxDelete");
@@ -390,7 +391,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteGoods(int index)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZBOZI", index);
 			}
@@ -403,7 +404,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		/// <returns></returns>
 		public async Task<IActionResult> ListLocations()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				Zbozi_Pohyby_Umisteni goods = new();
 				goods.Zbozi = await GoodsSQL.GetAllGoodsIdName();
@@ -422,7 +423,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public async Task<IActionResult> SearchLocations(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				ViewBag.Search = search;
 				Zbozi_Pohyby_Umisteni goods = new();
@@ -454,7 +455,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpGet]
 		public IActionResult AddLocation()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				return View();
 			}
@@ -470,7 +471,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddLocation(Umisteni newLocation)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				if (ModelState.IsValid)
 				{
@@ -492,7 +493,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[HttpPost]
 		public async Task<IActionResult> EditLocationGet(int index)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				Umisteni umisteni = await GoodsSQL.GetLocationById(index);
 				return View("EditLocation", umisteni);
@@ -509,7 +510,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditLocationPost(Umisteni umisteni)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				if (ModelState.IsValid)
 				{
@@ -532,7 +533,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteLocation(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_UMISTENI", index);
 			}

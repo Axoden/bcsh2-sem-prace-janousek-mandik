@@ -13,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všech zaměstnanců:</h2>
 
-	@if (ViewBag.Role.Equals("Admin"))
+	@if (ViewBag.Role == Roles.Admin)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.AddEmployee)" method="get">
@@ -46,7 +46,7 @@
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
 				<th>@Html.DisplayNameFor(item => item[0].Pozice.Nazev)</th>
 				<th>Upravit:</th>
-				@if (ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Role == Roles.Admin)
 				{
 					<th>Odstranit:</th>
 					<th>Emulace:</th>
@@ -64,7 +64,7 @@
 					<td>@item.Zamestnanci?.Prijmeni</td>
 					<td>@hidden</td>
 
-					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && ViewBag.Role != Roles.Admin || ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer)
 					{
 						<!-- Zobrazení data narození adminovi, manažerovi a vlastnímu zaměstnanci -->
 						<td>@item.Zamestnanci?.DatumNarozeni.Value.ToString("dd. MM. yyyy")</td>
@@ -77,7 +77,7 @@
 					<td><a href="tel:@item.Zamestnanci?.Telefon">@item.Zamestnanci?.Telefon</a></td>
 					<td><a href="mailto:@item.Zamestnanci?.Email">@item.Zamestnanci?.Email</a></td>
 
-					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin") && !ViewBag.Role.Equals("Manazer"))
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && ViewBag.Role != Roles.Admin && ViewBag.Role != Roles.Manazer)
 					{
 						<td>@item.Adresy?.Ulice</td>
 						<td>@item.Adresy?.Mesto</td>
@@ -92,7 +92,7 @@
 						<td>@item.Adresy?.Zeme</td>
 						<td>@item.Adresy?.Psc</td>
 					}
-					else if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+					else if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer)
 					{
 						<td>@item.Adresy?.Ulice</td>
 						<td>@item.Adresy?.Mesto</td>
@@ -112,7 +112,7 @@
 
 					<td>@item.Pozice?.Nazev</td>
 
-					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && !ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Email.Equals(item.Zamestnanci?.Email) && ViewBag.Role != Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">
@@ -121,7 +121,7 @@
 							</form>
 						</td>
 					}
-					else if (ViewBag.Role.Equals("Admin"))
+					else if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Employee)" asp-action="@nameof(EmployeeController.EditEmployeeGet)">

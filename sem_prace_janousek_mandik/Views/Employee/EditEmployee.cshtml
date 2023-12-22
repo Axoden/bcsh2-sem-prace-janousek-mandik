@@ -1,4 +1,5 @@
-﻿@using sem_prace_janousek_mandik.Models.Management;
+﻿@using sem_prace_janousek_mandik.Controllers.Management;
+@using sem_prace_janousek_mandik.Models.Management;
 @model sem_prace_janousek_mandik.Models.Employee.Zamestnanci_Adresy_PoziceList
 @section Title{
 	Úprava zaměstnance
@@ -18,7 +19,7 @@
         <p>@ViewBag.ErrorInfo</p>
         <form asp-action="EditEmployeePost">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @if (ViewBag.Role.Equals("Admin"))
+            @if (ViewBag.Role == Roles.Admin)
             {
                 <div class="form-group">
                     <label asp-for="Zamestnanci.Jmeno" class="control-label"></label>
@@ -41,7 +42,7 @@
                 <input asp-for="Zamestnanci.HesloZnova" class="form-control" placeholder="<nevyplňujte, pokud nechcete změnit>" />
                 <span asp-validation-for="Zamestnanci.HesloZnova" class="text-danger"></span>
             </div>
-            @if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+            @if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer)
             {
                 <div class="form-group">
                     <label asp-for="Zamestnanci.DatumNarozeni" class="control-label"></label>
@@ -54,7 +55,7 @@
                 <input asp-for="Zamestnanci.Telefon" class="form-control" />
                 <span asp-validation-for="Zamestnanci.Telefon" class="text-danger"></span>
             </div>
-            @if (ViewBag.Role.Equals("Admin"))
+            @if (ViewBag.Role == Roles.Admin)
             {
                 <div class="form-group">
                     <label asp-for="Zamestnanci.Email" class="control-label"></label>
@@ -63,7 +64,7 @@
                 </div>
             }
 
-            @if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer"))
+            @if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer)
             {
                 <div class="form-group">
                     <label asp-for="Adresy.Ulice" class="control-label"></label>
@@ -92,7 +93,7 @@
                 </div>
             }
 
-            @if (ViewBag.Role.Equals("Admin"))
+            @if (ViewBag.Role == Roles.Admin)
             {
                 <div class="form-group">
                     <label>@Html.DisplayNameFor(x => x.Pozice[0].Nazev)</label>

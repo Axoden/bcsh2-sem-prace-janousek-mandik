@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Models.Supplier;
 
 namespace sem_prace_janousek_mandik.Controllers.Supplier
@@ -12,7 +13,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		/// <returns></returns>
 		public async Task<IActionResult> ListSuppliers()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik || Role == Roles.Logistik)
 			{
 				List<Dodavatele_Adresy> dodavatele = await SupplierSQL.GetAllSuppliers();
 				return View(dodavatele);
@@ -28,7 +29,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[HttpGet]
 		public async Task<IActionResult> SearchSuppliers(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
 				ViewBag.Search = search;
 				List<Dodavatele_Adresy> dodavatele = await SupplierSQL.GetAllSuppliers();
@@ -49,7 +50,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[HttpGet]
 		public IActionResult AddSupplier()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				return View();
 			}
@@ -65,7 +66,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddSupplier(Dodavatele_Adresy novyDodavatel)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				if (ModelState.IsValid)
 				{
@@ -95,7 +96,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		public async Task<IActionResult> EditSupplierGet(int index)
 		{
 			// Kontrola oprávnění na načtení parametrů dodavatele
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				Dodavatele_Adresy dodavateleAdresy = await SupplierSQL.GetSupplierWithAddress(index);
 				return View("EditSupplier", dodavateleAdresy);
@@ -112,7 +113,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditSupplierPost(Dodavatele_Adresy editSupplier)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				if (ModelState.IsValid)
 				{
@@ -143,7 +144,7 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteSupplier(int idDodavatele, int idAdresy)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_DODAVATELE", idDodavatele, idAdresy);
 			}

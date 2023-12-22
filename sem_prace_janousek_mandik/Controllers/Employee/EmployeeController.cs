@@ -14,7 +14,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		/// <returns></returns>
 		public async Task<IActionResult> ListEmployees()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik || Role == Roles.Logistik)
 			{
 				List<Zamestnanci_Adresy_Pozice> zamestnanci = await EmployeeSQL.GetAllEmployeesWithAddressPosition();
 				return View(zamestnanci);
@@ -30,7 +30,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> SearchEmployees(string search)
         {
-            if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Skladnik"))
+            if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
             {
                 ViewBag.Search = search;
                 List<Zamestnanci_Adresy_Pozice> zamestnanci = await EmployeeSQL.GetAllEmployeesWithAddressPosition();
@@ -51,7 +51,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
         [HttpGet]
 		public async Task<IActionResult> AddEmployee()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Zamestnanci_Adresy_PoziceList employees = new();
 				employees.Pozice = await ManagementSQL.GetAllPositions();
@@ -69,7 +69,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddEmployee(Zamestnanci_Adresy_PoziceList newEmployee)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
                 if (ModelState.IsValid == true)
 				{
@@ -108,8 +108,8 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		public async Task<IActionResult> EditEmployeeGet(int index)
 		{
             Zamestnanci_Adresy_Pozice employee = await EmployeeSQL.GetEmployeeWithAddressPosition(index);
-            if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") && employee.Zamestnanci.Email.Equals(Email) ||
-				Role.Equals("Logistik") && employee.Zamestnanci.Email.Equals(Email))
+            if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik && employee.Zamestnanci.Email.Equals(Email) ||
+				Role == Roles.Logistik && employee.Zamestnanci.Email.Equals(Email))
 			{
 				Zamestnanci_Adresy_PoziceList emp = new();
 				emp.Zamestnanci = employee.Zamestnanci;
@@ -129,7 +129,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditEmployeePost(Zamestnanci_Adresy_PoziceList editedEmployee)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Skladnik") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik || Role == Roles.Logistik)
 			{
 				if (editedEmployee.Zamestnanci.Heslo != null)
 				{
@@ -161,7 +161,7 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteEmployee(int idZamestnance, int idAdresy)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZAMESTNANCE", idZamestnance, idAdresy);
 			}

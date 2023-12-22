@@ -1,5 +1,6 @@
 ﻿@model sem_prace_janousek_mandik.Models.Goods.Zbozi_Pohyby_Umisteni
 @using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Models.Goods;
 
 @section Title{
@@ -40,7 +41,7 @@
 					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Datum)</th>
 					<th>@Html.DisplayNameFor(item => item.Umisteni[0].Poznamka)</th>
 					<th>Upravit:</th>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<th>Odstranit:</th>
 					}
@@ -59,7 +60,7 @@
 							<input type="submit" value="Upravit" class="btn btn-primary" />
 						</form>
 					</td>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.DeleteLocation)">

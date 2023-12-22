@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Models.Customer;
 using sem_prace_janousek_mandik.Models.Employee;
 
@@ -71,7 +72,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 
 				if (err == null)
 				{
-					if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+					if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 					{
 						return RedirectToAction(nameof(ListCustomers), nameof(Customer));
 					}
@@ -104,7 +105,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		[HttpPost]
 		public async Task<IActionResult> EditCustomerGet(int index)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Zakaznici_Adresy zakazniciAdresy = await CustomerSQL.GetCustomerWithAddress(index);
 				return View("EditCustomer", zakazniciAdresy);
@@ -121,7 +122,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditCustomerPost(Zakaznici_Adresy customer)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				// Nevyžadovat validaci, když se heslo nemění
 				ModelState.Remove($"{nameof(Zakaznici_Adresy.Zakaznici)}.{nameof(Zakaznici.Heslo)}");
@@ -167,7 +168,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <returns></returns>
 		public async Task<IActionResult> ListCustomers()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				List<Zakaznici_Adresy> zakazniciAdresy = await CustomerSQL.GetAllCustomersWithAddresses();
 				return View(zakazniciAdresy);
@@ -183,7 +184,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		[HttpGet]
 		public async Task<IActionResult> SearchCustomers(string search)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ViewBag.Search = search;
 				List<Zakaznici_Adresy> customers = await CustomerSQL.GetAllCustomersWithAddresses();
@@ -203,7 +204,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		/// <returns></returns>
 		public async Task<IActionResult> ListCustomer()
 		{
-			if (Role.Equals("Zakaznik"))
+			if (Role == Roles.Zakaznik)
 			{
 				Zakaznici_Adresy customerAddress = await CustomerSQL.GetCustomerWithAddressByEmail(Email);
 				return View(customerAddress);
@@ -221,7 +222,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteCustomer(int idZakaznika, int idAdresy)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZAKAZNIKA", idZakaznika, idAdresy);
 			}

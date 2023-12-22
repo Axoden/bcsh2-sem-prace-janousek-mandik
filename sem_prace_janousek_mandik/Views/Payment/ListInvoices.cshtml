@@ -1,4 +1,5 @@
 ﻿@model sem_prace_janousek_mandik.Models.Payment.Faktury_Platby
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Controllers.Payment;
 @using sem_prace_janousek_mandik.Models.Payment
 @section Title{
@@ -12,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všech faktur a plateb:</h2>
 
-	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.AddInvoice)" method="get">
@@ -43,7 +44,7 @@
 					<th>@Html.DisplayNameFor(item => item.Faktury[0].Dph)</th>
 					<th>Celkem bez DPH [Kč]:</th>
 					<th>Částka s DPH [Kč]:</th>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<th>Upravit fakturu:</th>
 						<th>Odstranit fakturu:</th>
@@ -66,7 +67,7 @@
 					<td>@item.Dph</td>
 					<td>@celkemBezDph</td>
 					<td>@celkemDph</td>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditInvoiceGet)">
@@ -104,7 +105,7 @@
 							<th>@Html.DisplayNameFor(item => item.Platby[0].Castka)</th>
 							<th>@Html.DisplayNameFor(item => item.Platby[0].DatumPlatby)</th>
 							<th>@Html.DisplayNameFor(item => item.Platby[0].VariabilniSymbol)</th>
-							@if (ViewBag.Role.Equals("Admin"))
+							@if (ViewBag.Role == Roles.Admin)
 							{
 								<th>Upravit platbu:</th>
 								<th>Odstranit platbu:</th>
@@ -132,7 +133,7 @@
 						<td>@itemPayments.Castka</td>
 						<td>@itemPayments.DatumPlatby.ToString("dd. MM. yyyy HH:mm")</td>
 						<td>@itemPayments.VariabilniSymbol</td>
-						@if (ViewBag.Role.Equals("Admin"))
+						@if (ViewBag.Role == Roles.Admin)
 						{
 							<td>
 								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Payment)" asp-action="@nameof(PaymentController.EditPaymentGet)">

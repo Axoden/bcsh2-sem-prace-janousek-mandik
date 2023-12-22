@@ -43,7 +43,7 @@
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Zeme)</th>
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
 				<th>Upravit: </th>
-				@if (ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Role == Roles.Admin)
 				{
 					<th>Odstranit: </th>
 					<th>Emulovat: </th>
@@ -73,7 +73,7 @@
 							<input type="submit" value="Upravit" class="btn btn-primary" />
 						</form>
 					</td>
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Customer)" asp-action="@nameof(CustomerController.DeleteCustomer)">

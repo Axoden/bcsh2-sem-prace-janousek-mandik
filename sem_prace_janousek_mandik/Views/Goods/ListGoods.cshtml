@@ -1,5 +1,6 @@
 ﻿@model List<sem_prace_janousek_mandik.Models.Goods.Zbozi_Um_Kat_Dod_Soubory>
 @using sem_prace_janousek_mandik.Controllers.Goods;
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Models.Goods;
 @section Title{
 	Výpis zboží
@@ -12,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všeho zboží:</h2>
 
-	@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+	@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.AddGoods)" method="get">
@@ -51,7 +52,7 @@
 				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Prijmeni)</th>
 				<th>Dodavatel @Html.DisplayNameFor(item => item[0].Dodavatele.Telefon)</th>
 				<th>Dodavatel  @Html.DisplayNameFor(item => item[0].Dodavatele.Email)</th>
-				@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+				@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 				{
 					<th>Upravit:</th>
 					<th>Odstranit:</th>
@@ -86,7 +87,7 @@
 					<td>@item.Dodavatele?.Prijmeni</td>
 					<td><a href="tel:@item.Dodavatele?.Telefon">@item.Dodavatele?.Telefon</a></td>
 					<td><a href="mailto:@item.Dodavatele?.Email">@item.Dodavatele?.Email</a></td>
-					@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+					@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Goods)" asp-action="@nameof(GoodsController.EditGoodsGet)">

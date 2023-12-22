@@ -17,7 +17,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> ListPositions()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin"))
+			if (Role == Roles.Manazer || Role == Roles.Admin)
 			{
 				List<Pozice> pozice = await ManagementSQL.GetAllPositions();
 				return View(pozice);
@@ -33,7 +33,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public async Task<IActionResult> SearchPositions(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin"))
+			if (Role == Roles.Manazer || Role == Roles.Admin)
 			{
 				ViewBag.Search = search;
 				List<Pozice> pozice = await ManagementSQL.GetAllPositions();
@@ -54,7 +54,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public IActionResult AddPosition()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				return View();
 			}
@@ -70,7 +70,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddPosition(Pozice newPosition)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (ModelState.IsValid)
 				{
@@ -92,7 +92,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpPost]
 		public async Task<IActionResult> EditPositionGet(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Pozice position = await ManagementSQL.GetPositionById(index);
 				return View("EditPosition", position);
@@ -109,7 +109,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditPositionPost(Pozice position)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (ModelState.IsValid)
 				{
@@ -132,7 +132,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeletePosition(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_POZICI", index);
 			}
@@ -146,7 +146,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public IActionResult StartEmulationCustomer(string emailCustomer)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				HttpContext.Session.SetString("emulatedEmail", Email);
 				HttpContext.Session.SetString("email", emailCustomer);
@@ -162,7 +162,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> StartEmulationEmployee(int idEmployee)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Zamestnanci_Pozice employee = await EmployeeSQL.GetEmployeeRoleEmailById(idEmployee);
 				HttpContext.Session.SetString("emulatedEmail", Email);
@@ -194,7 +194,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> ListDatabaseObjects()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ViewBag.Tables = await ManagementSQL.GetAllObjects("table_name", "user_tables");
 				ViewBag.Views = await ManagementSQL.GetAllObjects("view_name", "user_views");
@@ -218,7 +218,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public async Task<IActionResult> SearchDatabaseObjects(string search)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ViewBag.Search = search;
 				List<string> tables = await ManagementSQL.GetAllObjects("table_name", "user_tables");
@@ -260,7 +260,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> ListLogs()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				List<LogTableInsUpdDel> logs = await ManagementSQL.GetAllLogs();
 				return View(logs);
@@ -276,7 +276,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public async Task<IActionResult> SearchLogs(string search)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ViewBag.Search = search;
 				List<LogTableInsUpdDel> logs = await ManagementSQL.GetAllLogs();
@@ -296,7 +296,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public async Task<IActionResult> ListReports()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer"))
+			if (Role == Roles.Admin || Role == Roles.Manazer)
 			{
 				Sestavy reports = await ManagementSQL.GetAllReports();
 				return View(reports);
@@ -311,7 +311,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpGet]
 		public async Task<IActionResult> ListOverView()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer"))
+			if (Role == Roles.Admin || Role == Roles.Manazer)
 			{
 				OverView overView = new();
 				overView.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
@@ -329,7 +329,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpPost]
 		public async Task<IActionResult> ListOverViewCus(int idZakaznika)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer"))
+			if (Role == Roles.Admin || Role == Roles.Manazer)
 			{
 				float customerValue = ManagementSQL.ListOverViewCus(idZakaznika);
 				ViewBag.CustomerValue = customerValue;
@@ -349,7 +349,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpPost]
 		public async Task<IActionResult> ListOverViewSuppliers()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer"))
+			if (Role == Roles.Admin || Role == Roles.Manazer)
 			{
 				string? supplierValue = await ManagementSQL.ListOverViewSuppliers();
 				ViewBag.SupplierValue = supplierValue;
@@ -370,7 +370,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpPost]
 		public async Task<IActionResult> ListOverViewCategories(int idKategorie)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer"))
+			if (Role == Roles.Admin || Role == Roles.Manazer)
 			{
 				int idGoods = await ManagementSQL.ListOverViewCategories(idKategorie);
 				if (idGoods != 0)
@@ -397,7 +397,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> ListFiles()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				List<Soubory_Vypis> soubory = await ManagementSQL.GetAllFiles();
 				return View(soubory);
@@ -413,7 +413,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		[HttpPost]
 		public async Task<IActionResult> SearchFiles(string search)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ViewBag.Search = search;
 				List<Soubory_Vypis> soubory = await ManagementSQL.GetAllFiles();
@@ -434,7 +434,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> EditFileGet(int idSouboru)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Soubory_Edit fileEdit = new();
 				fileEdit.Soubory = await ManagementSQL.GetFileById(idSouboru);
@@ -452,7 +452,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> EditFilePost(Soubory_Edit fileEdit, IFormFile soubor)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				fileEdit.Zamestnanci = await EmployeeSQL.GetAllEmployeesNameSurname();
 				ModelState.Remove("soubor");
@@ -485,7 +485,7 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 		/// <returns></returns>
 		public async Task<IActionResult> DeleteFile(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("P_SMAZAT_SOUBOR", index);
 			}

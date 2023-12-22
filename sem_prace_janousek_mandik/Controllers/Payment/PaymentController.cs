@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Controllers.Order;
 using sem_prace_janousek_mandik.Models.Order;
 using sem_prace_janousek_mandik.Models.Payment;
@@ -15,7 +16,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		/// <returns></returns>
 		public async Task<IActionResult> ListInvoices()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				Faktury_Platby invoices = new();
 				invoices.Faktury = await PaymentSQL.GetAllInvoices();
@@ -33,7 +34,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[HttpGet]
 		public async Task<IActionResult> SearchInvoices(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				ViewBag.Search = search;
 				Faktury_Platby invoices = new();
@@ -63,7 +64,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[HttpGet]
 		public IActionResult AddInvoice()
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				return View();
 			}
@@ -79,7 +80,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddInvoice(Faktury invoice)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (!ModelState.IsValid)
 				{
@@ -106,7 +107,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[HttpPost]
 		public async Task<IActionResult> EditInvoiceGet(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Faktury invoice = await PaymentSQL.GetInvoiceById(index);
 				return View("EditInvoice", invoice);
@@ -123,7 +124,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditInvoicePost(Faktury invoice)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ModelState.Remove("CisloFaktury");
 				if (!ModelState.IsValid)
@@ -152,7 +153,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteInvoice(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_FAKTURU", index);
 			}
@@ -168,7 +169,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[HttpPost]
 		public async Task<IActionResult> EditPaymentGet(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Platba_Faktury payment = new();
 				payment.Platby = await PaymentSQL.GetPaymentById(index);
@@ -187,7 +188,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditPaymentPost(Platba_Faktury payment)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (ModelState.IsValid)
 				{
@@ -217,7 +218,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeletePayment(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_PLATBU", index);
 			}
@@ -231,7 +232,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[HttpPost]
 		public IActionResult AddPaymentGet(int idInvoice)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				PlatbyCustomerForm payment = new();
 				payment.IdFaktury = idInvoice;
@@ -249,7 +250,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddPaymentPost(PlatbyCustomerForm payment)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (ModelState.IsValid)
 				{

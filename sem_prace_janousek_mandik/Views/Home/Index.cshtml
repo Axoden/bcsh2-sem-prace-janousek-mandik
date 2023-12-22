@@ -12,7 +12,7 @@
 	<h4>Pro další kroky využijte menu výše</h4>
 	<br />
 
-	@if (ViewBag.Role.Equals(""))
+	@if (ViewBag.Role == null)
 	{
 		<p>Uživatel nepřihlášen</p>
 	}

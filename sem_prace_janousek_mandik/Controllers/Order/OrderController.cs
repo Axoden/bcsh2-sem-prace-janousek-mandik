@@ -2,6 +2,7 @@
 using sem_prace_janousek_mandik.Controllers.Customer;
 using sem_prace_janousek_mandik.Controllers.Employee;
 using sem_prace_janousek_mandik.Controllers.Home;
+using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Controllers.Payment;
 using sem_prace_janousek_mandik.Models.Order;
 
@@ -15,7 +16,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		/// <returns></returns>
 		public async Task<IActionResult> ListOrders()
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Zakaznik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Zakaznik)
 			{
 				Objednavky_List orders = new();
 				orders = await FillDataListOrders();
@@ -33,13 +34,13 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		{
 			Objednavky_List orders = new();
 			orders.Platby = await PaymentSQL.GetAllPayments();
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				orders.Objednavky_Zam_Zak_Fak = await OrderSQL.GetAllOrders();
 				orders.ZboziObjednavek_Zbozi = await OrderSQL.GetAllGoodsOrders();
 			}
 
-			if (Role.Equals("Zakaznik"))
+			if (Role == Roles.Zakaznik)
 			{
 				orders.Objednavky_Zam_Zak_Fak = await OrderSQL.GetAllCustomerOrders(Email);
 				orders.ZboziObjednavek_Zbozi = await OrderSQL.GetAllGoodsOrdersCustomer(Email);
@@ -56,7 +57,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[HttpGet]
 		public async Task<IActionResult> SearchOrders(string search)
 		{
-			if (Role.Equals("Manazer") || Role.Equals("Admin") || Role.Equals("Logistik") || Role.Equals("Zakaznik"))
+			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Zakaznik)
 			{
 				ViewBag.Search = search;
 				Objednavky_List orders = new();
@@ -95,7 +96,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[HttpPost]
 		public async Task<IActionResult> EditGoodsOrderGet(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				ZboziObjednavek_Zbozi zboziObjednavek = await OrderSQL.GetGoodsOrderById(index);
 				return View("EditGoodsOrder", zboziObjednavek);
@@ -113,7 +114,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditGoodsOrderPost(ZboziObjednavek_Zbozi zboziObjednavky)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await OrderSQL.EditGoodsOrder(zboziObjednavky);
 			}
@@ -127,7 +128,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[HttpGet]
 		public async Task<IActionResult> AddOrder()
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				Objednavky_Faktury_ZakList order = new();
 				order.Zakaznici = await CustomerSQL.GetAllCustomersNameSurname();
@@ -145,7 +146,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddOrder(Objednavky_Faktury_ZakList newOrder)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				if (newOrder.Faktury.CastkaDoprava >= 0 && newOrder.Faktury.Dph >= 0)
 				{
@@ -173,7 +174,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[HttpPost]
 		public async Task<IActionResult> EditOrderGet(int idObjednavky)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				Objednavky_Zam_Zak_FakturyList order = new();
 				order.Objednavky = await OrderSQL.GetOrderById(idObjednavky);
@@ -195,7 +196,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditOrderPost(Objednavky_Zam_Zak_FakturyList order)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				if (!await OrderSQL.EditOrder(order))
 				{
@@ -216,7 +217,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[HttpPost]
 		public async Task<IActionResult> AddGoodsToOrderGet(int idObjednavky)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				// Kontrola, zda je objednávka otevřena
 				if (await OrderSQL.IsClosedOrder(idObjednavky) == false)
@@ -239,7 +240,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddGoodsToOrderPost(ZboziObjednavek_ZboziList addZboziObjednavek)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				// Kontrola, zda je objednávka otevřena
 				if (await OrderSQL.IsClosedOrder(addZboziObjednavek.ZboziObjednavek.IdObjednavky) == false)
@@ -275,7 +276,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CloseOrder(int idObjednavky)
 		{
-			if (Role.Equals("Admin") || Role.Equals("Manazer") || Role.Equals("Logistik"))
+			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				await OrderSQL.CloseOrder(idObjednavky);
 			}
@@ -291,7 +292,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteOrder(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_OBJEDNAVKU", index);
 			}
@@ -307,7 +308,7 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteGoodsOrder(int index)
 		{
-			if (Role.Equals("Admin"))
+			if (Role == Roles.Admin)
 			{
 				await SharedSQL.CallDeleteProcedure("pkg_delete.P_SMAZAT_ZBOZI_OBJEDNAVEK", index);
 			}

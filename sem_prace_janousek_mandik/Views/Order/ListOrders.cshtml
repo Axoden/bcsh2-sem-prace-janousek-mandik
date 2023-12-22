@@ -1,4 +1,5 @@
 ﻿@model sem_prace_janousek_mandik.Models.Order.Objednavky_List
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Controllers.Order;
 @using sem_prace_janousek_mandik.Controllers.Payment;
 @using sem_prace_janousek_mandik.Models.Order
@@ -40,7 +41,7 @@
 					<th>@Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Objednavky.Poznamka)</th>
 					<th>Zaměstnanec @Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Zamestnanci.Jmeno)</th>
 					<th>Zaměstnanec @Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Zamestnanci.Prijmeni)</th>
-					@if (ViewBag.Role.Equals("Zakaznik"))
+					@if (ViewBag.Role == Roles.Zakaznik)
 					{
 						<th>Zaměstnanec @Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Zamestnanci.Email)</th>
 					}
@@ -48,25 +49,25 @@
 					<th>Stav faktury:</th>
 					<th>Cena objednávky bez DPH [Kč]:</th>
 					<th>Cena objednávky vč. DPH [Kč]:</th>
-					@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+					@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 					{
 						<th>Zákazník @Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Zakaznici.Jmeno)</th>
 						<th>Zákazník @Html.DisplayNameFor(item => item.Objednavky_Zam_Zak_Fak[0].Zakaznici.Prijmeni)</th>
 						<th>Stav objednávky:</th>
 						<th>Přidat zboží:</th>
 					}
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<th>Upravit:</th>
 						<th>Odstranit:</th>
 					}
-					@if (ViewBag.Role.Equals("Zakaznik"))
+					@if (ViewBag.Role == Roles.Zakaznik)
 					{
 						<th>Platba:</th>
 					}
 				</tr>
 
-				@if (ViewBag.Role.Equals("Zakaznik") && item.Objednavky.Uzavrena == true || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+				@if (ViewBag.Role == Roles.Zakaznik && item.Objednavky.Uzavrena == true || ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 				{
 					var sumJednotkovaCenaBezDph = Model.ZboziObjednavek_Zbozi.Where(lmb => lmb.ZboziObjednavek.IdObjednavky == item.Objednavky.IdObjednavky).Sum(lmb => (lmb.ZboziObjednavek.JednotkovaCena * lmb.ZboziObjednavek.Mnozstvi)) + item.Faktury.CastkaDoprava;
 					string dph = "1." + item.Faktury.Dph.ToString();
@@ -83,7 +84,7 @@
 						<td>@item.Objednavky?.Poznamka</td>
 						<td>@item.Zamestnanci?.Jmeno</td>
 						<td>@item.Zamestnanci?.Prijmeni</td>
-						@if (ViewBag.Role.Equals("Zakaznik"))
+						@if (ViewBag.Role == Roles.Zakaznik)
 						{
 							<td><a href="mailto:@item.Zamestnanci?.Email">@item.Zamestnanci?.Email</a></td>
 						}
@@ -118,7 +119,7 @@
 						<td>@sumJednotkovaCenaBezDph</td>
 						<td>@sumJednotkovaCenaDph</td>
 
-						@if (ViewBag.Role.Equals("Zakaznik"))
+						@if (ViewBag.Role == Roles.Zakaznik)
 						{
 							<td>
 								@if (jeFakturaZaplacena)
@@ -135,7 +136,7 @@
 							</td>
 						}
 
-						@if (ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Logistik"))
+						@if (ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Logistik)
 						{
 							<td>@item.Zakaznici?.Jmeno</td>
 							<td>@item.Zakaznici?.Prijmeni</td>
@@ -175,7 +176,7 @@
 								}
 							</td>
 						}
-						@if (ViewBag.Role.Equals("Admin"))
+						@if (ViewBag.Role == Roles.Admin)
 						{
 							<td>
 								<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.EditOrderGet)">
@@ -209,7 +210,7 @@
 								<th>@Html.DisplayNameFor(item => item.ZboziObjednavek_Zbozi[0].ZboziObjednavek.Mnozstvi)</th>
 								<th>@Html.DisplayNameFor(item => item.ZboziObjednavek_Zbozi[0].ZboziObjednavek.JednotkovaCena)</th>
 								<th>Cena celkem [Kč]:</th>
-								@if (ViewBag.Role.Equals("Admin"))
+								@if (ViewBag.Role == Roles.Admin)
 								{
 									<th>Upravit:</th>
 									<th>Odstranit:</th>
@@ -224,7 +225,7 @@
 							<td>@itemZbozi.ZboziObjednavek?.Mnozstvi</td>
 							<td>@itemZbozi.ZboziObjednavek?.JednotkovaCena</td>
 							<td>@Math.Round((itemZbozi.ZboziObjednavek.Mnozstvi * itemZbozi.ZboziObjednavek.JednotkovaCena), 2)</td>
-							@if (ViewBag.Role.Equals("Admin"))
+							@if (ViewBag.Role == Roles.Admin)
 							{
 								<td>
 									<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Order)" asp-action="@nameof(OrderController.EditGoodsOrderGet)">

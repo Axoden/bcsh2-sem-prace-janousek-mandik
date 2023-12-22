@@ -1,4 +1,5 @@
 ﻿@model List<sem_prace_janousek_mandik.Models.Supplier.Dodavatele_Adresy>
+@using sem_prace_janousek_mandik.Controllers.Management;
 @using sem_prace_janousek_mandik.Controllers.Supplier;
 @using sem_prace_janousek_mandik.Models.Supplier;
 @section Title{
@@ -12,7 +13,7 @@
 <div class="text-center">
 	<h2>Výpis všech dodavatelů:</h2>
 
-	@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
+	@if (ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Logistik)
 	{
 		<br />
 		<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.AddSupplier)" method="get">
@@ -43,11 +44,11 @@
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Okres)</th>
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Zeme)</th>
 				<th>@Html.DisplayNameFor(item => item[0].Adresy.Psc)</th>
-				@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
+				@if (ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Logistik)
 				{
 					<th>Upravit:</th>
 				}
-				@if (ViewBag.Role.Equals("Admin"))
+				@if (ViewBag.Role == Roles.Admin)
 				{
 					<th>Odstranit:</th>
 				}
@@ -67,7 +68,7 @@
 					<td>@item.Adresy?.Zeme</td>
 					<td>@item.Adresy?.Psc</td>
 
-					@if (ViewBag.Role.Equals("Manazer") || ViewBag.Role.Equals("Admin") || ViewBag.Role.Equals("Logistik"))
+					@if (ViewBag.Role == Roles.Manazer || ViewBag.Role == Roles.Admin || ViewBag.Role == Roles.Logistik)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.EditSupplierGet)">
@@ -76,7 +77,7 @@
 							</form>
 						</td>
 					}
-					@if (ViewBag.Role.Equals("Admin"))
+					@if (ViewBag.Role == Roles.Admin)
 					{
 						<td>
 							<form asp-controller="@nameof(sem_prace_janousek_mandik.Controllers.Supplier)" asp-action="@nameof(SupplierController.DeleteSupplier)">
