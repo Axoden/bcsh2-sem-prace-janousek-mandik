@@ -14,7 +14,7 @@ namespace sem_prace_janousek_mandik.Models.Payment
 
         [Required]
 		[DisplayName("Částka [Kč]: ")]
-		[Range(0, float.MaxValue)]
+		[Range(0, 9999999)]
 		public float Castka { get; set; }
 
         [Required]
@@ -22,7 +22,7 @@ namespace sem_prace_janousek_mandik.Models.Payment
 		public char? TypPlatby { get; set; }
 
 		[DisplayName("Variabilní symbol: ")]
-		[Range(0, 99999999999999)]
+		[Range(0, 9999999999999)]
 		public string? VariabilniSymbol { get; set; }
 
         [Browsable(false)]

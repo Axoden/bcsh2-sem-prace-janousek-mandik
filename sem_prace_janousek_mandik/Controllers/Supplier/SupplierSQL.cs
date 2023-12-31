@@ -101,18 +101,18 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = supplier.Dodavatele.IdDodavatele;
-						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = supplier.Dodavatele.Nazev;
-						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = supplier.Dodavatele.Jmeno;
-						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = supplier.Dodavatele.Prijmeni;
-						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = supplier.Dodavatele.Telefon;
-						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = supplier.Dodavatele.Email;
-						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = supplier.Dodavatele.IdAdresy;
-						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = supplier.Adresy.Ulice;
-						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = supplier.Adresy.Mesto;
-						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = supplier.Adresy.Okres;
-						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = supplier.Adresy.Zeme;
-						command.Parameters.Add("p_psc", OracleDbType.Char).Value = supplier.Adresy.Psc;
+						command.Parameters.Add("p_iddodavatele", OracleDbType.Int32).Value = supplier.Dodavatele?.IdDodavatele;
+						command.Parameters.Add("p_nazev", OracleDbType.Varchar2).Value = supplier.Dodavatele?.Nazev;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = supplier.Dodavatele?.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = supplier.Dodavatele?.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = supplier.Dodavatele?.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = supplier.Dodavatele?.Email;
+						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = supplier.Dodavatele?.IdAdresy;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = supplier.Adresy?.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = supplier.Adresy?.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = supplier.Adresy?.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = supplier.Adresy?.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = supplier.Adresy?.Psc;
 
 						command.ExecuteNonQuery();
 					}

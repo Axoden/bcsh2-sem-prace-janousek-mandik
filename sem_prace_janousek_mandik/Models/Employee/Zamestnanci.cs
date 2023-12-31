@@ -5,23 +5,25 @@ namespace sem_prace_janousek_mandik.Models.Employee
 {
     public class Zamestnanci
     {
-        [Browsable(false)]
+		[Browsable(false)]
         public int IdZamestnance { get; set; }
 
         [Required]
-        [DisplayName("Jméno: ")]
+		[RegularExpression("^[A-Z][a-zA-Z]{2,}", ErrorMessage = "Musí začínat velkým písmenem a musí obsahovat minimálně 3 znaky.")]
+		[DisplayName("Jméno: ")]
         public string? Jmeno { get; set; }
 
         [Required]
-        [DisplayName("Příjmení: ")]
+		[RegularExpression("^[A-Z][a-zA-Z]{2,}", ErrorMessage = "Musí začínat velkým písmenem a musí obsahovat minimálně 3 znaky.")]
+		[DisplayName("Příjmení: ")]
         public string? Prijmeni { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
         [DisplayName("Datum narození: ")]
-        public DateOnly? DatumNarozeni { get; set; }
+		public DateOnly? DatumNarozeni { get; set; }
 
-        [Required]
+		[Required]
         [Phone]
         [DisplayName("Telefon: ")]
         public string? Telefon { get; set; }

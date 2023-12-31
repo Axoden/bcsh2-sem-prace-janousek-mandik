@@ -87,6 +87,12 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 					return View(invoice);
 				}
 
+				if (invoice.DatumVystaveni > DateOnly.FromDateTime(DateTime.Now))
+				{
+					ViewBag.ErrorInfo = "Datum vystavení nesmí být v budoucnosti!";
+					return View(invoice);
+				}
+
 				if (invoice.DatumSplatnosti < invoice.DatumVystaveni)
 				{
 					ViewBag.ErrorInfo = "Datum vystavení musí být před datem splatnosti!";
@@ -129,6 +135,12 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 				ModelState.Remove("CisloFaktury");
 				if (!ModelState.IsValid)
 				{
+					return View("EditInvoice", invoice);
+				}
+
+				if (invoice.DatumVystaveni > DateOnly.FromDateTime(DateTime.Now))
+				{
+					ViewBag.ErrorInfo = "Datum vystavení nesmí být v budoucnosti!";
 					return View("EditInvoice", invoice);
 				}
 

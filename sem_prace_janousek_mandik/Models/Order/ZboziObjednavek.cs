@@ -14,6 +14,7 @@ namespace sem_prace_janousek_mandik.Models.Order
 		public int Mnozstvi { get; set; }
 
 		[Required]
+		[Range(0, 9999999)]
 		[DisplayName("Jednotková cena [Kč]: ")]
 		public float JednotkovaCena { get; set; }
 

@@ -198,18 +198,18 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci.Jmeno;
-						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci.Prijmeni;
-						command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = newEmployee.Zamestnanci.DatumNarozeni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
-						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci.Telefon;
-						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci.Email;
-						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci.Heslo;
-						command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = newEmployee.Zamestnanci.IdPozice;
-						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = newEmployee.Adresy.Ulice;
-						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = newEmployee.Adresy.Mesto;
-						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = newEmployee.Adresy.Okres;
-						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = newEmployee.Adresy.Zeme;
-						command.Parameters.Add("p_psc", OracleDbType.Char).Value = newEmployee.Adresy.Psc;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci?.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci?.Prijmeni;
+						command.Parameters.Add("p_datumnarozeni", OracleDbType.Date).Value = newEmployee.Zamestnanci?.DatumNarozeni.Value.ToDateTime(TimeOnly.Parse("00:00PM"));
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci?.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci?.Email;
+						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = newEmployee.Zamestnanci?.Heslo;
+						command.Parameters.Add("p_idpozice", OracleDbType.Int32).Value = newEmployee.Zamestnanci?.IdPozice;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = newEmployee.Adresy?.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = newEmployee.Adresy?.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = newEmployee.Adresy?.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = newEmployee.Adresy?.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = newEmployee.Adresy?.Psc;
 
 						command.ExecuteNonQuery();
 					}

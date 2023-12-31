@@ -58,19 +58,19 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_idzakaznika", OracleDbType.Int32).Value = zakaznikAdresa.Zakaznici.IdZakaznika;
-						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici.Jmeno;
-						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici.Prijmeni;
-						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici.Telefon;
-						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici.Email;
-						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici.Heslo;
-						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = zakaznikAdresa.Zakaznici.IdAdresy;
+						command.Parameters.Add("p_idzakaznika", OracleDbType.Int32).Value = zakaznikAdresa.Zakaznici?.IdZakaznika;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici?.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici?.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici?.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici?.Email;
+						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = zakaznikAdresa.Zakaznici?.Heslo;
+						command.Parameters.Add("p_idadresy", OracleDbType.Int32).Value = zakaznikAdresa.Zakaznici?.IdAdresy;
 
-						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy.Ulice;
-						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy.Mesto;
-						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy.Okres;
-						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy.Zeme;
-						command.Parameters.Add("p_psc", OracleDbType.Char).Value = zakaznikAdresa.Adresy.Psc;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy?.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy?.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy?.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = zakaznikAdresa.Adresy?.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = zakaznikAdresa.Adresy?.Psc;
 
 						command.ExecuteNonQuery();
 					}
@@ -280,16 +280,16 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = newCustomer.Zakaznici.Jmeno;
-						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = newCustomer.Zakaznici.Prijmeni;
-						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = newCustomer.Zakaznici.Telefon;
-						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = newCustomer.Zakaznici.Email;
-						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = newCustomer.Zakaznici.Heslo;
-						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = newCustomer.Adresy.Ulice;
-						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = newCustomer.Adresy.Mesto;
-						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = newCustomer.Adresy.Okres;
-						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = newCustomer.Adresy.Zeme;
-						command.Parameters.Add("p_psc", OracleDbType.Char).Value = newCustomer.Adresy.Psc;
+						command.Parameters.Add("p_jmeno", OracleDbType.Varchar2).Value = newCustomer.Zakaznici?.Jmeno;
+						command.Parameters.Add("p_prijmeni", OracleDbType.Varchar2).Value = newCustomer.Zakaznici?.Prijmeni;
+						command.Parameters.Add("p_telefon", OracleDbType.Varchar2).Value = newCustomer.Zakaznici?.Telefon;
+						command.Parameters.Add("p_email", OracleDbType.Varchar2).Value = newCustomer.Zakaznici?.Email;
+						command.Parameters.Add("p_heslo", OracleDbType.Varchar2).Value = newCustomer.Zakaznici?.Heslo;
+						command.Parameters.Add("p_ulice", OracleDbType.Varchar2).Value = newCustomer.Adresy?.Ulice;
+						command.Parameters.Add("p_mesto", OracleDbType.Varchar2).Value = newCustomer.Adresy?.Mesto;
+						command.Parameters.Add("p_okres", OracleDbType.Varchar2).Value = newCustomer.Adresy?.Okres;
+						command.Parameters.Add("p_zeme", OracleDbType.Varchar2).Value = newCustomer.Adresy?.Zeme;
+						command.Parameters.Add("p_psc", OracleDbType.Char).Value = newCustomer.Adresy?.Psc;
 
 						command.ExecuteNonQuery();
 					}

@@ -489,6 +489,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return files;
 		}
 
+		/// <summary>
+		/// Metoda získá model souboru na základě ID souboru
+		/// </summary>
+		/// <param name="idSouboru">ID souboru</param>
+		/// <returns>Model souboru</returns>
 		internal static async Task<Soubory?> GetFileById(int idSouboru)
 		{
 			Soubory getFiles = new();
@@ -520,6 +525,11 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 			return getFiles;
 		}
 
+		/// <summary>
+		/// Metoda zavolá proceduru na úpravu souboru
+		/// </summary>
+		/// <param name="fileEdit">Model upraveného souboru</param>
+		/// <returns>true, pokud byla úprava úspěšná, jinak false</returns>
 		internal static async Task<bool> EditFile(Soubory_Edit fileEdit)
 		{
 			try

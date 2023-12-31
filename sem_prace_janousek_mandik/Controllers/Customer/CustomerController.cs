@@ -28,7 +28,7 @@ namespace sem_prace_janousek_mandik.Controllers.Customer
 		public async Task<IActionResult> LoginCustomer(ZamestnanciLoginForm inputZakaznik)
 		{
 			ViewBag.ErrorInfo = "Přihlašovací jméno nebo heslo je špatně!";
-			if (ModelState.IsValid == true)
+			if (ModelState.IsValid)
 			{
 				Zakaznici? dbZakaznik = await CustomerSQL.AuthCustomer(inputZakaznik.Email);
 				if (dbZakaznik != null)

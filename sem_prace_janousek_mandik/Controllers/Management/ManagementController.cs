@@ -458,6 +458,12 @@ namespace sem_prace_janousek_mandik.Controllers.Management
 				ModelState.Remove("soubor");
 				if (ModelState.IsValid)
 				{
+					if (fileEdit.Soubory.DatumNahrani > DateTime.Now && fileEdit.Soubory.DatumModifikace > DateTime.Now)
+					{
+						ViewBag.ErrorInfo = "Datum nahrání nebo úpravy nesmí být v budoucnosti!";
+						return View("EditFile", fileEdit);
+					}
+
 					if (fileEdit.Soubory != null)
 					{
 						if (soubor != null && soubor.Length > 0)

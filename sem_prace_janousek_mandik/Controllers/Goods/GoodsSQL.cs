@@ -51,7 +51,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			{
 				await connection.OpenAsync();
 
-				using (OracleCommand command = new("PROCEDURE1", connection))
+				using (OracleCommand command = connection.CreateCommand())
 				{
 					command.CommandText = "SELECT c.idkategorie, c.nazev, c.zkratka, c.popis, k.nazev AS nazevNadrizena FROM kategorie c LEFT JOIN kategorie k ON c.idnadrazenekategorie = k.idkategorie START WITH c.idnadrazenekategorie IS NULL CONNECT BY PRIOR c.idkategorie = c.idnadrazenekategorie ORDER BY zkratka";
 					using (OracleDataReader reader = (OracleDataReader)await command.ExecuteReaderAsync())

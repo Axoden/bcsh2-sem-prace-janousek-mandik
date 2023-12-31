@@ -5,6 +5,7 @@ using sem_prace_janousek_mandik.Controllers.Home;
 using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Controllers.Payment;
 using sem_prace_janousek_mandik.Models.Order;
+using System;
 
 namespace sem_prace_janousek_mandik.Controllers.Order
 {
@@ -116,7 +117,15 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		{
 			if (Role == Roles.Admin)
 			{
-				await OrderSQL.EditGoodsOrder(zboziObjednavky);
+				if (zboziObjednavky.ZboziObjednavek.Mnozstvi > 0)
+				{ 
+					await OrderSQL.EditGoodsOrder(zboziObjednavky);
+				}
+				else
+				{
+					ViewBag.ErrorInfo = "Množství nesmí být záporné!";
+					return View("EditGoodsOrder", zboziObjednavky);
+				}
 			}
 			return RedirectToAction(nameof(ListOrders), nameof(Order));
 		}
@@ -148,6 +157,12 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		{
 			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
+				if (newOrder.Objednavky.DatumPrijeti > DateTime.Now)
+				{
+					ViewBag.ErrorInfo = "Datum přijetí nesmí být v budoucnosti!";
+					return View(newOrder);
+				}
+
 				if (newOrder.Faktury.CastkaDoprava >= 0 && newOrder.Faktury.Dph >= 0)
 				{
 					newOrder.Objednavky.IdZamestnance = await EmployeeSQL.GetEmployeeIdByEmail(Email);
@@ -198,6 +213,12 @@ namespace sem_prace_janousek_mandik.Controllers.Order
 		{
 			if (Role == Roles.Admin)
 			{
+				if (order.Objednavky.DatumPrijeti > DateTime.Now)
+				{
+					ViewBag.ErrorInfo = "Datum přijetí nesmí být v budoucnosti!";
+					return View("EditOrder", order);
+				}
+
 				if (!await OrderSQL.EditOrder(order))
 				{
 					order.Faktury = await PaymentSQL.GetAllInvoices();

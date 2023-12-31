@@ -24,12 +24,12 @@ namespace sem_prace_janousek_mandik.Models.Payment
 		public DateOnly? DatumSplatnosti { get; set; }
 
 		[Required]
-		[Range(0, float.MaxValue)]
+		[Range(0, 9999999)]
 		[DisplayName("Celková částka za objednávku [Kč]: ")]
 		public float CastkaObjednavka { get; set; }
 
 		[Required]
-		[Range(0, 1000000)]
+		[Range(0, 999999)]
 		[DisplayName("Částka za dopravu [Kč]: ")]
 		public float CastkaDoprava { get; set; }
 

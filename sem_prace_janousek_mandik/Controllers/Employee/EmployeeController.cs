@@ -71,9 +71,15 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		{
 			if (Role == Roles.Admin)
 			{
-                if (ModelState.IsValid == true)
+                if (ModelState.IsValid)
 				{
-                    newEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(newEmployee.Zamestnanci.Heslo);
+					if (newEmployee.Zamestnanci.DatumNarozeni > DateOnly.FromDateTime(DateTime.Now))
+					{
+						ViewBag.ErrorInfo = "Datum narození nesmí být v budoucnosti!";
+						return await ReturnBad();
+					}
+
+					newEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(newEmployee.Zamestnanci.Heslo);
 
 					string? err = await EmployeeSQL.RegisterEmployee(newEmployee);
 
@@ -131,6 +137,12 @@ namespace sem_prace_janousek_mandik.Controllers.Employee
 		{
 			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Skladnik || Role == Roles.Logistik)
 			{
+				if (editedEmployee.Zamestnanci.DatumNarozeni > DateOnly.FromDateTime(DateTime.Now))
+				{
+					ViewBag.ErrorInfo = "Datum narození nesmí být v budoucnosti!";
+					return View("EditEmployee", editedEmployee);
+				}
+
 				if (editedEmployee.Zamestnanci.Heslo != null)
 				{
 					editedEmployee.Zamestnanci.Heslo = SharedSQL.HashPassword(editedEmployee.Zamestnanci.Heslo);

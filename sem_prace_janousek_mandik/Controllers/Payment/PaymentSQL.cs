@@ -124,12 +124,12 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 					{
 						command.CommandType = CommandType.StoredProcedure;
 
-						command.Parameters.Add("p_idPlatby", OracleDbType.Int32).Value = payment.Platby.IdPlatby;
-						command.Parameters.Add("p_datumPlatby", OracleDbType.Date).Value = payment.Platby.DatumPlatby;
-						command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Platby.Castka;
-						command.Parameters.Add("p_typPlatby", OracleDbType.Varchar2).Value = payment.Platby.TypPlatby;
-						command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.Platby.VariabilniSymbol;
-						command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.Platby.IdFaktury;
+						command.Parameters.Add("p_idPlatby", OracleDbType.Int32).Value = payment.Platby?.IdPlatby;
+						command.Parameters.Add("p_datumPlatby", OracleDbType.Date).Value = payment.Platby?.DatumPlatby;
+						command.Parameters.Add("p_castka", OracleDbType.BinaryFloat).Value = payment.Platby?.Castka;
+						command.Parameters.Add("p_typPlatby", OracleDbType.Varchar2).Value = payment.Platby?.TypPlatby;
+						command.Parameters.Add("p_variabilniSymbol", OracleDbType.Varchar2).Value = payment.Platby?.VariabilniSymbol;
+						command.Parameters.Add("p_idFaktury", OracleDbType.Int32).Value = payment.Platby?.IdFaktury;
 
 						command.ExecuteNonQuery();
 					}
@@ -204,7 +204,7 @@ namespace sem_prace_janousek_mandik.Controllers.Payment
 								specificPayment.IdPlatby = reader.GetInt32(reader.GetOrdinal("idPlatby"));
 								specificPayment.DatumPlatby = reader.GetDateTime(reader.GetOrdinal("datumPlatby"));
 								specificPayment.Castka = reader.GetFloat(reader.GetOrdinal("castka"));
-								specificPayment.TypPlatby = reader["typPlatby"].ToString()[0];
+								specificPayment.TypPlatby = reader["typPlatby"].ToString()?[0];
 								specificPayment.VariabilniSymbol = reader["variabilniSymbol"].ToString();
 								specificPayment.IdFaktury = reader.GetInt32(reader.GetOrdinal("idFaktury"));
 

@@ -20,12 +20,12 @@ namespace sem_prace_janousek_mandik.Models.Goods
 		public float? JednotkovaCena { get; set; }
 
 		[Required]
-		[Range(0, int.MaxValue)]
+		[Range(0, 99999)]
 		[DisplayName("Počet kusů na skladě: ")]
 		public int PocetNaSklade { get; set; }
 
 		[Required]
-		[Range(0, Int64.MaxValue)]
+		[Range(0, 9999999999999)]
 		[DisplayName("Čárový kód: ")]
 		public string? CarovyKod { get; set; }
 

@@ -95,7 +95,6 @@ namespace sem_prace_janousek_mandik.Controllers.Supplier
 		[HttpPost]
 		public async Task<IActionResult> EditSupplierGet(int index)
 		{
-			// Kontrola oprávnění na načtení parametrů dodavatele
 			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik)
 			{
 				Dodavatele_Adresy dodavateleAdresy = await SupplierSQL.GetSupplierWithAddress(index);

@@ -5,11 +5,10 @@ using sem_prace_janousek_mandik.Controllers.Management;
 using sem_prace_janousek_mandik.Controllers.Supplier;
 using sem_prace_janousek_mandik.Models.Goods;
 using sem_prace_janousek_mandik.Models.Management;
-using System.Linq;
 
 namespace sem_prace_janousek_mandik.Controllers.Goods
 {
-    public class GoodsController : BaseController
+	public class GoodsController : BaseController
 	{
 		/// <summary>
 		/// Výpis všech kategorií
@@ -35,7 +34,6 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 		{
 			if (Role == Roles.Manazer || Role == Roles.Admin || Role == Roles.Logistik || Role == Roles.Skladnik)
 			{
-				// Předání vyhledávaného výrazu
 				ViewBag.Search = search;
 				List<Kategorie_NadrazenaKategorie> categories = await GoodsSQL.GetAllCategories();
 				if (search != null)
@@ -76,7 +74,7 @@ namespace sem_prace_janousek_mandik.Controllers.Goods
 			if (Role == Roles.Admin || Role == Roles.Manazer || Role == Roles.Logistik)
 			{
 				newCategory.NadrazenaKategorie = await GoodsSQL.GetAllCategoriesIdNameAcronym();
-				if (ModelState.IsValid == true)
+				if (ModelState.IsValid)
 				{
 					newCategory.Kategorie.Zkratka = newCategory.Kategorie.Zkratka.ToUpper();
 					// Kontrola zda již neexistuje kategorie s touto zkratkou
